@@ -309,8 +309,8 @@ function filterCheatsheet() {
 const maxGlobalXp = 45000;
 function addXp(amount) {
   if (amount > 0) {
-      playSound('success');
-      showFloatingXP(amount);
+    playSound("success");
+    showFloatingXP(amount);
   }
   playerStats.xp += amount;
   let r = "Terminal Newbie";
@@ -340,7 +340,7 @@ function loadStats() {
     try {
       playerStats = JSON.parse(saved);
       if (!playerStats.completedQuests) playerStats.completedQuests = [];
-      if (!playerStats.discoveredCommands) playerStats.discoveredCommands = []; 
+      if (!playerStats.discoveredCommands) playerStats.discoveredCommands = [];
     } catch (e) {}
   } else {
     playerStats.discoveredCommands = [];
@@ -384,7 +384,7 @@ function executeCommand(rawCommand) {
       if (!playerStats.discoveredCommands.includes(cmdName)) {
         playerStats.discoveredCommands.push(cmdName);
         localStorage.setItem("linux_mega_stats", JSON.stringify(playerStats));
-        if (activeTab === "cheatsheet") renderCheatsheet(); 
+        if (activeTab === "cheatsheet") renderCheatsheet();
       }
 
       let m = learningModules[activeModuleIndex];
@@ -418,15 +418,29 @@ function executeCommand(rawCommand) {
         }
       });
     } catch (e) {
-      playSound('error'); // Play buzz
-      document.getElementById("terminal-container").classList.add("shake-error"); // Shake screen
-      setTimeout(() => document.getElementById("terminal-container").classList.remove("shake-error"), 300);
+      playSound("error"); // Play buzz
+      document
+        .getElementById("terminal-container")
+        .classList.add("shake-error"); // Shake screen
+      setTimeout(
+        () =>
+          document
+            .getElementById("terminal-container")
+            .classList.remove("shake-error"),
+        300,
+      );
       printToTerminal(`<span class="term-err">Execution Error.</span>`);
     }
   } else {
-    playSound('error'); // Play buzz
+    playSound("error"); // Play buzz
     document.getElementById("terminal-container").classList.add("shake-error"); // Shake screen
-    setTimeout(() => document.getElementById("terminal-container").classList.remove("shake-error"), 300);
+    setTimeout(
+      () =>
+        document
+          .getElementById("terminal-container")
+          .classList.remove("shake-error"),
+      300,
+    );
     printToTerminal(
       `<span class="term-err">${cmdName}: command not found</span>`,
     );
@@ -444,7 +458,7 @@ function resetSandbox() {
 }
 
 cmdInput.addEventListener("keydown", (e) => {
-  playSound('type')
+  playSound("type");
   if (e.key === "Enter") {
     let cmd = cmdInput.value;
     if (cmd.trim() !== "") {

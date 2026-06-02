@@ -10,8 +10,8 @@ const learningModules = [
   module6_redteam,
   module7_blueteam,
   module8_purpleteam,
-  module9_technical, 
+  module9_technical,
   module10_sysadmin,
   module11_exploitation,
-  module12_scripting
+  module12_scripting,
 ];
