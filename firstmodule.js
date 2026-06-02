@@ -1,0 +1,104 @@
+// firstmodule.js
+// Module 1: Navigation Ninja (65 Lessons)
+
+const module1_navigation = {
+    name: "1. Navigation Ninja (65 Lessons)",
+    lessons: [
+        // --- THE BASICS: PWD & LS ---
+        { title: "Where Am I?", why: "Always verify your location.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "Look Around", why: "See visible files.", text: "Type <code>ls</code>", objective: "Type ls", xp: 10, check: (c) => c==="ls" },
+        { title: "Expose Hidden", why: "See hidden dotfiles.", text: "Type <code>ls -a</code>", objective: "Type ls -a", xp: 10, check: (c,a) => c==="ls" && a.includes("-a") },
+        { title: "Long Format", why: "View permissions.", text: "Type <code>ls -l</code>", objective: "Type ls -l", xp: 10, check: (c,a) => c==="ls" && a.includes("-l") },
+        { title: "Combine Flags", why: "Long format + hidden.", text: "Type <code>ls -la</code>", objective: "Type ls -la", xp: 15, check: (c,a) => c==="ls" && a.includes("-la") },
+        { title: "Alternative Combine", why: "Order doesn't matter.", text: "Type <code>ls -al</code>", objective: "Type ls -al", xp: 15, check: (c,a) => c==="ls" && a.includes("-al") },
+        
+        // --- RELATIVE NAVIGATION ---
+        { title: "Step Forward", why: "Enter a folder.", text: "Type <code>cd documents</code>", objective: "Type cd documents", xp: 10, check: (c,a) => c==="cd" && a[0]==="documents" },
+        { title: "Verify Move", why: "Check your new path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "Step Back", why: "Go up one level.", text: "Type <code>cd ..</code>", objective: "Type cd ..", xp: 15, check: (c,a) => c==="cd" && a[0]===".." },
+        { title: "Verify Return", why: "Check location.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "Step Forward Again", why: "Enter another folder.", text: "Type <code>cd projects</code>", objective: "Type cd projects", xp: 10, check: (c,a) => c==="cd" && a[0]==="projects" },
+        { title: "Step Back Again", why: "Go up one level.", text: "Type <code>cd ..</code>", objective: "Type cd ..", xp: 10, check: (c,a) => c==="cd" && a[0]===".." },
+        
+        // --- TARGETED LISTING ---
+        { title: "Peek Inside", why: "List a folder without entering.", text: "Type <code>ls projects</code>", objective: "Type ls projects", xp: 15, check: (c,a) => c==="ls" && a[0]==="projects" },
+        { title: "Peek Another", why: "List documents.", text: "Type <code>ls documents</code>", objective: "Type ls documents", xp: 15, check: (c,a) => c==="ls" && a[0]==="documents" },
+        
+        // --- ABSOLUTE NAVIGATION ---
+        { title: "Jump to Root", why: "Go to the base of the system.", text: "Type <code>cd /</code>", objective: "Type cd /", xp: 20, check: (c,a) => c==="cd" && a[0]==="/" },
+        { title: "Verify Root", why: "Check root path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "List Root", why: "See system folders.", text: "Type <code>ls</code>", objective: "Type ls", xp: 10, check: (c) => c==="ls" },
+        { title: "Enter Var", why: "Go to variable data.", text: "Type <code>cd var</code>", objective: "Type cd var", xp: 10, check: (c,a) => c==="cd" && a[0]==="var" },
+        { title: "Enter Log", why: "Go to log files.", text: "Type <code>cd log</code>", objective: "Type cd log", xp: 10, check: (c,a) => c==="cd" && a[0]==="log" },
+        { title: "Verify Log Path", why: "Check deep path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "List Logs", why: "See log files.", text: "Type <code>ls</code>", objective: "Type ls", xp: 10, check: (c) => c==="ls" },
+        
+        // --- DOUBLE JUMPING ---
+        { title: "Double Step Back", why: "Go up two levels at once.", text: "Type <code>cd ../..</code>", objective: "Type cd ../..", xp: 25, check: (c,a) => c==="cd" && a[0]==="../.." },
+        { title: "Verify Root Return", why: "Check path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        
+        // --- DIRECT ABSOLUTE JUMPS ---
+        { title: "Direct to ETC", why: "Jump via absolute path.", text: "Type <code>cd /etc</code>", objective: "Type cd /etc", xp: 20, check: (c,a) => c==="cd" && a[0]==="/etc" },
+        { title: "List ETC", why: "See config files.", text: "Type <code>ls</code>", objective: "Type ls", xp: 10, check: (c) => c==="ls" },
+        { title: "Direct to TMP", why: "Jump to temp folder.", text: "Type <code>cd /tmp</code>", objective: "Type cd /tmp", xp: 20, check: (c,a) => c==="cd" && a[0]==="/tmp" },
+        { title: "List TMP", why: "See temp files.", text: "Type <code>ls</code>", objective: "Type ls", xp: 10, check: (c) => c==="ls" },
+        
+        // --- MANUAL HOME RETURN ---
+        { title: "Direct to Home Base", why: "Go to users dir.", text: "Type <code>cd /home</code>", objective: "Type cd /home", xp: 15, check: (c,a) => c==="cd" && a[0]==="/home" },
+        { title: "Direct to User", why: "Go to your user dir.", text: "Type <code>cd sysadmin</code>", objective: "Type cd sysadmin", xp: 15, check: (c,a) => c==="cd" && a[0]==="sysadmin" },
+        { title: "Verify Home", why: "Check home path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        
+        // --- THE TILDE SHORTCUT ---
+        { title: "The Home Shortcut", why: "Instantly return home from anywhere.", text: "Type <code>cd ~</code>", objective: "Type cd ~", xp: 30, check: (c,a) => c==="cd" && a[0]==="~" },
+        { title: "Verify Shortcut", why: "Check path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        
+        // --- ADVANCED LISTING ---
+        { title: "Human Readable", why: "Show file sizes clearly.", text: "Type <code>ls -lh</code>", objective: "Type ls -lh", xp: 15, check: (c,a) => c==="ls" && a.includes("-lh") },
+        { title: "Triple Flags", why: "Long, human-readable, all.", text: "Type <code>ls -lha</code>", objective: "Type ls -lha", xp: 20, check: (c,a) => c==="ls" && a.includes("-lha") },
+        { title: "Triple Alternative", why: "Different order.", text: "Type <code>ls -lah</code>", objective: "Type ls -lah", xp: 20, check: (c,a) => c==="ls" && a.includes("-lah") },
+        { title: "Almost All", why: "Ignore . and ..", text: "Type <code>ls -A</code>", objective: "Type ls -A", xp: 15, check: (c,a) => c==="ls" && a.includes("-A") },
+        { title: "Recursive List", why: "List subdirectories.", text: "Type <code>ls -R</code>", objective: "Type ls -R", xp: 25, check: (c,a) => c==="ls" && a.includes("-R") },
+        
+        // --- PATH MASTERY REP 1 ---
+        { title: "Jump to Logs", why: "Muscle memory.", text: "Type <code>cd /var/log</code>", objective: "Type cd /var/log", xp: 15, check: (c,a) => c==="cd" && a[0]==="/var/log" },
+        { title: "Check Path", why: "Always verify.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "Bail out", why: "Instantly go home.", text: "Type <code>cd ~</code>", objective: "Type cd ~", xp: 15, check: (c,a) => c==="cd" && a[0]==="~" },
+        { title: "Jump to Configs", why: "Muscle memory.", text: "Type <code>cd /etc</code>", objective: "Type cd /etc", xp: 15, check: (c,a) => c==="cd" && a[0]==="/etc" },
+        
+        // --- ABSOLUTE TO NESTED ---
+        { title: "Absolute to Nested", why: "Jump directly inside home.", text: "Type <code>cd /home/sysadmin/documents</code>", objective: "Type cd /home/sysadmin/documents", xp: 30, check: (c,a) => c==="cd" && a[0]==="/home/sysadmin/documents" },
+        { title: "Verify Nested", why: "Check path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        
+        // --- SIBLING FOLDER JUMP ---
+        { title: "Sibling Jump", why: "Go up and into a neighbor.", text: "Type <code>cd ../projects</code>", objective: "Type cd ../projects", xp: 35, check: (c,a) => c==="cd" && a[0]==="../projects" },
+        { title: "Verify Sibling", why: "Check path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "Double Back", why: "Return to home.", text: "Type <code>cd ../..</code>", objective: "Type cd ../..", xp: 15, check: (c,a) => c==="cd" && a[0]==="../.." },
+        { title: "Verify Path", why: "Check path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        
+        // --- BASIC FIND COMMANDS ---
+        { title: "Find Local", why: "Search current directory.", text: "Type <code>find .</code>", objective: "Type find .", xp: 20, check: (c,a) => c==="find" && a[0]==="." },
+        { title: "Find Var", why: "Search remote directory.", text: "Type <code>find /var</code>", objective: "Type find /var", xp: 20, check: (c,a) => c==="find" && a[0]==="/var" },
+        { title: "Find ETC", why: "Search remote directory.", text: "Type <code>find /etc</code>", objective: "Type find /etc", xp: 20, check: (c,a) => c==="find" && a[0]==="/etc" },
+        { title: "Find TMP", why: "Search remote directory.", text: "Type <code>find /tmp</code>", objective: "Type find /tmp", xp: 20, check: (c,a) => c==="find" && a[0]==="/tmp" },
+        { title: "Find Home", why: "Search home via shortcut.", text: "Type <code>find ~</code>", objective: "Type find ~", xp: 25, check: (c,a) => c==="find" && a[0]==="~" },
+        
+        // --- ADVANCED FIND ---
+        { title: "Find by Name", why: "Search specific files.", text: "Type <code>find . -name \"notes.txt\"</code>", objective: "Use -name flag", xp: 40, check: (c,a) => c==="find" && a.includes("-name") },
+        { title: "Find Directories", why: "Search only folders.", text: "Type <code>find . -type d</code>", objective: "Use -type d flag", xp: 40, check: (c,a) => c==="find" && a.includes("-type") && a.includes("d") },
+        { title: "Find Files", why: "Search only files.", text: "Type <code>find . -type f</code>", objective: "Use -type f flag", xp: 40, check: (c,a) => c==="find" && a.includes("-type") && a.includes("f") },
+        
+        // --- REMOTE LISTING REP ---
+        { title: "Remote List 1", why: "List logs remotely.", text: "Type <code>ls /var/log</code>", objective: "Type ls /var/log", xp: 15, check: (c,a) => c==="ls" && a[0]==="/var/log" },
+        { title: "Remote List 2", why: "List configs remotely.", text: "Type <code>ls /etc</code>", objective: "Type ls /etc", xp: 15, check: (c,a) => c==="ls" && a[0]==="/etc" },
+        { title: "Remote List 3", why: "List temp remotely.", text: "Type <code>ls /tmp</code>", objective: "Type ls /tmp", xp: 15, check: (c,a) => c==="ls" && a[0]==="/tmp" },
+        
+        // --- FINAL EXAM JUMPS ---
+        { title: "Tilde Nested", why: "Jump using tilde combination.", text: "Type <code>cd ~/documents</code>", objective: "Type cd ~/documents", xp: 30, check: (c,a) => c==="cd" && a[0]==="~/documents" },
+        { title: "Tilde Nested 2", why: "Jump using tilde combination.", text: "Type <code>cd ~/projects</code>", objective: "Type cd ~/projects", xp: 30, check: (c,a) => c==="cd" && a[0]==="~/projects" },
+        { title: "Verify Exam", why: "Check path.", text: "Type <code>pwd</code>", objective: "Type pwd", xp: 10, check: (c) => c==="pwd" },
+        { title: "Root Reset", why: "Go to system floor.", text: "Type <code>cd /</code>", objective: "Type cd /", xp: 15, check: (c,a) => c==="cd" && a[0]==="/" },
+        { title: "Global Find Dirs", why: "Heavy search.", text: "Type <code>find / -type d</code>", objective: "Type find / -type d", xp: 40, check: (c,a) => c==="find" && a.includes("/") && a.includes("-type") && a.includes("d") },
+        { title: "Global Find Files", why: "Heavy search.", text: "Type <code>find / -type f</code>", objective: "Type find / -type f", xp: 40, check: (c,a) => c==="find" && a.includes("/") && a.includes("-type") && a.includes("f") },
+        { title: "Return Home", why: "Module complete.", text: "Type <code>cd ~</code>", objective: "Type cd ~", xp: 20, check: (c,a) => c==="cd" && a[0]==="~" }
+    ]
+};
