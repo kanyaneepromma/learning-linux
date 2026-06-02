@@ -73,3 +73,22 @@ body {
   color: #94a3b8;
   font-style: italic;
 }
+
+/* Update or add this to css/style.css */
+#cmd-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f1f5f9; /* Ensure text is light */
+  font-family: "Fira Code", monospace;
+  font-size: 14px;
+  width: 100%;
+  caret-color: #34d399; /* Bright green cursor */
+}
+
+/* Ensure the container is visible */
+#input-line {
+  background: rgba(15, 23, 42, 0.5); /* Semi-transparent background */
+  padding: 10px;
+  border-top: 1px solid #1e293b;
+}
