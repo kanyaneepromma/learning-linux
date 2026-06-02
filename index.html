@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Linux Interactive Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+        .terminal-font {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        /* Custom Scrollbar for Terminal */
+        #terminal-output::-webkit-scrollbar {
+            width: 8px;
+        }
+        #terminal-output::-webkit-scrollbar-track {
+            background: #000; 
+        }
+        #terminal-output::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        #terminal-output::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        /* Blinking Cursor effect */
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Seamless Input Field */
+        #cmd-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            width: 100%;
+        }
+        
+        /* Text Colors */
+        .term-dir { color: #3b82f6; font-weight: bold; } /* Blue for directories */
+        .term-exec { color: #22c55e; font-weight: bold; } /* Green for executables/success */
+        .term-err { color: #ef4444; } /* Red for errors */
+        .term-prompt { color: #22c55e; font-weight: bold; } /* Green prompt user */
+        .term-path { color: #3b82f6; font-weight: bold; } /* Blue prompt path */
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col md:flex-row">
+
+    <!-- Left Panel: Lessons & Tutorial -->
+    <div class="w-full md:w-1/3 h-1/3 md:h-full bg-slate-800 border-b md:border-b-0 md:border-r border-slate-700 flex flex-col shadow-xl z-10">
+        <div class="p-4 border-b border-slate-700 bg-slate-900 flex items-center justify-between">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                Linux Basics
+            </h1>
+            <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300" id="lesson-counter">Lesson 1/8</span>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto">
+            <div id="lesson-content" class="space-y-4">
+                <!-- Content injected via JS -->
+            </div>
+            
+            <div class="mt-8 pt-4 border-t border-slate-700">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Available Commands:</h3>
+                <div class="flex flex-wrap gap-2 text-sm text-slate-300" id="available-commands">
+                    <!-- Commands injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Terminal Emulator -->
+    <div class="w-full md:w-2/3 h-2/3 md:h-full bg-black flex flex-col relative" id="terminal-container">
+        <!-- Terminal Header -->
+        <div class="h-8 bg-slate-900 flex items-center px-4 gap-2 select-none border-b border-slate-800">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            <span class="ml-2 text-xs text-slate-400 terminal-font">user@gemini: ~</span>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="flex-1 overflow-y-auto p-4 terminal-font text-sm md:text-base" id="terminal-output">
+            <!-- Output injected via JS -->
+            <div class="mb-4">
+                <span class="text-green-400 font-bold">Welcome to Gemini Linux Sandbox.</span><br>
+                <span>System load: 0.01  Uptime: 0 days</span><br>
+                <span>Type 'help' for a list of available commands.</span>
+            </div>
+        </div>
+
+        <!-- Terminal Input Line -->
+        <div class="px-4 pb-4 terminal-font text-sm md:text-base flex items-center w-full" id="input-line">
+            <span id="prompt" class="whitespace-pre flex-shrink-0">
+                <span class="term-prompt">user@gemini</span>:<span class="term-path" id="prompt-path">~</span>$ 
+            </span>
+            <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus class="ml-2 flex-1">
+        </div>
+    </div>
+
+    <script>
+        // --- VIRTUAL FILE SYSTEM (VFS) ---
+        // A simple hierarchical tree simulating a filesystem
+        const vfs = {
+            "/": {
+                type: "dir",
+                contents: {
+                    "home": {
+                        type: "dir",
+                        contents: {
+                            "user": {
+                                type: "dir",
+                                contents: {
+                                    "readme.txt": { type: "file", content: "Welcome to Linux!\nThis is a simple text file.\nYou can read me using the 'cat' command.\n\nLinux is a family of open-source Unix-like operating systems.\nThey are based on the Linux kernel, first released on September 17, 1991, by Linus Torvalds.\nLinux is typically packaged in a Linux distribution.\n\nEnjoy your learning journey!\nLine 9\nLine 10\nLine 11\nEnd of file." },
+                                    "documents": { 
+                                        type: "dir", 
+                                        contents: {
+                                            "secret.txt": { type: "file", content: "You found the secret document! Good job navigating directories." }
+                                        } 
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "var": {
+                        type: "dir",
+                        contents: {
+                            "log": {
+                                type: "dir",
+                                contents: {
+                                    "syslog": { type: "file", content: "System startup...\nKernel loaded.\nMounting filesystems...\nNetwork interfaces up.\nStarting sshd... OK.\nSystem ready." }
+                                }
+                            }
+                        }
+                    },
+                    "etc": {
+                        type: "dir",
+                        contents: {
+                            "os-release": { type: "file", content: "NAME=\"Gemini OS\"\nVERSION=\"1.0 (Simulated)\"" }
+                        }
+                    }
+                }
+            }
+        };
+
+        let currentPath = "/home/user";
+
+        // Helper: Get node and normalized absolute path from a path string
+        function resolvePath(targetPath) {
+            if (!targetPath) return { node: getVfsNode(currentPath), path: currentPath };
+            
+            let parts = targetPath.split('/');
+            let absPathParts = targetPath.startsWith('/') ? [] : currentPath.split('/').filter(Boolean);
+            
+            for (let part of parts) {
+                if (part === '' || part === '.') continue;
+                if (part === '..') {
+                    if (absPathParts.length > 0) absPathParts.pop();
+                } else {
+                    absPathParts.push(part);
+                }
+            }
+            
+            let resolvedStr = '/' + absPathParts.join('/');
+            let current = vfs['/'];
+            
+            for (let i = 0; i < absPathParts.length; i++) {
+                if (!current.contents || !current.contents[absPathParts[i]]) {
+                    return null; // Not found
+                }
+                current = current.contents[absPathParts[i]];
+            }
+            return { node: current, path: resolvedStr === '//' ? '/' : resolvedStr };
+        }
+
+        function getVfsNode(pathStr) {
+            let res = resolvePath(pathStr);
+            return res ? res.node : null;
+        }
+
+        // Format path for the prompt (replace /home/user with ~)
+        function formatPromptPath() {
+            if (currentPath === "/home/user") return "~";
+            if (currentPath.startsWith("/home/user/")) return "~" + currentPath.substring(10);
+            return currentPath;
+        }
+
+        // --- LESSON MANAGER ---
+        const lessons = [
+            {
+                title: "Welcome to the Terminal",
+                text: "The terminal is a text-based interface used to interact with a computer. Let's start by figuring out where we are.<br><br>Type <code>pwd</code> (Print Working Directory) and press Enter.",
+                check: (cmd) => cmd === "pwd"
+            },
+            {
+                title: "Looking Around",
+                text: "Great! You are in <code>/home/user</code>. Now let's see what files and folders are inside this directory.<br><br>Type <code>ls</code> (List) and press Enter.",
+                check: (cmd) => cmd === "ls"
+            },
+            {
+                title: "Reading Files",
+                text: "You should see a file named <code>readme.txt</code> and a directory named <code>documents</code>. Let's read the text file.<br><br>Type <code>cat readme.txt</code> to read its contents.",
+                check: (cmd) => cmd.startsWith("cat readme.txt")
+            },
+            {
+                title: "Making Directories",
+                text: "Awesome. Let's create a new folder of your own.<br><br>Type <code>mkdir my_folder</code> (Make Directory).",
+                check: (cmd) => cmd.startsWith("mkdir my_folder")
+            },
+            {
+                title: "Changing Directories",
+                text: "The folder is created. Now let's move inside it.<br><br>Type <code>cd my_folder</code> (Change Directory).",
+                check: (cmd) => cmd.startsWith("cd my_folder")
+            },
+            {
+                title: "Creating Files",
+                text: "Notice how your prompt path changed! You are now inside your new folder. Let's create an empty file here.<br><br>Type <code>touch hello.txt</code>.",
+                check: (cmd) => cmd.startsWith("touch hello.txt")
+            },
+            {
+                title: "Navigating Backwards",
+                text: "File created! Now, let's go back up to the parent directory (your home folder).<br><br>Type <code>cd ..</code> (The two dots represent the parent directory).",
+                check: (cmd) => cmd === "cd .."
+            },
+            {
+                title: "Copying Files",
+                text: "Now let's copy a file. We have <code>readme.txt</code> here. Let's make a backup.<br><br>Type <code>cp readme.txt backup.txt</code> (Copy).",
+                check: (cmd) => cmd.startsWith("cp readme.txt")
+            },
+            {
+                title: "Renaming & Moving",
+                text: "Good! What if we want to rename it? The <code>mv</code> (Move) command does both moving and renaming.<br><br>Type <code>mv backup.txt hidden.txt</code>.",
+                check: (cmd) => cmd.startsWith("mv backup.txt")
+            },
+            {
+                title: "Searching Inside Files",
+                text: "You can search for specific text inside a file using <code>grep</code>.<br><br>Type <code>grep \"Linux\" readme.txt</code> to find lines with that word.",
+                check: (cmd) => cmd.startsWith("grep") && cmd.includes("readme.txt")
+            },
+            {
+                title: "File Statistics",
+                text: "Sometimes you need to know how large a file is. The <code>wc</code> (Word Count) command counts lines, words, and characters.<br><br>Type <code>wc readme.txt</code>.",
+                check: (cmd) => cmd.startsWith("wc readme.txt")
+            },
+            {
+                title: "Peeking at Files",
+                text: "If a file is huge, you might only want to read the top or bottom of it.<br><br>Type <code>head readme.txt</code> or <code>tail readme.txt</code>.",
+                check: (cmd) => cmd.startsWith("head") || cmd.startsWith("tail")
+            },
+            {
+                title: "Finding Files",
+                text: "Lost a file? The <code>find</code> command searches through directories recursively.<br><br>Type <code>find .</code> to list everything in the current directory and below.",
+                check: (cmd) => cmd.startsWith("find")
+            },
+            {
+                title: "System Information",
+                text: "Want to know what system you're running, or how much memory/disk space is left?<br><br>Try typing <code>uname -a</code>, <code>free</code>, <code>df</code>, or <code>ps</code>. Pick any to continue!",
+                check: (cmd) => ["uname -a", "free", "df", "ps", "uname"].includes(cmd)
+            },
+            {
+                title: "Superuser Privileges",
+                text: "Some commands require administrator (root) access using <code>sudo</code>. Try running a command as superuser.<br><br>Type <code>sudo ls</code>.",
+                check: (cmd) => cmd.startsWith("sudo")
+            },
+            {
+                title: "Reading the Manual",
+                text: "If you ever forget what a command does, you can read its manual page.<br><br>Type <code>man ls</code> to see the manual for the list command.",
+                check: (cmd) => cmd.startsWith("man ls")
+            },
+            {
+                title: "Removing Files",
+                text: "Time to clean up. Let's delete the file we renamed earlier.<br><br>Type <code>rm hidden.txt</code> (Remove).",
+                check: (cmd) => cmd.startsWith("rm hidden.txt")
+            },
+            {
+                title: "You're a Linux Pro!",
+                text: "Congratulations! You've learned the essential Linux commands.<br><br>Try typing <code>history</code> to see your past commands, use the <b>Up/Down arrow keys</b> to scroll through them, or type <code>help</code> to see everything.",
+                check: () => false // End of guided tour
+            }
+        ];
+
+        let currentLessonIndex = 0;
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        function renderLesson() {
+            const lesson = lessons[currentLessonIndex];
+            const contentDiv = document.getElementById('lesson-content');
+            
+            contentDiv.innerHTML = `
+                <h2 class="text-2xl font-bold text-white mb-2">${lesson.title}</h2>
+                <p class="text-slate-300 leading-relaxed text-lg">${lesson.text}</p>
+            `;
+            
+            document.getElementById('lesson-counter').innerText = `Lesson ${currentLessonIndex + 1}/${lessons.length}`;
+        }
+
+        function checkLessonProgress(cmd) {
+            if (currentLessonIndex < lessons.length - 1) {
+                const lesson = lessons[currentLessonIndex];
+                if (lesson.check(cmd.trim())) {
+                    currentLessonIndex++;
+                    renderLesson();
+                    // Optional: add a slight visual cue that lesson advanced
+                    document.getElementById('lesson-content').classList.add('opacity-50');
+                    setTimeout(() => document.getElementById('lesson-content').classList.remove('opacity-50'), 200);
+                }
+            }
+        }
+
+        // --- TERMINAL COMMAND LOGIC ---
+        
+        const commands = {
+            'help': {
+                desc: 'Show available commands',
+                run: () => {
+                    let out = "Available commands:\n";
+                    for (let cmd in commands) {
+                        out += `  <span class="text-green-400">${cmd.padEnd(10)}</span> - ${commands[cmd].desc}\n`;
+                    }
+                    return out;
+                }
+            },
+            'pwd': {
+                desc: 'Print working directory',
+                run: () => currentPath
+            },
+            'ls': {
+                desc: 'List directory contents',
+                run: (args) => {
+                    let target = args.length > 0 ? args[0] : "";
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">ls: cannot access '${target}': No such file or directory</span>`;
+                    if (res.node.type !== 'dir') return target; // If it's a file, just list the file
+                    
+                    let out = [];
+                    for (let key in res.node.contents) {
+                        if (res.node.contents[key].type === 'dir') {
+                            out.push(`<span class="term-dir">${key}</span>`);
+                        } else {
+                            out.push(`<span>${key}</span>`);
+                        }
+                    }
+                    return out.join("  ");
+                }
+            },
+            'cd': {
+                desc: 'Change directory',
+                run: (args) => {
+                    let target = args.length > 0 ? args[0] : "/home/user";
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">cd: ${target}: No such file or directory</span>`;
+                    if (res.node.type !== 'dir') return `<span class="term-err">cd: ${target}: Not a directory</span>`;
+                    
+                    currentPath = res.path;
+                    document.getElementById('prompt-path').innerText = formatPromptPath();
+                    return ""; // cd produces no output on success
+                }
+            },
+            'cat': {
+                desc: 'Concatenate files and print on the standard output',
+                run: (args) => {
+                    if (args.length === 0) return ""; // technically cat waits for stdin, but we'll ignore for simplicity
+                    let target = args[0];
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">cat: ${target}: No such file or directory</span>`;
+                    if (res.node.type === 'dir') return `<span class="term-err">cat: ${target}: Is a directory</span>`;
+                    
+                    // Escape HTML to prevent XSS/rendering issues in cat output
+                    let escaped = res.node.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    return escaped;
+                }
+            },
+            'mkdir': {
+                desc: 'Make directories',
+                run: (args) => {
+                    if (args.length === 0) return `<span class="term-err">mkdir: missing operand</span>`;
+                    let target = args[0];
+                    
+                    // Basic parent parsing (doesn't handle complex nested missing dirs like mkdir -p)
+                    let parts = target.split('/');
+                    let newDirName = parts.pop();
+                    let parentPath = parts.join('/') || '.';
+                    
+                    let parentRes = resolvePath(parentPath);
+                    
+                    if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">mkdir: cannot create directory '${target}': No such file or directory</span>`;
+                    if (parentRes.node.contents[newDirName]) return `<span class="term-err">mkdir: cannot create directory '${target}': File exists</span>`;
+                    
+                    parentRes.node.contents[newDirName] = { type: "dir", contents: {} };
+                    return "";
+                }
+            },
+            'touch': {
+                desc: 'Change file timestamps (or create empty file)',
+                run: (args) => {
+                    if (args.length === 0) return `<span class="term-err">touch: missing file operand</span>`;
+                    let target = args[0];
+                    
+                    let parts = target.split('/');
+                    let newFileName = parts.pop();
+                    let parentPath = parts.join('/') || '.';
+                    
+                    let parentRes = resolvePath(parentPath);
+                    if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">touch: cannot touch '${target}': No such file or directory</span>`;
+                    
+                    if (!parentRes.node.contents[newFileName]) {
+                         parentRes.node.contents[newFileName] = { type: "file", content: "" };
+                    }
+                    return "";
+                }
+            },
+            'echo': {
+                desc: 'Display a line of text',
+                run: (args, rawCommand) => {
+                    // Check for redirection '>'
+                    let redirectIndex = args.indexOf('>');
+                    if (redirectIndex !== -1 && redirectIndex < args.length - 1) {
+                        let textParts = args.slice(0, redirectIndex);
+                        let textToPrint = textParts.join(" ");
+                        // Remove surrounding quotes if they exist
+                        if (textToPrint.startsWith('"') && textToPrint.endsWith('"') || textToPrint.startsWith("'") && textToPrint.endsWith("'")) {
+                            textToPrint = textToPrint.substring(1, textToPrint.length - 1);
+                        }
+
+                        let targetFile = args[redirectIndex + 1];
+                        
+                        let parts = targetFile.split('/');
+                        let fileName = parts.pop();
+                        let parentPath = parts.join('/') || '.';
+                        
+                        let parentRes = resolvePath(parentPath);
+                        if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">bash: ${targetFile}: No such file or directory</span>`;
+                        
+                        parentRes.node.contents[fileName] = { type: "file", content: textToPrint };
+                        return "";
+                    } else {
+                        // Standard echo
+                        let out = args.join(" ");
+                        if (out.startsWith('"') && out.endsWith('"') || out.startsWith("'") && out.endsWith("'")) {
+                            out = out.substring(1, out.length - 1);
+                        }
+                        return out;
+                    }
+                }
+            },
+            'clear': {
+                desc: 'Clear the terminal screen',
+                run: () => {
+                    // Handled specially in execution logic
+                    return "CLEAR_SIGNAL";
+                }
+            },
+            'whoami': {
+                desc: 'Print effective userid',
+                run: () => "user"
+            },
+            'date': {
+                desc: 'Print the system date and time',
+                run: () => new Date().toString()
+            },
+            'cp': {
+                desc: 'Copy files and directories',
+                run: (args) => {
+                    if (args.length < 2) return `<span class="term-err">cp: missing file operand</span>`;
+                    let src = args[0];
+                    let dest = args[1];
+                    let srcRes = resolvePath(src);
+                    if(!srcRes) return `<span class="term-err">cp: cannot stat '${src}': No such file or directory</span>`;
+                    if(srcRes.node.type === 'dir') return `<span class="term-err">cp: -r not specified; omitting directory '${src}'</span>`;
+                    
+                    let nodeToCopy = JSON.parse(JSON.stringify(srcRes.node)); // Deep copy the object
+                    let destRes = resolvePath(dest);
+                    
+                    if (destRes && destRes.node.type === 'dir') {
+                        let srcParts = src.split('/');
+                        let srcName = srcParts.pop();
+                        destRes.node.contents[srcName] = nodeToCopy;
+                    } else {
+                        let destParts = dest.split('/');
+                        let destName = destParts.pop();
+                        let destParentPath = destParts.join('/') || '.';
+                        let destParentRes = resolvePath(destParentPath);
+                        if (!destParentRes) return `<span class="term-err">cp: cannot create regular file '${dest}': No such directory</span>`;
+                        destParentRes.node.contents[destName] = nodeToCopy;
+                    }
+                    return "";
+                }
+            },
+            'mv': {
+                desc: 'Move or rename files',
+                run: (args) => {
+                    if (args.length < 2) return `<span class="term-err">mv: missing file operand</span>`;
+                    let src = args[0];
+                    let dest = args[1];
+
+                    let srcParts = src.split('/');
+                    let srcName = srcParts.pop();
+                    let srcParentPath = srcParts.join('/') || '.';
+                    let srcParentRes = resolvePath(srcParentPath);
+
+                    if (!srcParentRes || !srcParentRes.node.contents[srcName]) return `<span class="term-err">mv: cannot stat '${src}': No such file or directory</span>`;
+                    let nodeToMove = srcParentRes.node.contents[srcName];
+
+                    let destRes = resolvePath(dest);
+                    if (destRes && destRes.node.type === 'dir') {
+                        destRes.node.contents[srcName] = nodeToMove;
+                        delete srcParentRes.node.contents[srcName];
+                    } else {
+                        let destParts = dest.split('/');
+                        let destName = destParts.pop();
+                        let destParentPath = destParts.join('/') || '.';
+                        let destParentRes = resolvePath(destParentPath);
+                        if (!destParentRes) return `<span class="term-err">mv: cannot move to '${dest}': No such directory</span>`;
+                        destParentRes.node.contents[destName] = nodeToMove;
+                        delete srcParentRes.node.contents[srcName];
+                    }
+                    return "";
+                }
+            },
+            'rm': {
+                desc: 'Remove files or directories',
+                run: (args) => {
+                    if (args.length === 0) return `<span class="term-err">rm: missing operand</span>`;
+                    let target = args[0];
+                    let isRecursive = false;
+                    if(args[0] === '-r' || args[0] === '-rf') {
+                       isRecursive = true;
+                       target = args[1];
+                    }
+                    if (!target) return `<span class="term-err">rm: missing operand</span>`;
+
+                    let parts = target.split('/');
+                    let fileName = parts.pop();
+                    let parentPath = parts.join('/') || '.';
+                    let parentRes = resolvePath(parentPath);
+
+                    if (!parentRes || !parentRes.node.contents[fileName]) return `<span class="term-err">rm: cannot remove '${target}': No such file or directory</span>`;
+
+                    let targetNode = parentRes.node.contents[fileName];
+                    if (targetNode.type === 'dir' && !isRecursive) return `<span class="term-err">rm: cannot remove '${target}': Is a directory</span>`;
+
+                    delete parentRes.node.contents[fileName];
+                    return "";
+                }
+            },
+            'grep': {
+                desc: 'Print lines that match patterns',
+                run: (args) => {
+                    if (args.length < 2) return `<span class="term-err">grep: missing operand</span>`;
+                    let pattern = args[0].replace(/['"]/g, ''); // Remove quotes
+                    let target = args[1];
+                    let res = resolvePath(target);
+                    
+                    if (!res) return `<span class="term-err">grep: ${target}: No such file or directory</span>`;
+                    if (res.node.type === 'dir') return `<span class="term-err">grep: ${target}: Is a directory</span>`;
+
+                    let lines = res.node.content.split('\n');
+                    let matches = lines.filter(line => line.includes(pattern));
+                    
+                    return matches.map(line => {
+                        let escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        return escaped.replace(new RegExp(pattern, 'g'), `<span class="text-red-400 font-bold bg-red-900/30 px-1 rounded">${pattern}</span>`);
+                    }).join('<br>');
+                }
+            },
+            'man': {
+                desc: 'An interface to the system reference manuals',
+                run: (args) => {
+                    if (args.length === 0) return `What manual page do you want?`;
+                    let cmd = args[0];
+                    if (commands[cmd]) {
+                        return `NAME<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="font-bold text-green-400">${cmd}</span> - ${commands[cmd].desc}<br><br>DESCRIPTION<br>&nbsp;&nbsp;&nbsp;&nbsp;This is a simulated manual page for ${cmd}. It helps you understand how a command works.`;
+                    }
+                    return `No manual entry for ${cmd}`;
+                }
+            },
+            'history': {
+                desc: 'Command History',
+                run: () => {
+                    return commandHistory.map((cmd, i) => `&nbsp;&nbsp;${i + 1}&nbsp;&nbsp;${cmd}`).join('<br>');
+                }
+            },
+            'wc': {
+                desc: 'Print newline, word, and byte counts for a file',
+                run: (args) => {
+                    if (args.length === 0) return `<span class="term-err">wc: missing operand</span>`;
+                    let target = args[0];
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">wc: ${target}: No such file or directory</span>`;
+                    if (res.node.type === 'dir') return `<span class="term-err">wc: ${target}: Is a directory</span>`;
+                    let content = res.node.content;
+                    let lines = content === "" ? 0 : content.split('\n').length;
+                    let words = content === "" ? 0 : content.trim().split(/\s+/).length;
+                    let chars = content.length;
+                    return `&nbsp;${lines}&nbsp;&nbsp;${words}&nbsp;&nbsp;${chars}&nbsp;${target}`;
+                }
+            },
+            'head': {
+                desc: 'Output the first part of files',
+                run: (args) => {
+                    if (args.length === 0) return `<span class="term-err">head: missing operand</span>`;
+                    let target = args[0];
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">head: ${target}: No such file or directory</span>`;
+                    if (res.node.type === 'dir') return `<span class="term-err">head: ${target}: Is a directory</span>`;
+                    let lines = res.node.content.split('\n');
+                    return lines.slice(0, 5).map(l => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")).join('<br>');
+                }
+            },
+            'tail': {
+                desc: 'Output the last part of files',
+                run: (args) => {
+                    if (args.length === 0) return `<span class="term-err">tail: missing operand</span>`;
+                    let target = args[0];
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">tail: ${target}: No such file or directory</span>`;
+                    if (res.node.type === 'dir') return `<span class="term-err">tail: ${target}: Is a directory</span>`;
+                    let lines = res.node.content.split('\n');
+                    return lines.slice(-5).map(l => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")).join('<br>');
+                }
+            },
+            'find': {
+                desc: 'Search for files in a directory hierarchy',
+                run: (args) => {
+                    let target = args.length > 0 ? args[0] : ".";
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">find: '${target}': No such file or directory</span>`;
+                    
+                    let output = [];
+                    function traverse(node, currentPathStr) {
+                        output.push(currentPathStr);
+                        if (node.type === 'dir') {
+                            for (let key in node.contents) {
+                                let nextPath = currentPathStr.endsWith('/') ? currentPathStr + key : currentPathStr + '/' + key;
+                                // Clean up the ./ prefix rendering nicely
+                                if (currentPathStr === '.') nextPath = './' + key;
+                                traverse(node.contents[key], nextPath);
+                            }
+                        }
+                    }
+                    traverse(res.node, target);
+                    return output.join('<br>');
+                }
+            },
+            'uname': {
+                desc: 'Print system information',
+                run: (args) => {
+                    if (args.includes('-a')) return "Linux gemini-sandbox 5.15.0-generic #1 SMP Tue Jun 2 14:41:29 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux";
+                    return "Linux";
+                }
+            },
+            'df': {
+                desc: 'Report file system disk space usage',
+                run: () => "Filesystem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1K-blocks&nbsp;&nbsp;&nbsp;&nbsp;Used&nbsp;Available&nbsp;Use%&nbsp;Mounted on<br>/dev/sda1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20480000&nbsp;&nbsp;5120000&nbsp;&nbsp;15360000&nbsp;&nbsp;25%&nbsp;/<br>tmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;819200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;819200&nbsp;&nbsp;&nbsp;0%&nbsp;/run"
+            },
+            'free': {
+                desc: 'Display amount of free and used memory in the system',
+                run: () => "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shared&nbsp;&nbsp;buff/cache&nbsp;&nbsp;&nbsp;available<br>Mem:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8192000&nbsp;&nbsp;&nbsp;&nbsp;2048000&nbsp;&nbsp;&nbsp;&nbsp;4096000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2048000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5120000<br>Swap:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2048000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;2048000"
+            },
+            'ps': {
+                desc: 'Report a snapshot of the current processes',
+                run: () => "&nbsp;&nbsp;PID&nbsp;TTY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TIME&nbsp;CMD<br>&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:01&nbsp;init<br>&nbsp;&nbsp;512&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:00&nbsp;bash<br>&nbsp;1024&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:00&nbsp;ps"
+            },
+            'sudo': {
+                desc: 'Execute a command as another user',
+                run: (args) => {
+                    if (args.length === 0) return "usage: sudo command";
+                    return `<span class="term-err">[sudo] password for user: </span><br>Sorry, try again.<br><span class="term-err">user is not in the sudoers file. This incident will be reported.</span>`;
+                }
+            }
+        };
+
+        // --- TERMINAL I/O LOGIC ---
+        
+        const terminalOutput = document.getElementById('terminal-output');
+        const cmdInput = document.getElementById('cmd-input');
+        const container = document.getElementById('terminal-container');
+
+        // Render available commands pill badges
+        function renderCommandList() {
+            const cmdContainer = document.getElementById('available-commands');
+            for(let cmd in commands) {
+                cmdContainer.innerHTML += `<span class="bg-slate-700/50 border border-slate-600 px-2 py-1 rounded text-xs font-mono">${cmd}</span>`;
+            }
+        }
+
+        // Print to terminal
+        function printToTerminal(htmlContent, isCommand = false) {
+            const div = document.createElement('div');
+            div.className = "mb-1";
+            if (isCommand) {
+                div.innerHTML = `<span class="term-prompt">user@gemini</span>:<span class="term-path">${formatPromptPath()}</span>$ ${htmlContent}`;
+            } else {
+                div.innerHTML = htmlContent;
+            }
+            
+            // Insert before the input line
+            terminalOutput.appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        // Parse and execute
+        function executeCommand(rawCommand) {
+            let cmdStr = rawCommand.trim();
+            if (cmdStr === "") return;
+            
+            printToTerminal(cmdStr, true); // Echo the command
+            checkLessonProgress(cmdStr);   // Advance lesson if applicable
+
+            // Basic parsing (split by spaces but simplistic, doesn't handle complex quoted strings with spaces well, but good enough for a basic simulator)
+            // A more robust regex for splitting respecting quotes:
+            let args = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
+            let cmdName = args.shift();
+
+            if (commands[cmdName]) {
+                try {
+                    let output = commands[cmdName].run(args, cmdStr);
+                    if (output === "CLEAR_SIGNAL") {
+                        terminalOutput.innerHTML = "";
+                    } else if (output !== "") {
+                        // Handle newlines in output
+                        let formattedOutput = output.replace(/\n/g, "<br>");
+                        printToTerminal(formattedOutput);
+                    }
+                } catch (e) {
+                    printToTerminal(`<span class="term-err">Error executing command.</span>`);
+                    console.error(e);
+                }
+            } else {
+                printToTerminal(`<span class="term-err">${cmdName}: command not found</span>`);
+            }
+        }
+
+        // Event Listeners
+        cmdInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                let cmd = this.value;
+                if (cmd.trim() !== '') {
+                    commandHistory.push(cmd);
+                    historyIndex = commandHistory.length;
+                }
+                executeCommand(cmd);
+                this.value = ''; // clear input
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    this.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    this.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    this.value = '';
+                }
+            }
+        });
+
+        // Keep focus on input when clicking anywhere in terminal
+        container.addEventListener('click', () => {
+            cmdInput.focus();
+        });
+
+        // Initialize
+        window.onload = () => {
+            renderLesson();
+            renderCommandList();
+            document.getElementById('prompt-path').innerText = formatPromptPath();
+            cmdInput.focus();
+        };
+
+    </script>
+</body>
+</html>
