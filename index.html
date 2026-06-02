@@ -34,6 +34,7 @@
             background: #475569; 
         }
 
+        /* Animations */
         .pulse-emerald {
             animation: pulse-glow 2s infinite;
         }
@@ -60,6 +61,7 @@
         .term-prompt { color: #34d399; font-weight: bold; }
         .term-path { color: #60a5fa; font-weight: bold; }
         .term-highlight { color: #fbbf24; font-weight: bold; }
+        .term-locked { color: #94a3b8; font-style: italic; }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col md:flex-row overflow-hidden">
@@ -81,7 +83,7 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-mono">XP System</span>
-                    <span class="text-sm font-black text-indigo-400 font-mono" id="xp-counter">0 / 2600 XP</span>
+                    <span class="text-sm font-black text-indigo-400 font-mono" id="xp-counter">0 / 8000 XP</span>
                 </div>
             </div>
             
@@ -162,6 +164,9 @@
 
             <!-- VIEW C: COMMAND REFERENCE (CHEATSHEET) -->
             <div id="view-cheatsheet" class="hidden space-y-4">
+                <div class="p-3 bg-slate-800/50 text-slate-300 rounded-lg border border-slate-700 text-xs italic">
+                    Note: Advanced commands are locked based on your rank XP. Rank up to unlock them!
+                </div>
                 <div class="flex items-center gap-2">
                     <input type="text" id="cheatsheet-search" placeholder="Search commands..." oninput="filterCheatsheet()" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 </div>
@@ -202,13 +207,13 @@
         <!-- Terminal Output -->
         <div class="flex-1 overflow-y-auto p-4 terminal-font text-sm md:text-base space-y-1.5" id="terminal-output">
             <div class="text-slate-500 font-mono text-xs border-b border-slate-900/60 pb-3 mb-3">
-                <span>Gemini Linux Sandbox v1.4.2 (Standard Terminal Environment)</span><br>
+                <span>Gemini Linux Sandbox v2.0 (RPG Progression Mode)</span><br>
                 <span>Current virtual architecture: x86_64, VFS: Memory Storage</span><br>
-                <span>Commands supported: pwd, ls, cd, cat, echo, mkdir, touch, cp, mv, rm, grep, wc, head, tail, find, uname, df, free, ps, sudo, chmod, ping, curl, wget, top, kill, tar, du, sort, alias, history, help</span>
+                <span>Type 'help' to inspect command indices. Advanced commands unlock via XP.</span>
             </div>
             <div class="mb-4">
-                <span class="text-indigo-400 font-bold">Welcome to Gemini Linux Sandbox.</span><br>
-                <span class="text-slate-400">Your playground to test intermediate SysAdmin commands. Filesystem changes are live! Type 'help' to inspect command indices.</span>
+                <span class="text-indigo-400 font-bold">Welcome back to Gemini Linux Sandbox.</span><br>
+                <span class="text-slate-400">Your playground to test SysAdmin commands. Filesystem changes are live! Level up to unlock systemctl, awk, sed, and more!</span>
             </div>
         </div>
 
@@ -238,28 +243,31 @@
             if (event.ctrlKey && event.key.toUpperCase() === 'U') event.preventDefault();
         });
 
-        // --- VIRTUAL FILE SYSTEM (VFS) STATE DATABASE ---
+        // --- VIRTUAL STATE DATABASES ---
         let vfs = {};
+        let runningServices = { 'ssh': true, 'nginx': false, 'docker': false };
+        let envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
 
         const initialVfsTemplate = {
             "/": {
                 type: "dir",
+                owner: "root",
                 contents: {
                     "home": {
-                        type: "dir",
+                        type: "dir", owner: "root",
                         contents: {
                             "sysadmin": {
-                                type: "dir",
+                                type: "dir", owner: "sysadmin",
                                 contents: {
-                                    ".bash_history": { type: "file", content: "cd /\nls -la\ncat /var/log/syslog\nwhoami\nsudo su\n" },
+                                    ".bash_history": { type: "file", owner: "sysadmin", content: "cd /\nls -la\ncat /var/log/syslog\nwhoami\nsudo su\n" },
                                     "readme.txt": { 
-                                        type: "file", 
+                                        type: "file", owner: "sysadmin",
                                         content: "Welcome to Linux!\nThis is a simple text file.\nYou can read me using the 'cat' command.\n\nLinux is a family of open-source Unix-like operating systems.\nThey are based on the Linux kernel, first released on September 17, 1991, by Linus Torvalds.\nLinux is typically packaged in a Linux distribution.\n\nEnjoy your learning journey!\nLine 9\nLine 10\nLine 11\nEnd of file." 
                                     },
                                     "documents": { 
-                                        type: "dir", 
+                                        type: "dir", owner: "sysadmin",
                                         contents: {
-                                            "secret.txt": { type: "file", content: "You found the secret document! Good job navigating directories." }
+                                            "secret.txt": { type: "file", owner: "sysadmin", content: "You found the secret document! Good job navigating directories." }
                                         } 
                                     }
                                 }
@@ -267,20 +275,21 @@
                         }
                     },
                     "var": {
-                        type: "dir",
+                        type: "dir", owner: "root",
                         contents: {
                             "log": {
-                                type: "dir",
+                                type: "dir", owner: "root",
                                 contents: {
-                                    "syslog": { type: "file", content: "System startup...\nKernel loaded.\nMounting filesystems...\nNetwork interfaces up.\nStarting sshd... OK.\nSystem ready.\nWarning: SSH login attempt failed from 192.168.1.105.\nAuthentication failed for sysadmin.\nError: Failed to bind port 80." }
+                                    "syslog": { type: "file", owner: "root", content: "System startup...\nKernel loaded.\nMounting filesystems...\nNetwork interfaces up.\nStarting sshd... OK.\nSystem ready.\nWarning: SSH login attempt failed from 192.168.1.105.\nAuthentication failed for sysadmin.\nError: Failed to bind port 80." }
                                 }
                             }
                         }
                     },
                     "etc": {
-                        type: "dir",
+                        type: "dir", owner: "root",
                         contents: {
-                            "os-release": { type: "file", content: "NAME=\"Gemini OS\"\nVERSION=\"1.4 (Interactive Sandbox)\"" }
+                            "os-release": { type: "file", owner: "root", content: "NAME=\"Gemini OS\"\nVERSION=\"2.0 (Interactive Sandbox)\"\nID=gemini\nHOME_URL=\"https://google.com\"" },
+                            "passwd": { type: "file", owner: "root", content: "root:x:0:0:root:/root:/bin/bash\nsysadmin:x:1000:1000:sysadmin:/home/sysadmin:/bin/bash" }
                         }
                     }
                 }
@@ -291,21 +300,22 @@
         let userAliases = { 'll': 'ls -la', 'la': 'ls -a' };
         let commandHistory = [];
         let historyIndex = -1;
-        let tabDoubleTapTimer = null;
 
-        // Player Stats Tracker (saved to localStorage so state persists across minor reloads if desired)
+        // Player Stats Tracker
         let playerStats = {
             xp: 0,
-            completedLessons: [], // Store moduleIndex_lessonIndex strings
-            completedQuests: []   // Store quest indices strings
+            completedLessons: [], 
+            completedQuests: []   
         };
 
         // Initialize Virtual Filesystem
         function initVfs() {
             vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
+            runningServices = { 'ssh': true, 'nginx': false, 'docker': false };
+            envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
         }
 
-        // Helper: Resolves path safely returning { node, path } or null
+        // Helper: Resolves path safely returning { node, path, parentNode, fileName } or null
         function resolvePath(targetPath) {
             if (!targetPath) return { node: getVfsNode(currentPath), path: currentPath };
             
@@ -323,14 +333,17 @@
             
             let resolvedStr = '/' + absPathParts.join('/');
             let current = vfs['/'];
+            let parent = null;
+            let finalName = absPathParts.length > 0 ? absPathParts[absPathParts.length-1] : "";
             
             for (let i = 0; i < absPathParts.length; i++) {
+                parent = current;
                 if (!current.contents || !current.contents[absPathParts[i]]) {
                     return null; // File or dir not found
                 }
                 current = current.contents[absPathParts[i]];
             }
-            return { node: current, path: resolvedStr === '//' ? '/' : resolvedStr };
+            return { node: current, path: resolvedStr === '//' ? '/' : resolvedStr, parentNode: parent, name: finalName };
         }
 
         function getVfsNode(pathStr) {
@@ -344,55 +357,38 @@
             return currentPath;
         }
 
-        // --- STREAMING_CHUNK: Compiling Modules and Curriculum Data ---
+        // --- CORE MODULES (Basic to Intermediate) ---
         const learningModules = [
             {
                 name: "1. Navigation Masterclass",
                 lessons: [
                     {
-                        title: "Where Am I?",
-                        module: "Navigation",
+                        title: "Where Am I?", module: "Navigation",
                         why: "Directories in Linux are layered. Before running commands, you must verify your exact position.",
                         text: "Run the command <code>pwd</code> (Print Working Directory) to identify your exact path in the virtual machine.",
-                        objective: "Type exactly 'pwd' in your terminal and press enter.",
-                        xp: 100,
+                        objective: "Type exactly 'pwd' in your terminal and press enter.", xp: 100,
                         check: (cmd, args) => cmd === "pwd"
                     },
                     {
-                        title: "Looking Around",
-                        module: "Navigation",
+                        title: "Looking Around", module: "Navigation",
                         why: "In visual interfaces, files are icons. In the command line, you need tools to view what is in a container folder.",
                         text: "Type <code>ls</code> (List) to list the folders and files in your home directory.",
-                        objective: "Type exactly 'ls' to list the files inside the current working path.",
-                        xp: 100,
+                        objective: "Type exactly 'ls' to list the files inside the current working path.", xp: 100,
                         check: (cmd, args) => cmd === "ls"
                     },
                     {
-                        title: "Changing Directories",
-                        module: "Navigation",
+                        title: "Changing Directories", module: "Navigation",
                         why: "Double clicking folders is replaced by cd. You must explicitly name folders you want to enter.",
                         text: "Type <code>cd documents</code> to enter your virtual document store.",
-                        objective: "Type 'cd documents' and hit enter.",
-                        xp: 100,
+                        objective: "Type 'cd documents' and hit enter.", xp: 100,
                         check: (cmd, args) => cmd === "cd" && args[0] === "documents"
                     },
                     {
-                        title: "Moving Upwards",
-                        module: "Navigation",
+                        title: "Moving Upwards", module: "Navigation",
                         why: "Every directory has two virtual linkages: '.' pointing to itself, and '..' pointing back one tier to its parent.",
                         text: "Type <code>cd ..</code> to jump back out to your home folder (/home/sysadmin).",
-                        objective: "Type 'cd ..' to return to the parent directory.",
-                        xp: 100,
+                        objective: "Type 'cd ..' to return to the parent directory.", xp: 100,
                         check: (cmd, args) => cmd === "cd" && args[0] === ".."
-                    },
-                    {
-                        title: "The Target Search",
-                        module: "Navigation",
-                        why: "When managing millions of logs or web files, recursive structural search tools are essential.",
-                        text: "Run <code>find .</code> to find and recursively display all folders and documents nested below your path.",
-                        objective: "Type 'find .' in the console to explore paths recursively.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "find" && args[0] === "."
                     }
                 ]
             },
@@ -400,67 +396,32 @@
                 name: "2. Filesystem Scalpels",
                 lessons: [
                     {
-                        title: "Making Directories",
-                        module: "Filesystem",
+                        title: "Making Directories", module: "Filesystem",
                         why: "Creating directories is critical to maintaining safe isolation boundaries for web apps.",
                         text: "Type <code>mkdir playground</code> to make a new directory in your current home directory.",
-                        objective: "Create a directory called 'playground' using mkdir.",
-                        xp: 100,
+                        objective: "Create a directory called 'playground' using mkdir.", xp: 100,
                         check: (cmd, args) => cmd === "mkdir" && args[0] === "playground" && getVfsNode(currentPath + "/playground") !== null
                     },
                     {
-                        title: "Creating File Timestamps",
-                        module: "Filesystem",
+                        title: "Creating File Timestamps", module: "Filesystem",
                         why: "The touch command instantly creates blank files or touches metadata timestamps.",
                         text: "Let's make a new blank file inside your home. Type <code>touch server.conf</code>.",
-                        objective: "Touch and create a file named 'server.conf'.",
-                        xp: 100,
+                        objective: "Touch and create a file named 'server.conf'.", xp: 100,
                         check: (cmd, args) => cmd === "touch" && args[0] === "server.conf" && getVfsNode(currentPath + "/server.conf") !== null
                     },
                     {
-                        title: "Writing with Output Redirection",
-                        module: "Filesystem",
+                        title: "Writing with Output Redirection", module: "Filesystem",
                         why: "Standard redirection using '>' channels outputs into target files directly, overwriting whatever was there.",
                         text: "Write text inside your new configuration file. Type <code>echo \"PORT=8080\" > server.conf</code>.",
-                        objective: "Direct content into server.conf via redirection (>).",
-                        xp: 100,
+                        objective: "Direct content into server.conf via redirection (>).", xp: 100,
                         check: (cmd, args) => cmd === "echo" && args.includes(">") && args.includes("server.conf")
                     },
                     {
-                        title: "Reading File Contents",
-                        module: "Filesystem",
+                        title: "Reading File Contents", module: "Filesystem",
                         why: "To view configuration values or verify codes quickly without opening hefty visual editors.",
                         text: "Inspect what you just wrote by typing <code>cat server.conf</code>.",
-                        objective: "Print the raw text inside 'server.conf' via cat.",
-                        xp: 100,
+                        objective: "Print the raw text inside 'server.conf' via cat.", xp: 100,
                         check: (cmd, args) => cmd === "cat" && args[0] === "server.conf"
-                    },
-                    {
-                        title: "Copying Configurations",
-                        module: "Filesystem",
-                        why: "Before mutating system config files, copy them as active backups to prevent major server downtime.",
-                        text: "Type <code>cp server.conf backup.conf</code> to secure an active duplicate.",
-                        objective: "Duplicate 'server.conf' into 'backup.conf' via cp.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "cp" && args[0] === "server.conf" && args[1] === "backup.conf" && getVfsNode(currentPath + "/backup.conf") !== null
-                    },
-                    {
-                        title: "Moving & Renaming",
-                        module: "Filesystem",
-                        why: "Linux uses the command mv (Move) to change directories AND to rename local files.",
-                        text: "Let's rename your backup. Type <code>mv backup.conf config_backup.conf</code>.",
-                        objective: "Rename backup.conf into config_backup.conf via mv.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "mv" && args[0] === "backup.conf" && args[1] === "config_backup.conf" && getVfsNode(currentPath + "/config_backup.conf") !== null
-                    },
-                    {
-                        title: "Removing Remnants",
-                        module: "Filesystem",
-                        why: "Disk resources are finite. Cleaning old backups and source builds is standard sysadmin hygiene.",
-                        text: "Delete your backup. Type <code>rm config_backup.conf</code>.",
-                        objective: "Delete 'config_backup.conf' using rm.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "rm" && args[0] === "config_backup.conf" && getVfsNode(currentPath + "/config_backup.conf") === null
                     }
                 ]
             },
@@ -468,330 +429,144 @@
                 name: "3. Text Slicing & Parsing",
                 lessons: [
                     {
-                        title: "Word Counting Metrics",
-                        module: "Text Parsing",
-                        why: "Quantify source files, tracking the absolute line quantities of logs or server lists.",
-                        text: "Let's audit our home text file using <code>wc readme.txt</code> to read lines, words, and character scales.",
-                        objective: "Assess file properties by running 'wc readme.txt'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "wc" && args[0] === "readme.txt"
-                    },
-                    {
-                        title: "Top Inspection (head)",
-                        module: "Text Parsing",
+                        title: "Top Inspection (head)", module: "Text Parsing",
                         why: "When opening a heavy multi-gigabyte document, loading everything is fatal. Read just the top.",
                         text: "Let's slice off the top 5 lines of a text source using <code>head readme.txt</code>.",
-                        objective: "Read top file parameters using 'head readme.txt'.",
-                        xp: 100,
+                        objective: "Read top file parameters using 'head readme.txt'.", xp: 100,
                         check: (cmd, args) => cmd === "head" && args[0] === "readme.txt"
                     },
                     {
-                        title: "Analyzing Bottom Logs (tail)",
-                        module: "Text Parsing",
-                        why: "Active issues are logged continuously at the end of system files. Tail prints the tail margins.",
-                        text: "Read the lower bounds of your main introductory file using <code>tail readme.txt</code>.",
-                        objective: "Display bottom content segments with 'tail readme.txt'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "tail" && args[0] === "readme.txt"
-                    },
-                    {
-                        title: "Global Regular Expressions (grep)",
-                        module: "Text Parsing",
+                        title: "Global Regular Expressions (grep)", module: "Text Parsing",
                         why: "Filter patterns out of complex arrays instantly, showing ONLY matching instances.",
                         text: "Find references to the kernel. Type <code>grep \"Linux\" readme.txt</code>.",
-                        objective: "Filter matches containing 'Linux' using grep.",
-                        xp: 100,
+                        objective: "Filter matches containing 'Linux' using grep.", xp: 100,
                         check: (cmd, args) => cmd === "grep" && args.includes("readme.txt")
-                    },
-                    {
-                        title: "Sorting Lists",
-                        module: "Text Parsing",
-                        why: "Standard alphabetization or numeric organization makes reading values simple.",
-                        text: "Sort the output contents alphabetically. Type <code>sort readme.txt</code>.",
-                        objective: "Sort readme contents with 'sort readme.txt'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "sort" && args[0] === "readme.txt"
                     }
                 ]
             },
             {
-                name: "4. SysAdmin Diagnostics",
+                name: "4. Deep Filesystem Mastery",
                 lessons: [
                     {
-                        title: "System OS Verification",
-                        module: "SysAdmin",
-                        why: "You cannot administer machines if you don't know the running kernel details.",
-                        text: "Type <code>uname -a</code> to print all active OS, architecture, and network host metadata.",
-                        objective: "Collect detailed platform architecture using 'uname -a'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "uname" && args.includes("-a")
-                    },
-                    {
-                        title: "Analyzing Disks (df)",
-                        module: "SysAdmin",
-                        why: "Identify filesystem partitions that are reaching max storage limits before crashes occur.",
-                        text: "Type <code>df</code> (Disk Free) to check capacity percentages of mounted drives.",
-                        objective: "Inspect system partitions via 'df'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "df"
-                    },
-                    {
-                        title: "Sizing Directory Trees (du)",
-                        module: "SysAdmin",
-                        why: "Which folder is actually hogging resource? Disk Usage tells you recursively.",
-                        text: "Type <code>du</code> to calculate size contributions of current path files.",
-                        objective: "Audit path volume footprint via 'du'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "du"
-                    },
-                    {
-                        title: "Allocating Memory (free)",
-                        module: "SysAdmin",
-                        why: "Verify system health, detailing total active RAM vs system paging files (Swap).",
-                        text: "Measure current memory allocations. Type <code>free</code>.",
-                        objective: "Type 'free' to output hardware RAM statuses.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "free"
-                    },
-                    {
-                        title: "Managing Access Privileges",
-                        module: "SysAdmin",
-                        why: "Security constraints dictate user actions. Chmod toggles execution permissions of configurations.",
-                        text: "Configure readme as write or executable. Type <code>chmod +x readme.txt</code>.",
-                        objective: "Toggle resource execute flags via 'chmod +x readme.txt'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "chmod" && args.includes("+x") && args.includes("readme.txt")
-                    },
-                    {
-                        title: "The Superuser Escape (sudo)",
-                        module: "SysAdmin",
-                        why: "Commands that scale across general users or system properties require root elevation authorization.",
-                        text: "Type <code>sudo ls</code> to request system execution under root privileges.",
-                        objective: "Attempt root instruction using 'sudo ls'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "sudo" && args.includes("ls")
-                    }
-                ]
-            },
-            {
-                name: "5. Active Networks & Assets",
-                lessons: [
-                    {
-                        title: "Probing Target Hosts (ping)",
-                        module: "Networking",
-                        why: "Diagnose network connectivity, calculating ICMP echo response latency metrics.",
-                        text: "Check if google is reachable. Type <code>ping google.com</code>.",
-                        objective: "Test target host accessibility with 'ping google.com'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "ping" && args[0] === "google.com"
-                    },
-                    {
-                        title: "Downloading HTTP Endpoints (curl)",
-                        module: "Networking",
-                        why: "Inspect API responses or load remote configurations from specific endpoints directly inside bash.",
-                        text: "Type <code>curl http://example.com</code> to print raw index HTML payload structures.",
-                        objective: "Examine remote code parameters by running 'curl http://example.com'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "curl" && args[0] === "http://example.com"
-                    },
-                    {
-                        title: "Downloading Assets (wget)",
-                        module: "Networking",
-                        why: "Fetch binary distributions, scripts, and media resources directly onto your server.",
-                        text: "Type <code>wget http://example.com</code> to fetch and write the site directly to disk.",
-                        objective: "Execute resource retrieval using 'wget http://example.com'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "wget" && args[0] === "http://example.com"
-                    }
-                ]
-            },
-            {
-                name: "6. Automation & Power User",
-                lessons: [
-                    {
-                        title: "Audit Running Tasks (ps)",
-                        module: "Automation",
-                        why: "You cannot resolve server crashes unless you track which programs are running in the system background.",
-                        text: "Type <code>ps</code> (Process Status) to capture running tasks tied to your environment.",
-                        objective: "View active runtime processes with 'ps'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "ps"
-                    },
-                    {
-                        title: "Process Kill Tactics",
-                        module: "Automation",
-                        why: "Stop unresponsive applications, releasing resources from system locks safely.",
-                        text: "Force-kill program PID 1234. Type <code>kill 1234</code>.",
-                        objective: "Terminate process 1234 by running 'kill 1234'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "kill" && args[0] === "1234"
-                    },
-                    {
-                        title: "Designing Command Aliases",
-                        module: "Automation",
-                        why: "Cut down complex, long command syntax lines into brief single-word aliases.",
-                        text: "Assign 'greet' to print message arrays. Type <code>alias greet='echo Hello'</code>.",
-                        objective: "Bind the nickname alias via 'alias greet=\'echo Hello\''.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "alias" && args.join(" ").includes("greet")
-                    }
-                ]
-            },
-            {
-                name: "7. Deep Filesystem Mastery",
-                lessons: [
-                    {
-                        title: "Exposing Hidden Files",
-                        module: "Deep Filesystem",
+                        title: "Exposing Hidden Files", module: "Deep Filesystem",
                         why: "In Linux, any file or folder that starts with a dot (.) is hidden by default. These are usually config files.",
                         text: "Let's find hidden files in your home directory. Type <code>ls -la</code> to see all files in long format.",
-                        objective: "Type 'ls -la' or 'ls -a' to expose hidden dotfiles.",
-                        xp: 100,
+                        objective: "Type 'ls -la' or 'ls -a' to expose hidden dotfiles.", xp: 100,
                         check: (cmd, args) => cmd === "ls" && (args.includes("-la") || args.includes("-a"))
                     },
                     {
-                        title: "Absolute Navigation",
-                        module: "Deep Filesystem",
-                        why: "Relative paths depend on where you are. Absolute paths always start from the root (/) and work anywhere.",
-                        text: "Jump straight to the system logs no matter where you are. Type <code>cd /var/log</code>.",
-                        objective: "Navigate using the absolute path 'cd /var/log'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "cd" && args[0] === "/var/log"
-                    },
-                    {
-                        title: "Recursive Destruction",
-                        module: "Deep Filesystem",
+                        title: "Recursive Destruction", module: "Deep Filesystem",
                         why: "Standard 'rm' cannot delete directories. You must tell it to recursively delete folders and everything inside.",
                         text: "First go home with <code>cd</code>, then make a test dir with <code>mkdir junk</code>. Finally, delete it by typing <code>rm -r junk</code>.",
-                        objective: "Use the recursive flag 'rm -r junk' to delete a directory.",
-                        xp: 150,
+                        objective: "Use the recursive flag 'rm -r junk' to delete a directory.", xp: 150,
                         check: (cmd, args) => cmd === "rm" && (args.includes("-r") || args.includes("-rf"))
                     }
                 ]
             },
+            // --- NEW ADVANCED MODULES ---
             {
-                name: "8. System Survival Guide",
+                name: "5. Advanced Service Control",
                 lessons: [
                     {
-                        title: "Reading the Map (man)",
-                        module: "Survival Guide",
-                        why: "You don't need to memorize everything. The 'man' (manual) command tells you how to use other commands.",
-                        text: "Want to know how 'ls' works? Type <code>man ls</code> to pull up its manual page.",
-                        objective: "Read the manual for ls by typing 'man ls'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "man" && args[0] === "ls"
+                        title: "Checking Service Daemons", module: "Services",
+                        why: "Advanced SysAdmins manage background tasks (daemons) like web servers using systemctl.",
+                        text: "Check if the Nginx web server is running. Type <code>systemctl status nginx</code>.",
+                        objective: "Verify the status of the 'nginx' service.", xp: 300,
+                        check: (cmd, args) => cmd === "systemctl" && args[0] === "status" && args[1] === "nginx"
                     },
                     {
-                        title: "Command Recall (history)",
-                        module: "Survival Guide",
-                        why: "Forgot that massive command you typed 5 minutes ago? The shell remembers everything.",
-                        text: "Type <code>history</code> to print out a numbered list of all your recent terminal inputs.",
-                        objective: "View your terminal logs by typing 'history'.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "history"
+                        title: "Starting Background Services", module: "Services",
+                        why: "When a server reboots, some services might not start. You must orchestrate them manually.",
+                        text: "Start the web server by typing <code>systemctl start nginx</code>.",
+                        objective: "Start the nginx background daemon.", xp: 300,
+                        check: (cmd, args) => cmd === "systemctl" && args[0] === "start" && args[1] === "nginx" && runningServices['nginx'] === true
+                    }
+                ]
+            },
+            {
+                name: "6. Stream Editing (sed & awk)",
+                lessons: [
+                    {
+                        title: "The Stream Editor (sed)", module: "Text Manipulation",
+                        why: "Sed is a legendary tool used to find and replace text instantly across massive files without opening them.",
+                        text: "Replace 'Linux' with 'Unix' inside the readme file! Type: <code>sed 's/Linux/Unix/g' readme.txt</code>",
+                        objective: "Use sed string substitution syntax (s/old/new/g).", xp: 400,
+                        check: (cmd, args) => cmd === "sed" && args[0] === "s/Linux/Unix/g" && args[1] === "readme.txt"
                     },
                     {
-                        title: "Creating Archives (tar)",
-                        module: "Survival Guide",
-                        why: "SysAdmins often compress multiple files into a single '.tar' archive (a tarball) to save space or transfer data.",
-                        text: "Let's archive your readme. Type <code>tar -cvf backup.tar readme.txt</code> (c=create, v=verbose, f=file).",
-                        objective: "Create an archive using 'tar -cvf backup.tar readme.txt'.",
-                        xp: 150,
-                        check: (cmd, args) => cmd === "tar" && args.includes("-cvf") && args.includes("backup.tar")
+                        title: "Data Extraction (awk)", module: "Text Manipulation",
+                        why: "Awk is a full programming language designed for text processing. It excels at extracting specific columns of data.",
+                        text: "Extract just the first column of words from our readme file. Type <code>awk '{print $1}' readme.txt</code>",
+                        objective: "Use awk to print column $1.", xp: 400,
+                        check: (cmd, args) => cmd === "awk" && args[0] === "{print $1}" && args[1] === "readme.txt"
+                    }
+                ]
+            },
+            {
+                name: "7. Identity & Permissions",
+                lessons: [
+                    {
+                        title: "Creating Users", module: "Identity",
+                        why: "Managing a server means granting isolated access to developers using useradd.",
+                        text: "Create a new user account named 'developer'. Type: <code>useradd developer</code>",
+                        objective: "Create 'developer' using the useradd tool.", xp: 500,
+                        check: (cmd, args) => cmd === "useradd" && args[0] === "developer"
                     },
                     {
-                        title: "Live Monitoring (top)",
-                        module: "Survival Guide",
-                        why: "While 'ps' gives a snapshot, 'top' provides a live, continuously updating dashboard of system resources.",
-                        text: "Launch the task manager by typing <code>top</code>.",
-                        objective: "Type 'top' to view real-time process utilization.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "top"
+                        title: "Transferring Ownership", module: "Identity",
+                        why: "Sometimes files belong to the wrong user, blocking access. Chown (Change Owner) fixes this.",
+                        text: "Give ownership of secret.txt to root! Type <code>chown root documents/secret.txt</code>",
+                        objective: "Change file owner to root using chown.", xp: 500,
+                        check: (cmd, args) => {
+                            let node = getVfsNode(currentPath + "/documents/secret.txt");
+                            return cmd === "chown" && args[0] === "root" && node && node.owner === "root";
+                        }
+                    }
+                ]
+            },
+            {
+                name: "8. The System Environment",
+                lessons: [
+                    {
+                        title: "Reading The Matrix", module: "Environment",
+                        why: "Linux relies on hidden variables in RAM (like PATH) to know where to find commands.",
+                        text: "View all currently active environment variables by typing <code>env</code>.",
+                        objective: "Print active environment properties.", xp: 500,
+                        check: (cmd, args) => cmd === "env"
                     },
                     {
-                        title: "Cleaning the Slate (clear)",
-                        module: "Survival Guide",
-                        why: "A cluttered terminal leads to mistakes. Power users constantly wipe the screen to focus.",
-                        text: "Wipe all previous output from the screen. Type <code>clear</code>.",
-                        objective: "Clear your terminal screen using the 'clear' command.",
-                        xp: 100,
-                        check: (cmd, args) => cmd === "clear"
+                        title: "Exporting Variables", module: "Environment",
+                        why: "You often need to define API keys or runtime variables before launching a server application.",
+                        text: "Set an application environment variable. Type <code>export APP_ENV=production</code>",
+                        objective: "Declare an environment variable using export.", xp: 600,
+                        check: (cmd, args) => cmd === "export" && args[0] === "APP_ENV=production" && envVars["APP_ENV"] === "production"
                     }
                 ]
             }
         ];
 
-        // --- STREAMING_CHUNK: Instantiating Quests Data Objects ---
+        // --- BOSS QUESTS ---
         const quests = [
             {
-                id: "q1",
-                title: "Log File Investigator",
-                difficulty: "Medium",
-                description: "There was a failed security attack logged in this machine! A malicious user tried to login as root or sysadmin. Your job is to search the log files inside <code>/var/log</code> directory and locate the warning message.",
+                id: "q1", title: "Log File Investigator", difficulty: "Medium", reward: 300,
+                description: "Search the log files inside <code>/var/log</code> directory and locate the warning message.",
                 objective: "Grep for the word 'Warning' inside the file '/var/log/syslog'.",
-                hint: "Use 'grep' followed by the search pattern and then the full absolute path of syslog.",
-                reward: 250,
-                check: (cmd, args, outputText) => {
-                    return cmd === "grep" && args.includes("Warning") && args.some(a => a.includes("syslog"));
-                }
+                hint: "Use 'grep' followed by the search pattern and then the absolute path of syslog.",
+                check: (cmd, args) => cmd === "grep" && args.includes("Warning") && args.some(a => a.includes("syslog"))
             },
             {
-                id: "q2",
-                title: "Asset Backup Operation",
-                difficulty: "Medium",
-                description: "You need to secure the system configuration files immediately. Create a folder in your home named <code>backups</code>, copy the <code>readme.txt</code> file inside it, and verify that the file exists in its new location.",
-                objective: "Create home directory 'backups', copy 'readme.txt' to 'backups/', and verify the file is there.",
-                hint: "Use 'mkdir backups', then 'cp readme.txt backups/', and then 'ls backups' to confirm.",
-                reward: 350,
-                check: (cmd, args, outputText) => {
-                    let folderNode = getVfsNode("/home/sysadmin/backups");
-                    if (folderNode && folderNode.type === "dir" && folderNode.contents["readme.txt"]) {
-                        return true;
-                    }
-                    return false;
-                }
+                id: "q2", title: "Web Server Incident", difficulty: "Hard", reward: 600,
+                description: "The website went down! You need to check the status of the Nginx service, and if it's dead, start it immediately.",
+                objective: "Start the nginx service daemon.",
+                hint: "First use 'systemctl status nginx', then 'systemctl start nginx'.",
+                check: (cmd, args) => runningServices['nginx'] === true && cmd === "systemctl"
             },
             {
-                id: "q3",
-                title: "The Shell Script Launchpad",
-                difficulty: "Hard",
-                description: "Automate custom startup scripts! You must create an empty script file named <code>startup.sh</code> inside <code>/home/sysadmin/documents</code>, write <code>echo 'System Live'</code> inside it, and set the permissions to executable.",
-                objective: "Create '/home/sysadmin/documents/startup.sh', add system echo, and use chmod +x.",
-                hint: "Use 'touch', 'echo' with redirection '>', and 'chmod +x' on that file.",
-                reward: 500,
-                check: (cmd, args, outputText) => {
-                    let scriptNode = getVfsNode("/home/sysadmin/documents/startup.sh");
-                    if (scriptNode && scriptNode.type === "file" && scriptNode.content.includes("System Live")) {
-                        // Check if chmod +x was run on it by evaluating typical lesson completion patterns
-                        return cmd === "chmod" && args.includes("+x") && args.some(a => a.includes("startup.sh"));
-                    }
-                    return false;
-                }
-            },
-            {
-                id: "q4",
-                title: "The Archive Architect",
-                difficulty: "Medium",
-                description: "Storage space on the virtual server is getting full! We need to compress the main documentation. Use the <code>tar</code> command to create a new archive named <code>docs.tar</code> that compresses the <code>readme.txt</code> file in your home directory.",
-                objective: "Create a tar archive named 'docs.tar' using tar -cvf.",
-                hint: "Ensure you are in '/home/sysadmin' and run 'tar -cvf docs.tar readme.txt'.",
-                reward: 300,
-                check: (cmd, args, outputText) => {
-                    let tarNode = getVfsNode("/home/sysadmin/docs.tar");
-                    return (tarNode !== null && tarNode.type === "file");
-                }
-            },
-            {
-                id: "q5",
-                title: "The Hidden Spy",
-                difficulty: "Hard",
-                description: "We suspect a previous administrator left behind a hidden file in your home directory tracking sensitive commands. Find the hidden file (starts with a dot) and use <code>cat</code> to read its contents.",
-                objective: "Locate and read the hidden '.bash_history' file.",
-                hint: "Use 'ls -la' to spot the hidden file, then 'cat .bash_history' to read it.",
-                reward: 450,
-                check: (cmd, args, outputText) => {
-                    return cmd === "cat" && args.some(a => a.includes(".bash_history"));
-                }
+                id: "q3", title: "Data Extraction Mission", difficulty: "Expert", reward: 800,
+                description: "We need just the first column of the /etc/os-release file to send to the developer team. Use awk to extract the first word on each line.",
+                objective: "Use awk to print $1 on /etc/os-release.",
+                hint: "Run `awk '{print $1}' /etc/os-release`",
+                check: (cmd, args) => cmd === "awk" && args[0] === "{print $1}" && args.some(a => a.includes("os-release"))
             }
         ];
 
@@ -799,8 +574,7 @@
         let activeLessonIndex = 0;
         let activeTab = 'modules';
 
-        // --- STREAMING_CHUNK: View Switching and DOM Manipulation Functions ---
-        
+        // --- CORE UI LOGIC ---
         function switchTab(tabId) {
             activeTab = tabId;
             document.getElementById('view-modules').classList.add('hidden');
@@ -844,7 +618,6 @@
             select.value = activeModuleIndex;
         }
 
-        // Render current selected lesson on left panel
         function renderLesson() {
             let m = learningModules[activeModuleIndex];
             let l = m.lessons[activeLessonIndex];
@@ -867,12 +640,10 @@
             document.getElementById('lesson-objective-target').innerHTML = l.objective;
             document.getElementById('lesson-xp-badge').innerText = `+${l.xp} XP`;
             
-            // Re-render overview grid list below active card
             renderModulesOverview();
             updateOverallProgress();
         }
 
-        // Render standard overview showing checkmarks next to completed items
         function renderModulesOverview() {
             let container = document.getElementById('modules-list');
             container.innerHTML = '';
@@ -882,12 +653,10 @@
                 mod.lessons.forEach((les, lIdx) => {
                     if (playerStats.completedLessons.includes(`${mIdx}_${lIdx}`)) modCompletedCount++;
                 });
-                
                 let modPct = Math.round((modCompletedCount / mod.lessons.length) * 100);
                 
                 let div = document.createElement('div');
                 div.className = `p-3 rounded-xl border text-xs flex flex-col gap-2 transition-all ${activeModuleIndex === mIdx ? 'bg-slate-950 border-indigo-500/30 shadow-md' : 'bg-slate-950/40 border-slate-800'}`;
-                
                 div.innerHTML = `
                     <div class="flex items-center justify-between cursor-pointer" onclick="selectModuleFromList(${mIdx})">
                         <span class="font-bold text-slate-300">${mod.name}</span>
@@ -897,7 +666,6 @@
                         <div class="bg-indigo-500 h-1 rounded-full" style="width: ${modPct}%"></div>
                     </div>
                 `;
-                
                 container.appendChild(div);
             });
         }
@@ -915,12 +683,11 @@
             
             quests.forEach((q, qIdx) => {
                 let isCompleted = playerStats.completedQuests.includes(q.id);
-                
                 let div = document.createElement('div');
                 div.className = `p-4 border rounded-xl space-y-3 relative overflow-hidden transition-all duration-300 ${isCompleted ? 'bg-emerald-950/10 border-emerald-500/20' : 'bg-slate-950 border-slate-800'}`;
-                
                 let difficultyColor = q.difficulty === 'Medium' ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20';
-                
+                if(q.difficulty === 'Expert') difficultyColor = 'text-purple-400 bg-purple-400/10 border-purple-400/20';
+
                 div.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="font-mono text-[10px] uppercase px-2 py-0.5 border rounded-full ${isCompleted ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : difficultyColor}">
@@ -928,71 +695,40 @@
                         </span>
                         <span class="text-xs font-bold text-indigo-400 font-mono">+${q.reward} XP</span>
                     </div>
-                    
                     <div class="space-y-1">
                         <h4 class="font-bold text-white text-sm">${q.title}</h4>
                         <p class="text-slate-400 text-xs leading-relaxed">${q.description}</p>
                     </div>
-
                     <div class="p-2.5 bg-slate-900 rounded border border-slate-800 text-xs font-mono">
                         <strong class="text-slate-400">Target Condition:</strong> ${q.objective}
                     </div>
-
                     <div class="text-[11px] text-slate-500 italic font-mono flex items-center gap-1">
                         <span>💡 Hint:</span> ${q.hint}
                     </div>
                 `;
-                
                 container.appendChild(div);
             });
         }
 
-        // --- STREAMING_CHUNK: Setting up Command Cheatsheet and Statistics ---
-        function renderCheatsheet() {
-            let container = document.getElementById('cheatsheet-list');
-            container.innerHTML = '';
-            
-            let query = document.getElementById('cheatsheet-search').value.toLowerCase().trim();
-            
-            let keys = Object.keys(commands).sort();
-            keys.forEach(k => {
-                if (query !== '' && !k.includes(query) && !commands[k].desc.toLowerCase().includes(query)) {
-                    return; // Search filter match fail
-                }
-                
-                let div = document.createElement('div');
-                div.className = "p-3 bg-slate-950 border border-slate-800/80 rounded-xl space-y-1";
-                div.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="font-mono text-xs font-bold text-indigo-400 bg-indigo-400/5 px-2 py-0.5 rounded border border-indigo-500/10">${k}</span>
-                    </div>
-                    <p class="text-slate-300 text-xs leading-relaxed">${commands[k].desc}</p>
-                `;
-                container.appendChild(div);
-            });
-        }
+        // --- COMMAND ENGINE & PROGRESSION CHECKS ---
+        const maxGlobalXp = 8000;
 
-        function filterCheatsheet() {
-            renderCheatsheet();
-        }
-
-        // Add XP to progression pool
         function addXp(amount) {
             playerStats.xp += amount;
             
-            // Cap ranking ranks based on XP thresholds
             let rank = "Terminal Newbie";
-            if (playerStats.xp >= 4000) rank = "Linux Deity 👑⚡";
+            if (playerStats.xp >= 8000) rank = "Root Avatar 👁️";
+            else if (playerStats.xp >= 6000) rank = "Kernel Overlord 🌌";
+            else if (playerStats.xp >= 4000) rank = "Linux Deity 👑⚡";
             else if (playerStats.xp >= 3000) rank = "Linux Demigod 👑";
             else if (playerStats.xp >= 2000) rank = "Terminal Sorcerer 🧙‍♂️";
             else if (playerStats.xp >= 1000) rank = "Senior SysAdmin 🛡️";
             else if (playerStats.xp >= 500) rank = "Junior Administrator 💻";
             
             document.getElementById('rank-name').innerText = `Rank: ${rank}`;
-            document.getElementById('xp-counter').innerText = `${playerStats.xp} XP`;
+            document.getElementById('xp-counter').innerText = `${playerStats.xp} / ${maxGlobalXp} XP`;
             
-            // Progress Bar animation width calculation
-            let pct = Math.min(100, (playerStats.xp / 6000) * 100);
+            let pct = Math.min(100, (playerStats.xp / maxGlobalXp) * 100);
             document.getElementById('xp-progress').style.width = `${pct}%`;
             
             saveStats();
@@ -1001,50 +737,74 @@
         function updateOverallProgress() {
             let totalLessons = 0;
             learningModules.forEach(m => totalLessons += m.lessons.length);
-            
             let completed = playerStats.completedLessons.length;
             let percentage = Math.round((completed / totalLessons) * 100);
             document.getElementById('overall-progress-tag').innerText = `Progress: ${percentage}%`;
         }
 
-        // Local Storage handles persistence smoothly
-        function saveStats() {
-            localStorage.setItem('linux_learner_stats', JSON.stringify(playerStats));
-        }
-
+        function saveStats() { localStorage.setItem('linux_learner_rpg_stats', JSON.stringify(playerStats)); }
         function loadStats() {
-            let saved = localStorage.getItem('linux_learner_stats');
+            let saved = localStorage.getItem('linux_learner_rpg_stats');
             if (saved) {
                 try {
                     playerStats = JSON.parse(saved);
-                    // Check schema compatibility
                     if(!playerStats.completedQuests) playerStats.completedQuests = [];
-                } catch(e) {
-                    // Reset on error
-                }
+                } catch(e) {}
             }
-            addXp(0); // Update gauges
+            addXp(0); // Trigger rank calculation
         }
 
-        // --- STREAMING_CHUNK: Initializing Terminal Sandbox Command Logic ---
-        
+        function renderCheatsheet() {
+            let container = document.getElementById('cheatsheet-list');
+            container.innerHTML = '';
+            let query = document.getElementById('cheatsheet-search').value.toLowerCase().trim();
+            let keys = Object.keys(commands).sort();
+            
+            keys.forEach(k => {
+                let cmdObj = commands[k];
+                if (query !== '' && !k.includes(query) && !cmdObj.desc.toLowerCase().includes(query)) return;
+                
+                let isLocked = cmdObj.minXp && playerStats.xp < cmdObj.minXp;
+                
+                let div = document.createElement('div');
+                div.className = `p-3 bg-slate-950 border rounded-xl space-y-1 ${isLocked ? 'border-red-900/40 opacity-70' : 'border-slate-800/80'}`;
+                
+                let badge = isLocked 
+                    ? `<span class="font-mono text-[10px] text-red-400 bg-red-400/10 px-2 py-0.5 rounded border border-red-500/20">🔒 Requires ${cmdObj.minXp} XP</span>`
+                    : `<span class="font-mono text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-500/20">Unlocked</span>`;
+
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-xs font-bold ${isLocked ? 'text-slate-500' : 'text-indigo-400'}">${k}</span>
+                        ${badge}
+                    </div>
+                    <p class="text-slate-300 text-xs leading-relaxed ${isLocked ? 'blur-[2px]' : ''}">${cmdObj.desc}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+        function filterCheatsheet() { renderCheatsheet(); }
+
+        // --- THE TERMINAL COMMAND ENGINE ---
         const commands = {
             'help': {
                 desc: 'Print active index list of terminal sandbox instructions.',
                 run: () => {
                     let out = "Terminal Index System:\n";
                     Object.keys(commands).sort().forEach(cmd => {
-                        out += `  <span class="text-indigo-400 font-bold">${cmd.padEnd(10)}</span> - ${commands[cmd].desc}\n`;
+                        let isLocked = commands[cmd].minXp && playerStats.xp < commands[cmd].minXp;
+                        if (isLocked) {
+                            out += `  <span class="term-locked">${cmd.padEnd(10)} - [LOCKED - Requires ${commands[cmd].minXp} XP]</span>\n`;
+                        } else {
+                            out += `  <span class="text-indigo-400 font-bold">${cmd.padEnd(10)}</span> - ${commands[cmd].desc}\n`;
+                        }
                     });
                     return out;
                 }
             },
-            'pwd': {
-                desc: 'Print working directory details.',
-                run: () => currentPath
-            },
+            'pwd': { desc: 'Print working directory details.', run: () => currentPath },
             'ls': {
-                desc: 'List directory entries. Parameters: [target_path], [-la] for recursive view.',
+                desc: 'List directory entries. Parameters: [target_path], [-la]',
                 run: (args) => {
                     let showAll = args.includes('-la') || args.includes('-a');
                     let target = args.filter(a => !a.startsWith('-'))[0] || "";
@@ -1059,470 +819,229 @@
                     }
                     for (let key in res.node.contents) {
                         let node = res.node.contents[key];
-                        if (node.type === 'dir') {
-                            out.push(`<span class="term-dir">${key}/</span>`);
-                        } else {
-                            let execClass = (node.content && node.content.startsWith('#!')) ? 'term-exec' : '';
-                            out.push(`<span class="${execClass}">${key}</span>`);
-                        }
+                        if (node.type === 'dir') out.push(`<span class="term-dir">${key}/</span>`);
+                        else out.push(`<span>${key}</span>`);
                     }
                     return out.join("   ");
                 }
             },
             'cd': {
-                desc: 'Switch active path focus. Usage: cd [target_directory]',
+                desc: 'Switch active path focus.',
                 run: (args) => {
                     let target = args[0] || "/home/sysadmin";
                     let res = resolvePath(target);
                     if (!res) return `<span class="term-err">cd: ${target}: No such file or directory</span>`;
                     if (res.node.type !== 'dir') return `<span class="term-err">cd: ${target}: Not a directory</span>`;
-                    
                     currentPath = res.path;
                     document.getElementById('prompt-path').innerText = formatPromptPath();
                     return "";
                 }
             },
             'cat': {
-                desc: 'Read target text file contents onto the stdout terminal window.',
+                desc: 'Read target text file contents onto the stdout.',
                 run: (args) => {
                     if (args.length === 0) return "cat: standard input stream empty";
-                    let target = args[0];
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">cat: ${target}: No such file or directory</span>`;
-                    if (res.node.type === 'dir') return `<span class="term-err">cat: ${target}: Is a directory</span>`;
-                    
-                    let escaped = res.node.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                    return escaped;
+                    let res = resolvePath(args[0]);
+                    if (!res) return `<span class="term-err">cat: ${args[0]}: No such file or directory</span>`;
+                    if (res.node.type === 'dir') return `<span class="term-err">cat: ${args[0]}: Is a directory</span>`;
+                    return res.node.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
                 }
             },
             'mkdir': {
-                desc: 'Create folder structures under the current path parameters.',
+                desc: 'Create folder structures.',
                 run: (args) => {
                     if (args.length === 0) return `<span class="term-err">mkdir: missing operand</span>`;
                     let target = args[0];
                     let parts = target.split('/');
                     let newDirName = parts.pop();
                     let parentPath = parts.join('/') || '.';
-                    
                     let parentRes = resolvePath(parentPath);
-                    if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">mkdir: cannot create directory '${target}': No such parent folder</span>`;
-                    if (parentRes.node.contents[newDirName]) return `<span class="term-err">mkdir: cannot create directory '${target}': File exists</span>`;
-                    
-                    parentRes.node.contents[newDirName] = { type: "dir", contents: {} };
+                    if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">mkdir: parent folder missing</span>`;
+                    parentRes.node.contents[newDirName] = { type: "dir", owner: "sysadmin", contents: {} };
                     return "";
                 }
             },
             'touch': {
-                desc: 'Establish zero-byte tracking files or update metadata timestamps.',
+                desc: 'Establish zero-byte tracking files.',
                 run: (args) => {
                     if (args.length === 0) return `<span class="term-err">touch: missing file operand</span>`;
-                    let target = args[0];
-                    let parts = target.split('/');
-                    let newFileName = parts.pop();
+                    let parts = args[0].split('/');
+                    let fileName = parts.pop();
                     let parentPath = parts.join('/') || '.';
-                    
                     let parentRes = resolvePath(parentPath);
-                    if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">touch: cannot access target path '${target}'</span>`;
-                    
-                    if (!parentRes.node.contents[newFileName]) {
-                         parentRes.node.contents[newFileName] = { type: "file", content: "" };
-                    }
+                    if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">touch: path inaccessible</span>`;
+                    if (!parentRes.node.contents[fileName]) parentRes.node.contents[fileName] = { type: "file", owner: "sysadmin", content: "" };
                     return "";
                 }
             },
             'echo': {
-                desc: 'Write inputs to outputs. Supports piping to files via redirection: echo [text] > [target]',
-                run: (args, rawCommand) => {
+                desc: 'Write inputs to outputs. Supports redirection >',
+                run: (args) => {
                     let redirectIndex = args.indexOf('>');
                     if (redirectIndex !== -1 && redirectIndex < args.length - 1) {
-                        let textParts = args.slice(0, redirectIndex);
-                        let textToPrint = textParts.join(" ").replace(/^['"]|['"]$/g, '');
+                        let text = args.slice(0, redirectIndex).join(" ").replace(/^['"]|['"]$/g, '');
                         let targetFile = args[redirectIndex + 1];
-                        
                         let parts = targetFile.split('/');
                         let fileName = parts.pop();
                         let parentPath = parts.join('/') || '.';
-                        
                         let parentRes = resolvePath(parentPath);
-                        if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">bash: ${targetFile}: Target parent directory not found</span>`;
-                        
-                        parentRes.node.contents[fileName] = { type: "file", content: textToPrint };
+                        if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">bash: path not found</span>`;
+                        parentRes.node.contents[fileName] = { type: "file", owner: "sysadmin", content: text };
                         return "";
-                    } else {
-                        return args.join(" ").replace(/^['"]|['"]$/g, '');
                     }
+                    return args.join(" ").replace(/^['"]|['"]$/g, '');
                 }
             },
-            'clear': {
-                desc: 'Clean up screen displays.',
-                run: () => "CLEAR_SIGNAL"
-            },
-            'cp': {
-                desc: 'Duplicate and clone asset pathways. Usage: cp [source] [target]',
-                run: (args) => {
-                    if (args.length < 2) return `<span class="term-err">cp: missing file operands</span>`;
-                    let src = args[0];
-                    let dest = args[1];
-                    let srcRes = resolvePath(src);
-                    if(!srcRes) return `<span class="term-err">cp: cannot stat '${src}': No such file</span>`;
-                    if(srcRes.node.type === 'dir') return `<span class="term-err">cp: -r omitted; directories require recursion flags</span>`;
-                    
-                    let nodeToCopy = JSON.parse(JSON.stringify(srcRes.node));
-                    let destRes = resolvePath(dest);
-                    
-                    if (destRes && destRes.node.type === 'dir') {
-                        let srcParts = src.split('/');
-                        let srcName = srcParts.pop();
-                        destRes.node.contents[srcName] = nodeToCopy;
-                    } else {
-                        let destParts = dest.split('/');
-                        let destName = destParts.pop();
-                        let destParentPath = destParts.join('/') || '.';
-                        let destParentRes = resolvePath(destParentPath);
-                        if (!destParentRes) return `<span class="term-err">cp: target location inaccessible</span>`;
-                        destParentRes.node.contents[destName] = nodeToCopy;
-                    }
-                    return "";
-                }
-            },
-            'mv': {
-                desc: 'Displace or rename node structures. Usage: mv [source] [target]',
-                run: (args) => {
-                    if (args.length < 2) return `<span class="term-err">mv: missing destination pathways</span>`;
-                    let src = args[0];
-                    let dest = args[1];
-
-                    let srcParts = src.split('/');
-                    let srcName = srcParts.pop();
-                    let srcParentPath = srcParts.join('/') || '.';
-                    let srcParentRes = resolvePath(srcParentPath);
-
-                    if (!srcParentRes || !srcParentRes.node.contents[srcName]) return `<span class="term-err">mv: missing system node '${src}'</span>`;
-                    let nodeToMove = srcParentRes.node.contents[srcName];
-
-                    let destRes = resolvePath(dest);
-                    if (destRes && destRes.node.type === 'dir') {
-                        destRes.node.contents[srcName] = nodeToMove;
-                        delete srcParentRes.node.contents[srcName];
-                    } else {
-                        let destParts = dest.split('/');
-                        let destName = destParts.pop();
-                        let destParentPath = destParts.join('/') || '.';
-                        let destParentRes = resolvePath(destParentPath);
-                        if (!destParentRes) return `<span class="term-err">mv: cannot construct target mapping</span>`;
-                        destParentRes.node.contents[destName] = nodeToMove;
-                        delete srcParentRes.node.contents[srcName];
-                    }
-                    return "";
-                }
-            },
+            'clear': { desc: 'Clean up screen displays.', run: () => "CLEAR_SIGNAL" },
             'rm': {
-                desc: 'Safely release metadata objects from disk index storage.',
+                desc: 'Remove files or directories (-r).',
                 run: (args) => {
                     if (args.length === 0) return `<span class="term-err">rm: missing targets</span>`;
-                    let target = args[0];
-                    let recursive = false;
-                    if(args[0] === '-r' || args[0] === '-rf') {
-                       recursive = true;
-                       target = args[1];
-                    }
-                    if (!target) return `<span class="term-err">rm: operand target incomplete</span>`;
-
-                    let parts = target.split('/');
-                    let fileName = parts.pop();
-                    let parentPath = parts.join('/') || '.';
-                    let parentRes = resolvePath(parentPath);
-
-                    if (!parentRes || !parentRes.node.contents[fileName]) return `<span class="term-err">rm: targeting missing files '${target}'</span>`;
-
-                    let targetNode = parentRes.node.contents[fileName];
-                    if (targetNode.type === 'dir' && !recursive) return `<span class="term-err">rm: cannot remove directories without -r</span>`;
-
-                    delete parentRes.node.contents[fileName];
+                    let recursive = args[0] === '-r' || args[0] === '-rf';
+                    let target = recursive ? args[1] : args[0];
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">rm: ${target} not found</span>`;
+                    if (res.node.type === 'dir' && !recursive) return `<span class="term-err">rm: cannot remove directory without -r</span>`;
+                    delete res.parentNode.contents[res.name];
                     return "";
                 }
             },
             'grep': {
-                desc: 'Evaluate text documents tracking expression matches inside lines.',
+                desc: 'Filter matches inside text documents.',
                 run: (args) => {
-                    if (args.length < 2) return `<span class="term-err">grep: arguments invalid. Usage: grep [pattern] [filepath]</span>`;
+                    if (args.length < 2) return `<span class="term-err">grep: arguments invalid</span>`;
                     let pattern = args[0].replace(/['"]/g, '');
-                    let target = args[1];
-                    let res = resolvePath(target);
-                    
-                    if (!res) return `<span class="term-err">grep: '${target}' missing</span>`;
+                    let res = resolvePath(args[1]);
+                    if (!res) return `<span class="term-err">grep: target missing</span>`;
                     if (res.node.type === 'dir') return `<span class="term-err">grep: target is directory</span>`;
-
-                    let lines = res.node.content.split('\n');
-                    let matches = lines.filter(line => line.includes(pattern));
-                    
+                    let matches = res.node.content.split('\n').filter(line => line.includes(pattern));
                     if (matches.length === 0) return "No matches found.";
-                    
-                    return matches.map(line => {
-                        let escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                        return escaped.replace(new RegExp(pattern, 'g'), `<span class="text-red-400 font-bold bg-red-900/30 px-1 rounded">${pattern}</span>`);
-                    }).join('<br>');
-                }
-            },
-            'man': {
-                desc: 'Request comprehensive system reference handbook mappings.',
-                run: (args) => {
-                    if (args.length === 0) return `What manual page do you require? (e.g. man ls)`;
-                    let cmd = args[0];
-                    if (commands[cmd]) {
-                        return `NAME<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="font-bold text-indigo-400">${cmd}</span> - ${commands[cmd].desc}<br><br>DESCRIPTION<br>&nbsp;&nbsp;&nbsp;&nbsp;This details simulated sandbox structures for tracking commands in current layers.`;
-                    }
-                    return `No manual entry for command '${cmd}'`;
-                }
-            },
-            'history': {
-                desc: 'Capture all user instructions fed into terminal streams.',
-                run: () => {
-                    return commandHistory.map((cmd, i) => `&nbsp;&nbsp;${i + 1}&nbsp;&nbsp;${cmd}`).join('<br>');
-                }
-            },
-            'wc': {
-                desc: 'Audit document volumes. Output sequence: Lines Words Bytes.',
-                run: (args) => {
-                    if (args.length === 0) return `<span class="term-err">wc: missing target files</span>`;
-                    let target = args[0];
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">wc: ${target} is missing</span>`;
-                    let content = res.node.content || "";
-                    let lines = content === "" ? 0 : content.split('\n').length;
-                    let words = content === "" ? 0 : content.trim().split(/\s+/).length;
-                    let chars = content.length;
-                    return `&nbsp;${lines}&nbsp;&nbsp;${words}&nbsp;&nbsp;${chars}&nbsp;&nbsp;${target}`;
+                    return matches.map(l => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(new RegExp(pattern, 'g'), `<span class="text-red-400 font-bold bg-red-900/30 px-1 rounded">${pattern}</span>`)).join('<br>');
                 }
             },
             'head': {
-                desc: 'Peek at top bounding parameters. Usage: head [target]',
+                desc: 'Peek at top bounding parameters.',
                 run: (args) => {
                     if (args.length === 0) return `<span class="term-err">head: target missing</span>`;
-                    let target = args[0];
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">head: ${target} is missing</span>`;
-                    let lines = res.node.content.split('\n');
-                    return lines.slice(0, 5).map(l => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")).join('<br>');
-                }
-            },
-            'tail': {
-                desc: 'Audit the bottom margins of targeted configurations.',
-                run: (args) => {
-                    if (args.length === 0) return `<span class="term-err">tail: targets missing</span>`;
-                    let target = args[0];
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">tail: '${target}' missing</span>`;
-                    let lines = res.node.content.split('\n');
-                    return lines.slice(-5).map(l => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")).join('<br>');
-                }
-            },
-            'find': {
-                desc: 'Scrapes folder targets resolving system mappings recursively.',
-                run: (args) => {
-                    let target = args[0] || ".";
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">find: '${target}': No such path</span>`;
-                    
-                    let output = [];
-                    function traverse(node, currentPathStr) {
-                        output.push(currentPathStr);
-                        if (node.type === 'dir') {
-                            for (let key in node.contents) {
-                                let nextPath = currentPathStr.endsWith('/') ? currentPathStr + key : currentPathStr + '/' + key;
-                                if (currentPathStr === '.') nextPath = './' + key;
-                                traverse(node.contents[key], nextPath);
-                            }
-                        }
-                    }
-                    traverse(res.node, target);
-                    return output.join('<br>');
-                }
-            },
-            'uname': {
-                desc: 'Display operating system parameters. Usage: uname -a',
-                run: (args) => {
-                    if (args.includes('-a')) return "Linux gemini-sandbox-host 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian x86_64 GNU/Linux";
-                    return "Linux";
-                }
-            },
-            'df': {
-                desc: 'Expose details of active partition capacity indices.',
-                run: () => "Filesystem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1K-blocks&nbsp;&nbsp;&nbsp;&nbsp;Used&nbsp;Available&nbsp;Use%&nbsp;Mounted on<br>/dev/xvda1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;40960000&nbsp;&nbsp;8291000&nbsp;&nbsp;32669000&nbsp;&nbsp;21%&nbsp;/<br>tmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1638400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;1638400&nbsp;&nbsp;&nbsp;0%&nbsp;/run"
-            },
-            'free': {
-                desc: 'Output total RAM metrics of current system profiles.',
-                run: () => "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shared&nbsp;&nbsp;buff/cache&nbsp;&nbsp;&nbsp;available<br>Mem:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;16384000&nbsp;&nbsp;&nbsp;&nbsp;4192000&nbsp;&nbsp;&nbsp;12192000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12800&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1024000&nbsp;&nbsp;&nbsp;&nbsp;11200000<br>Swap:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4192000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;4192000"
-            },
-            'ps': {
-                desc: 'Process diagnostics overview showing running processes in local shells.',
-                run: () => "&nbsp;&nbsp;PID&nbsp;TTY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TIME&nbsp;CMD<br>&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:02&nbsp;initd<br>&nbsp;&nbsp;245&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:01&nbsp;bash<br>&nbsp;1234&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:00&nbsp;daemon_service<br>&nbsp;2056&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:00&nbsp;ps"
-            },
-            'sudo': {
-                desc: 'Elevate current user interactions to Superuser permissions temporarily.',
-                run: (args) => {
-                    if (args.length === 0) return "usage: sudo [command]";
-                    return `<span class="term-err">[sudo] password prompt for user:</span><br>Permission validated. Simulating root elevation access privileges for: <span class="text-white">${args.join(" ")}</span>`;
-                }
-            },
-            'chmod': {
-                desc: 'Adjust execution permissions metadata bindings on targets. Usage: chmod +x [target]',
-                run: (args) => {
-                    if (args.length < 2) return `<span class="term-err">chmod: syntax errors. (e.g. chmod +x path)</span>`;
-                    let target = args[1];
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">chmod: system cannot reach path '${target}'</span>`;
-                    return "";
-                }
-            },
-            'ping': {
-                desc: 'Probe targets checking connection packet status parameters.',
-                run: (args) => {
-                    let target = args[0] || "127.0.0.1";
-                    return `PING ${target} (93.184.216.34) 56(84) bytes of data.<br>64 bytes from ${target} (93.184.216.34): icmp_seq=1 ttl=56 time=11.2 ms<br>64 bytes from ${target} (93.184.216.34): icmp_seq=2 ttl=56 time=11.9 ms<br>--- ${target} ping statistics ---<br>2 packets transmitted, 2 received, 0% packet loss, duration 1002ms`;
-                }
-            },
-            'curl': {
-                desc: 'Resolve internet requests streaming output content arrays. Usage: curl [url]',
-                run: (args) => {
-                    if (args.length === 0) return "curl: missing URL arguments";
-                    return `&lt;!DOCTYPE html&gt;<br>&lt;html&gt;<br>&lt;head&gt;<br>&nbsp;&nbsp;&lt;title&gt;Example Domain&lt;/title&gt;<br>&lt;/head&gt;<br>&lt;body&gt;<br>&nbsp;&nbsp;&lt;h1&gt;Example Site Response&lt;/h1&gt;<br>&lt;/body&gt;<br>&lt;/html&gt;`;
-                }
-            },
-            'wget': {
-                desc: 'Download internet configurations onto active virtual disk structures.',
-                run: (args) => {
-                    if (args.length === 0) return "wget: link unresolved";
-                    return `Connecting to example.com (93.184.216.34:80)... connected.<br>HTTP request sent, awaiting response... 200 OK<br>Length: 1256 (1.2K) [text/html]<br>Saving to: 'index.html' completed successfully.`;
-                }
-            },
-            'top': {
-                desc: 'Launch real-time performance diagnostics overlay.',
-                run: () => {
-                    return `top - 15:13:52 up 5 days, 1 user, load average: 0.05, 0.08, 0.12<br>Tasks: <span class="font-bold">112</span> total,   <span class="font-bold">1</span> running, <span class="font-bold">111</span> sleeping<br>MiB Mem : <span class="font-bold">16384.0</span> total, <span class="font-bold">12192.0</span> free, <span class="font-bold">4192.0</span> used<br><br>&nbsp;&nbsp;PID USER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PR&nbsp;&nbsp;NI&nbsp;&nbsp;&nbsp;&nbsp;VIRT&nbsp;&nbsp;&nbsp;&nbsp;RES&nbsp;&nbsp;&nbsp;&nbsp;SHR S&nbsp;&nbsp;%CPU&nbsp;&nbsp;%MEM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TIME+ COMMAND<br>&nbsp;1234 sysadmin&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;24000&nbsp;&nbsp;&nbsp;5000&nbsp;&nbsp;&nbsp;3000 S&nbsp;&nbsp;&nbsp;0.8&nbsp;&nbsp;&nbsp;0.1&nbsp;&nbsp;&nbsp;0:04.15 daemon_service<br>&nbsp;&nbsp;&nbsp;&nbsp;1 root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;168000&nbsp;&nbsp;11000&nbsp;&nbsp;&nbsp;8000 S&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;0.1&nbsp;&nbsp;&nbsp;0:05.12 initd`;
-                }
-            },
-            'kill': {
-                desc: 'Kill running threads using specific target identification numbers (PID).',
-                run: (args) => {
-                    if (args.length === 0) return "kill: targeting pid index values missing";
-                    return "";
-                }
-            },
-            'tar': {
-                desc: 'Compile compressed document archives. Usage: tar -cvf backup.tar readme.txt',
-                run: (args) => {
-                    if (args.length < 3) return "tar: options insufficient. Usage: tar -cvf [archive_name.tar] [target]";
-                    let archiveName = args[1];
-                    let target = args[2];
-                    let parentRes = resolvePath(".");
-                    if(parentRes && parentRes.node.type === 'dir') {
-                        parentRes.node.contents[archiveName] = { type: "file", content: "BINARY_ARCHIVE_DATA" };
-                    }
-                    return `a ${target}<br>Archive ${archiveName} compiled successfully.`;
-                }
-            },
-            'du': {
-                desc: 'Show active memory sizes of file trees recursively.',
-                run: () => "4.0K&nbsp;&nbsp;&nbsp;./documents/secret.txt<br>8.0K&nbsp;&nbsp;&nbsp;./documents<br>16K&nbsp;&nbsp;&nbsp;&nbsp;."
-            },
-            'sort': {
-                desc: 'Sort target content alphabetically.',
-                run: (args) => {
-                    if (args.length === 0) return "sort: specify file targets";
                     let res = resolvePath(args[0]);
-                    if (!res) return `sort: cannot parse file path '${args[0]}'`;
-                    let lines = res.node.content.split('\n').filter(l => l.trim() !== '');
-                    return lines.sort().map(l => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")).join('<br>');
+                    if (!res) return `<span class="term-err">head: ${args[0]} missing</span>`;
+                    return res.node.content.split('\n').slice(0, 5).join('<br>');
                 }
             },
-            'alias': {
-                desc: 'Assign alias nicknames to instructions. Usage: alias [key]=[command]',
+
+            // --- ADVANCED COMMANDS (RANK GATED) ---
+            'systemctl': {
+                desc: 'Control system daemon background services.',
+                minXp: 2000,
                 run: (args) => {
-                    if (args.length === 0) {
-                        return Object.entries(userAliases).map(([k, v]) => `alias ${k}='${v}'`).join('<br>');
-                    }
-                    let assignment = args.join(" ");
-                    if (assignment.includes('=')) {
-                        let parts = assignment.split('=');
-                        let name = parts[0].trim();
-                        let val = parts.slice(1).join('=').replace(/^['"]|['"]$/g, '');
-                        userAliases[name] = val;
+                    if (args.length < 2) return "Usage: systemctl [start|stop|status] [service]";
+                    let action = args[0];
+                    let service = args[1];
+                    if (runningServices[service] === undefined) return `Unit ${service}.service could not be found.`;
+                    
+                    if (action === 'status') {
+                        let isRun = runningServices[service];
+                        let color = isRun ? "text-green-400" : "text-slate-500";
+                        let state = isRun ? "active (running)" : "inactive (dead)";
+                        return `● ${service}.service - Advanced Application Daemon<br>&nbsp;&nbsp;&nbsp;Loaded: loaded (/lib/systemd/system/${service}.service)<br>&nbsp;&nbsp;&nbsp;Active: <span class="${color} font-bold">${state}</span><br>&nbsp;&nbsp;&nbsp;Main PID: ${isRun ? Math.floor(Math.random()*5000+1000) : '-'}`;
+                    } else if (action === 'start') {
+                        runningServices[service] = true;
+                        return "";
+                    } else if (action === 'stop') {
+                        runningServices[service] = false;
                         return "";
                     }
-                    return `alias: identifier error`;
+                    return "systemctl: unknown operational action.";
+                }
+            },
+            'sed': {
+                desc: 'Stream editor for filtering and transforming text.',
+                minXp: 3000,
+                run: (args) => {
+                    if (args.length < 2) return "Usage: sed 's/old/new/g' file";
+                    let pattern = args[0];
+                    let res = resolvePath(args[1]);
+                    if (!res) return `sed: ${args[1]}: No such file`;
+                    
+                    // Basic s/foo/bar/g parsing
+                    let parts = pattern.split('/');
+                    if (parts.length >= 3 && parts[0] === 's' || parts[0] === "'s") {
+                        let oldText = parts[1];
+                        let newText = parts[2];
+                        let lines = res.node.content.split('\n');
+                        let updated = lines.map(l => l.replace(new RegExp(oldText, 'g'), newText));
+                        res.node.content = updated.join('\n');
+                        return updated.join('<br>'); // Print to terminal too
+                    }
+                    return "sed: -e expression syntax error.";
+                }
+            },
+            'awk': {
+                desc: 'Pattern scanning and data extraction language.',
+                minXp: 3000,
+                run: (args) => {
+                    if (args.length < 2) return "Usage: awk '{print $N}' file";
+                    let pattern = args[0];
+                    let res = resolvePath(args[1]);
+                    if (!res) return `awk: cannot open file`;
+                    
+                    if (pattern.includes('{print $1}')) {
+                        let lines = res.node.content.split('\n');
+                        return lines.map(l => {
+                            let words = l.trim().split(/\s+/);
+                            return words[0] || "";
+                        }).join('<br>');
+                    }
+                    return "awk: instruction parsing simulation limited to basic print fields.";
+                }
+            },
+            'useradd': {
+                desc: 'Create a new user or update default new user information.',
+                minXp: 4000,
+                run: (args) => {
+                    if (args.length === 0) return "useradd: missing user name";
+                    let user = args[0];
+                    let passwdRes = resolvePath('/etc/passwd');
+                    passwdRes.node.content += `\n${user}:x:1001:1001::/home/${user}:/bin/bash`;
+                    vfs['/'].contents['home'].contents[user] = { type: 'dir', owner: user, contents: {} };
+                    return "";
+                }
+            },
+            'chown': {
+                desc: 'Change file owner and group metadata.',
+                minXp: 4000,
+                run: (args) => {
+                    if (args.length < 2) return "Usage: chown [user] [file]";
+                    let newOwner = args[0];
+                    let res = resolvePath(args[1]);
+                    if (!res) return `chown: cannot access '${args[1]}'`;
+                    res.node.owner = newOwner;
+                    return "";
+                }
+            },
+            'env': {
+                desc: 'Run a program in a modified environment or print active variables.',
+                minXp: 6000,
+                run: () => {
+                    return Object.entries(envVars).map(([k,v]) => `${k}=${v}`).join('<br>');
+                }
+            },
+            'export': {
+                desc: 'Set environment variables for the active session shell.',
+                minXp: 6000,
+                run: (args) => {
+                    if (args.length === 0) return "Usage: export KEY=VALUE";
+                    let expr = args.join("");
+                    if (expr.includes('=')) {
+                        let parts = expr.split('=');
+                        envVars[parts[0]] = parts[1].replace(/['"]/g, '');
+                    }
+                    return "";
                 }
             }
         };
 
-        // --- STREAMING_CHUNK: Setting up Advanced Keyboard Auto-Completion Mechanisms ---
-        
-        function handleTabCompletion() {
-            let inputField = document.getElementById('cmd-input');
-            let text = inputField.value;
-            if (text === '') return;
-
-            let words = text.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [text];
-            let lastWord = words[words.length - 1] || "";
-            let autocompleteContainer = document.getElementById('autocomplete-indicator');
-
-            // Completing Commands (1st word)
-            if (words.length === 1 && !text.endsWith(" ")) {
-                let allCommands = [...Object.keys(commands), ...Object.keys(userAliases)];
-                let matches = allCommands.filter(c => c.startsWith(lastWord));
-
-                if (matches.length === 1) {
-                    inputField.value = matches[0] + " ";
-                    hideAutocompleteIndicator();
-                } else if (matches.length > 1) {
-                    showAutocompleteIndicator(matches);
-                }
-            } 
-            // Completing Files and Directories (argument words)
-            else {
-                let currentWord = lastWord;
-                let parentDir = ".";
-                let partialFile = currentWord;
-
-                if (currentWord.includes('/')) {
-                    let slashParts = currentWord.split('/');
-                    partialFile = slashParts.pop();
-                    parentDir = slashParts.join('/');
-                }
-
-                let dirRes = resolvePath(parentDir);
-                if (dirRes && dirRes.node.type === 'dir') {
-                    let contents = Object.keys(dirRes.node.contents);
-                    let matches = contents.filter(f => f.startsWith(partialFile));
-
-                    if (matches.length === 1) {
-                        let completion = matches[0];
-                        let isDir = dirRes.node.contents[completion].type === 'dir';
-                        
-                        let base = text.substring(0, text.lastIndexOf(currentWord));
-                        let completedPath = parentDir !== "." ? (parentDir + "/" + completion) : completion;
-                        
-                        inputField.value = base + completedPath + (isDir ? "/" : " ");
-                        hideAutocompleteIndicator();
-                    } else if (matches.length > 1) {
-                        showAutocompleteIndicator(matches);
-                    }
-                }
-            }
-        }
-
-        function showAutocompleteIndicator(suggestions) {
-            let container = document.getElementById('autocomplete-indicator');
-            container.innerHTML = `<span>Matches: </span><span class="text-slate-300 font-mono">${suggestions.join("   ")}</span>`;
-            container.classList.remove('hidden');
-        }
-
-        function hideAutocompleteIndicator() {
-            document.getElementById('autocomplete-indicator').classList.add('hidden');
-        }
-
-        // --- STREAMING_CHUNK: Managing Terminal Stream Pipelines ---
-        
+        // --- PIPELINE TERMINAL SYSTEM ---
         const terminalOutput = document.getElementById('terminal-output');
         const cmdInput = document.getElementById('cmd-input');
         const container = document.getElementById('terminal-container');
@@ -1535,7 +1054,6 @@
             } else {
                 div.innerHTML = htmlContent;
             }
-            
             terminalOutput.appendChild(div);
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
         }
@@ -1545,108 +1063,78 @@
             if (cmdStr === "") return;
             
             printToTerminal(cmdStr, true);
-            
-            // Check redirect pipelines
             let args = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
             let cmdName = args.shift();
 
-            // Expand Alias
-            if (userAliases && userAliases[cmdName]) {
-                let aliasExpansion = userAliases[cmdName];
-                let aliasArgs = aliasExpansion.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
-                cmdName = aliasArgs.shift();
-                args = aliasArgs.concat(args);
-            }
-
             if (commands[cmdName]) {
+                // Progression / Rank check
+                if (commands[cmdName].minXp && playerStats.xp < commands[cmdName].minXp) {
+                    printToTerminal(`<span class="text-red-400 font-bold bg-red-900/30 px-2 py-1 rounded inline-block mt-1">🔒 Level Locked: This advanced command requires ${commands[cmdName].minXp} XP. Keep doing lessons to rank up!</span>`);
+                    return;
+                }
+
                 try {
                     let output = commands[cmdName].run(args, cmdStr);
-                    if (output === "CLEAR_SIGNAL") {
-                        terminalOutput.innerHTML = "";
-                    } else if (output !== "") {
-                        let formattedOutput = output.replace(/\n/g, "<br>");
-                        printToTerminal(formattedOutput);
-                    }
+                    if (output === "CLEAR_SIGNAL") terminalOutput.innerHTML = "";
+                    else if (output !== "") printToTerminal(output);
                     
-                    // Verify Lesson Progression
                     verifyObjectives(cmdName, args, output);
-
                 } catch (e) {
-                    printToTerminal(`<span class="term-err">Internal execution exception. Error reporting activated.</span>`);
-                    console.error(e);
+                    printToTerminal(`<span class="term-err">Internal execution exception.</span>`);
                 }
             } else {
-                printToTerminal(`<span class="term-err">${cmdName}: instruction unrecognized inside this bash simulation</span>`);
+                printToTerminal(`<span class="term-err">${cmdName}: command not found</span>`);
             }
         }
 
-        // --- STREAMING_CHUNK: Designing Multi-Mode Verification Engine ---
         function verifyObjectives(cmd, args, outputText) {
-            // A. Check Active Lesson Objective
             let activeModule = learningModules[activeModuleIndex];
             let activeLesson = activeModule.lessons[activeLessonIndex];
-            
             let lessonIDString = `${activeModuleIndex}_${activeLessonIndex}`;
             
             if (!playerStats.completedLessons.includes(lessonIDString)) {
                 if (activeLesson.check(cmd, args, outputText)) {
                     playerStats.completedLessons.push(lessonIDString);
                     addXp(activeLesson.xp);
-                    
                     printToTerminal(`<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-mono text-xs flex items-center justify-between">
-                        <span>🏆 Objective Accomplished!</span>
-                        <span>+${activeLesson.xp} XP</span>
+                        <span>🏆 Objective Accomplished!</span><span>+${activeLesson.xp} XP</span>
                     </div>`);
-                    
-                    // Advance to next lesson inside this module if available
                     if (activeLessonIndex < activeModule.lessons.length - 1) {
                         activeLessonIndex++;
                     } else {
-                        // All lessons completed in current module
                         printToTerminal(`<div class="my-2 p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded font-mono text-xs">
-                            🎉 Module "${activeModule.name.substring(3)}" complete! You've masterfully scaled this skillset. Check other paths on the left.
+                            🎉 Module complete! You've masterfully scaled this skillset.
                         </div>`);
                     }
                     renderLesson();
                 }
             }
 
-            // B. Check Quest/Boss Targets
             quests.forEach(q => {
                 if (!playerStats.completedQuests.includes(q.id)) {
                     if (q.check(cmd, args, outputText)) {
                         playerStats.completedQuests.push(q.id);
                         addXp(q.reward);
-                        
                         printToTerminal(`<div class="my-3 p-3 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded font-mono text-xs">
-                            🔥 Boss Quest Cleared: "${q.title}"!<br>
-                            Your filesystem configuration state is correct. Reward allocated: +${q.reward} XP.
+                            🔥 Boss Quest Cleared: "${q.title}"!<br>Reward allocated: +${q.reward} XP.
                         </div>`);
-                        
                         if (activeTab === 'quests') renderQuests();
                     }
                 }
             });
         }
 
-        // Hard recovery reset defaults VFS
         function resetSandbox() {
-            if (confirm("Are you sure you want to reset your Virtual Filesystem? Your XP stats will be kept, but files reset.")) {
+            if (confirm("Reset Virtual Filesystem? XP stats will be kept, but files reset.")) {
                 initVfs();
                 currentPath = "/home/sysadmin";
                 document.getElementById('prompt-path').innerText = formatPromptPath();
-                printToTerminal(`<span class="text-red-400 font-mono font-bold">System Hard Reset Complete. Filesystem states restored to templates.</span>`);
+                printToTerminal(`<span class="text-red-400 font-mono font-bold">System Hard Reset Complete.</span>`);
             }
         }
 
-        // Keyboard Event Bindings
         cmdInput.addEventListener('keydown', function(e) {
-            hideAutocompleteIndicator();
-
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                handleTabCompletion();
-            } else if (e.key === 'Enter') {
+            if (e.key === 'Enter') {
                 let cmd = this.value;
                 if (cmd.trim() !== '') {
                     commandHistory.push(cmd);
@@ -1672,12 +1160,8 @@
             }
         });
 
-        // Click focus binder
-        container.addEventListener('click', () => {
-            cmdInput.focus();
-        });
+        container.addEventListener('click', () => cmdInput.focus());
 
-        // App Entry Point
         window.onload = () => {
             initVfs();
             loadStats();
@@ -1685,7 +1169,6 @@
             renderLesson();
             cmdInput.focus();
         };
-
     </script>
 </body>
 </html>
