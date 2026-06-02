@@ -241,6 +241,7 @@
                             "sysadmin": {
                                 type: "dir",
                                 contents: {
+                                    ".bash_history": { type: "file", content: "cd /\nls -la\ncat /var/log/syslog\nwhoami\nsudo su\n" },
                                     "readme.txt": { 
                                         type: "file", 
                                         content: "Welcome to Linux!\nThis is a simple text file.\nYou can read me using the 'cat' command.\n\nLinux is a family of open-source Unix-like operating systems.\nThey are based on the Linux kernel, first released on September 17, 1991, by Linus Torvalds.\nLinux is typically packaged in a Linux distribution.\n\nEnjoy your learning journey!\nLine 9\nLine 10\nLine 11\nEnd of file." 
@@ -625,6 +626,88 @@
                         check: (cmd, args) => cmd === "alias" && args.join(" ").includes("greet")
                     }
                 ]
+            },
+            {
+                name: "7. Deep Filesystem Mastery",
+                lessons: [
+                    {
+                        title: "Exposing Hidden Files",
+                        module: "Deep Filesystem",
+                        why: "In Linux, any file or folder that starts with a dot (.) is hidden by default. These are usually config files.",
+                        text: "Let's find hidden files in your home directory. Type <code>ls -la</code> to see all files in long format.",
+                        objective: "Type 'ls -la' or 'ls -a' to expose hidden dotfiles.",
+                        xp: 100,
+                        check: (cmd, args) => cmd === "ls" && (args.includes("-la") || args.includes("-a"))
+                    },
+                    {
+                        title: "Absolute Navigation",
+                        module: "Deep Filesystem",
+                        why: "Relative paths depend on where you are. Absolute paths always start from the root (/) and work anywhere.",
+                        text: "Jump straight to the system logs no matter where you are. Type <code>cd /var/log</code>.",
+                        objective: "Navigate using the absolute path 'cd /var/log'.",
+                        xp: 100,
+                        check: (cmd, args) => cmd === "cd" && args[0] === "/var/log"
+                    },
+                    {
+                        title: "Recursive Destruction",
+                        module: "Deep Filesystem",
+                        why: "Standard 'rm' cannot delete directories. You must tell it to recursively delete folders and everything inside.",
+                        text: "First go home with <code>cd</code>, then make a test dir with <code>mkdir junk</code>. Finally, delete it by typing <code>rm -r junk</code>.",
+                        objective: "Use the recursive flag 'rm -r junk' to delete a directory.",
+                        xp: 150,
+                        check: (cmd, args) => cmd === "rm" && (args.includes("-r") || args.includes("-rf"))
+                    }
+                ]
+            },
+            {
+                name: "8. System Survival Guide",
+                lessons: [
+                    {
+                        title: "Reading the Map (man)",
+                        module: "Survival Guide",
+                        why: "You don't need to memorize everything. The 'man' (manual) command tells you how to use other commands.",
+                        text: "Want to know how 'ls' works? Type <code>man ls</code> to pull up its manual page.",
+                        objective: "Read the manual for ls by typing 'man ls'.",
+                        xp: 100,
+                        check: (cmd, args) => cmd === "man" && args[0] === "ls"
+                    },
+                    {
+                        title: "Command Recall (history)",
+                        module: "Survival Guide",
+                        why: "Forgot that massive command you typed 5 minutes ago? The shell remembers everything.",
+                        text: "Type <code>history</code> to print out a numbered list of all your recent terminal inputs.",
+                        objective: "View your terminal logs by typing 'history'.",
+                        xp: 100,
+                        check: (cmd, args) => cmd === "history"
+                    },
+                    {
+                        title: "Creating Archives (tar)",
+                        module: "Survival Guide",
+                        why: "SysAdmins often compress multiple files into a single '.tar' archive (a tarball) to save space or transfer data.",
+                        text: "Let's archive your readme. Type <code>tar -cvf backup.tar readme.txt</code> (c=create, v=verbose, f=file).",
+                        objective: "Create an archive using 'tar -cvf backup.tar readme.txt'.",
+                        xp: 150,
+                        check: (cmd, args) => cmd === "tar" && args.includes("-cvf") && args.includes("backup.tar")
+                    },
+                    {
+                        title: "Live Monitoring (top)",
+                        module: "Survival Guide",
+                        why: "While 'ps' gives a snapshot, 'top' provides a live, continuously updating dashboard of system resources.",
+                        text: "Launch the task manager by typing <code>top</code>.",
+                        objective: "Type 'top' to view real-time process utilization.",
+                        xp: 100,
+                        check: (cmd, args) => cmd === "top"
+                    },
+                    {
+                        title: "Cleaning the Slate (clear)",
+                        module: "Survival Guide",
+                        why: "A cluttered terminal leads to mistakes. Power users constantly wipe the screen to focus.",
+                        text: "Wipe all previous output from the screen. Type <code>clear</code>.",
+                        objective: "Clear your terminal screen using the 'clear' command.",
+                        xp: 100,
+                        check: (cmd, args) => cmd === "clear"
+                    }
+                ]
             }
         ];
 
@@ -673,6 +756,31 @@
                         return cmd === "chmod" && args.includes("+x") && args.some(a => a.includes("startup.sh"));
                     }
                     return false;
+                }
+            },
+            {
+                id: "q4",
+                title: "The Archive Architect",
+                difficulty: "Medium",
+                description: "Storage space on the virtual server is getting full! We need to compress the main documentation. Use the <code>tar</code> command to create a new archive named <code>docs.tar</code> that compresses the <code>readme.txt</code> file in your home directory.",
+                objective: "Create a tar archive named 'docs.tar' using tar -cvf.",
+                hint: "Ensure you are in '/home/sysadmin' and run 'tar -cvf docs.tar readme.txt'.",
+                reward: 300,
+                check: (cmd, args, outputText) => {
+                    let tarNode = getVfsNode("/home/sysadmin/docs.tar");
+                    return (tarNode !== null && tarNode.type === "file");
+                }
+            },
+            {
+                id: "q5",
+                title: "The Hidden Spy",
+                difficulty: "Hard",
+                description: "We suspect a previous administrator left behind a hidden file in your home directory tracking sensitive commands. Find the hidden file (starts with a dot) and use <code>cat</code> to read its contents.",
+                objective: "Locate and read the hidden '.bash_history' file.",
+                hint: "Use 'ls -la' to spot the hidden file, then 'cat .bash_history' to read it.",
+                reward: 450,
+                check: (cmd, args, outputText) => {
+                    return cmd === "cat" && args.some(a => a.includes(".bash_history"));
                 }
             }
         ];
@@ -864,8 +972,9 @@
             
             // Cap ranking ranks based on XP thresholds
             let rank = "Terminal Newbie";
-            if (playerStats.xp >= 2000) rank = "Linux Demigod 👑";
-            else if (playerStats.xp >= 1500) rank = "Terminal Sorcerer 🧙‍♂️";
+            if (playerStats.xp >= 4000) rank = "Linux Deity 👑⚡";
+            else if (playerStats.xp >= 3000) rank = "Linux Demigod 👑";
+            else if (playerStats.xp >= 2000) rank = "Terminal Sorcerer 🧙‍♂️";
             else if (playerStats.xp >= 1000) rank = "Senior SysAdmin 🛡️";
             else if (playerStats.xp >= 500) rank = "Junior Administrator 💻";
             
@@ -873,7 +982,7 @@
             document.getElementById('xp-counter').innerText = `${playerStats.xp} XP`;
             
             // Progress Bar animation width calculation
-            let pct = Math.min(100, (playerStats.xp / 3500) * 100);
+            let pct = Math.min(100, (playerStats.xp / 6000) * 100);
             document.getElementById('xp-progress').style.width = `${pct}%`;
             
             saveStats();
@@ -1293,8 +1402,14 @@
             'tar': {
                 desc: 'Compile compressed document archives. Usage: tar -cvf backup.tar readme.txt',
                 run: (args) => {
-                    if (args.length < 2) return "tar: options insufficient";
-                    return `a readme.txt<br>Archive compiled successfully.`;
+                    if (args.length < 3) return "tar: options insufficient. Usage: tar -cvf [archive_name.tar] [target]";
+                    let archiveName = args[1];
+                    let target = args[2];
+                    let parentRes = resolvePath(".");
+                    if(parentRes && parentRes.node.type === 'dir') {
+                        parentRes.node.contents[archiveName] = { type: "file", content: "BINARY_ARCHIVE_DATA" };
+                    }
+                    return `a ${target}<br>Archive ${archiveName} compiled successfully.`;
                 }
             },
             'du': {
