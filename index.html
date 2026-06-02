@@ -8,41 +8,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0b0f19;
-            color: #f1f5f9;
-            overflow: hidden;
-        }
-        .terminal-font {
-            font-family: 'Fira Code', monospace;
-        }
-        
-        /* Custom Scrollbars */
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f1f5f9; overflow: hidden; }
+        .terminal-font { font-family: 'Fira Code', monospace; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        /* Animations */
         .pulse-emerald { animation: pulse-glow 2s infinite; }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            50% { box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.2); }
-        }
-
-        /* Seamless Input Field */
-        #cmd-input {
-            background: transparent;
-            border: none;
-            outline: none;
-            color: inherit;
-            font-family: inherit;
-            font-size: inherit;
-            width: 100%;
-        }
-        
-        /* Terminal Highlights */
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 50% { box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.2); } }
+        #cmd-input { background: transparent; border: none; outline: none; color: inherit; font-family: inherit; font-size: inherit; width: 100%; }
         .term-dir { color: #60a5fa; font-weight: bold; }
         .term-exec { color: #34d399; font-weight: bold; }
         .term-err { color: #f87171; }
@@ -53,10 +27,8 @@
 </head>
 <body class="h-screen w-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- Left Panel: Learning Suite -->
     <div class="w-full md:w-5/12 lg:w-4/12 h-1/2 md:h-full bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col shadow-2xl z-20">
         
-        <!-- Top Status Bar: Level, XP and Stats -->
         <div class="p-4 border-b border-slate-800 bg-slate-950 flex flex-col gap-2">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -70,16 +42,14 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-mono">XP System</span>
-                    <span class="text-sm font-black text-indigo-400 font-mono" id="xp-counter">0 / 20000 XP</span>
+                    <span class="text-sm font-black text-indigo-400 font-mono" id="xp-counter">0 / 30000 XP</span>
                 </div>
             </div>
-            
             <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                 <div id="xp-progress" class="bg-indigo-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
             </div>
         </div>
 
-        <!-- Main Workspace Tabs -->
         <div class="flex border-b border-slate-800 bg-slate-950 text-sm">
             <button onclick="switchTab('modules')" id="tab-btn-modules" class="flex-1 py-3 text-center border-b-2 border-indigo-500 text-white font-medium hover:bg-slate-900 transition-colors">
                 📖 Modules
@@ -92,27 +62,22 @@
             </button>
         </div>
 
-        <!-- Scrollable Learning Contents Area -->
         <div class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
             
-            <!-- VIEW A: CURRICULUM MODULES -->
             <div id="view-modules" class="space-y-4">
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Choose Curriculum Path</label>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Curriculum Path</label>
                     <select id="module-selector" onchange="changeModule()" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
                     </select>
                 </div>
 
-                <!-- Active Lesson Card -->
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4 relative overflow-hidden" id="active-lesson-card">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider font-mono" id="lesson-module-tag">Module 1</span>
                         <span class="text-xs bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded" id="lesson-index-tag">Lesson 1/5</span>
                     </div>
-
-                    <div id="active-lesson-body" class="space-y-3"></div>
-
-                    <!-- Task Verification Card -->
+                    <div id="active-lesson-body" class="space-y-3">
+                        </div>
                     <div class="border border-slate-800 bg-slate-900/50 rounded-lg p-3 space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-400 uppercase font-mono tracking-wider">Mission Target</span>
@@ -128,34 +93,25 @@
                 </div>
             </div>
 
-            <!-- VIEW B: CHALLEGING QUESTS -->
             <div id="view-quests" class="hidden space-y-4">
                 <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20 text-xs">
-                    <strong>Boss Quests Mode:</strong> Solve real-world admin problems. The validation engine tests your Virtual Filesystem (VFS) states. Read hints carefully!
+                    <strong>Boss Quests Mode:</strong> Multi-step problem solving.
                 </div>
                 <div id="quests-container" class="space-y-3"></div>
             </div>
 
-            <!-- VIEW C: COMMAND REFERENCE (CHEATSHEET) -->
             <div id="view-cheatsheet" class="hidden space-y-4">
-                <div class="p-3 bg-slate-800/50 text-slate-300 rounded-lg border border-slate-700 text-xs italic">
-                    Note: Advanced & Cybersecurity commands are locked based on your rank XP. Rank up to unlock them!
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="text" id="cheatsheet-search" placeholder="Search commands..." oninput="filterCheatsheet()" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                </div>
+                <input type="text" id="cheatsheet-search" placeholder="Search commands..." oninput="filterCheatsheet()" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 <div id="cheatsheet-list" class="space-y-3"></div>
             </div>
 
         </div>
-
         <div class="p-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400 font-mono">
-            <span>💡 Try double-pressing <kbd class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300 font-bold border border-slate-700">Tab</kbd> to complete!</span>
+            <span>💡 Double-press <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">Tab</kbd> to complete!</span>
             <span id="overall-progress-tag">Progress: 0%</span>
         </div>
     </div>
 
-    <!-- Right Panel: Immersive Interactive Terminal -->
     <div class="w-full md:w-7/12 lg:w-8/12 h-1/2 md:h-full bg-black flex flex-col relative" id="terminal-container">
         
         <div class="h-10 bg-slate-950 flex items-center justify-between px-4 select-none border-b border-slate-900">
@@ -168,20 +124,17 @@
                     sysadmin@gemini-sandbox:~
                 </span>
             </div>
-            <button onclick="resetSandbox()" class="text-[10px] bg-slate-900 border border-slate-800 hover:bg-red-950/40 hover:border-red-900 hover:text-red-400 text-slate-400 px-2 py-1 rounded transition-all font-mono">
-                ⚡ Hard Reset System
-            </button>
+            <button onclick="resetSandbox()" class="text-[10px] bg-slate-900 border border-slate-800 hover:bg-red-950/40 hover:text-red-400 text-slate-400 px-2 py-1 rounded transition-all font-mono">⚡ Hard Reset</button>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4 terminal-font text-sm md:text-base space-y-1.5" id="terminal-output">
             <div class="text-slate-500 font-mono text-xs border-b border-slate-900/60 pb-3 mb-3">
-                <span>Gemini Linux Sandbox v5.0 (MAXXED Security Edition)</span><br>
-                <span>Current virtual architecture: x86_64, VFS: Memory Storage</span><br>
-                <span>Type 'help' to inspect command indices. Advanced CTF commands unlock via XP.</span>
+                <span>Gemini Linux Sandbox v6.0 (Mega Architect Edition)</span><br>
+                <span>Type 'help' to inspect command indices.</span>
             </div>
             <div class="mb-4">
-                <span class="text-indigo-400 font-bold">Welcome to the Ultimate Cyber Sandbox.</span><br>
-                <span class="text-slate-400">Master SysAdmin, Red Team (OSINT/Exploit), and Blue Team (Auditing/Firewalls). Let's go!</span>
+                <span class="text-indigo-400 font-bold">Welcome to the Mega Sandbox.</span><br>
+                <span class="text-slate-400">Over 60+ rapid-fire lessons have been loaded. Get to work!</span>
             </div>
         </div>
 
@@ -195,901 +148,7 @@
         </div>
     </div>
 
-    <script>
-        // --- ANTI-INSPECT SECURITY HOOK ---
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('keydown', event => {
-            if (event.key === 'F12') event.preventDefault();
-            if (event.ctrlKey && event.shiftKey && ['I', 'J', 'C'].includes(event.key.toUpperCase())) event.preventDefault();
-            if (event.ctrlKey && event.key.toUpperCase() === 'U') event.preventDefault();
-        });
+    <script src="script.js"></script>
 
-        // --- VIRTUAL STATE DATABASES ---
-        let vfs = {};
-        let runningServices = { 'ssh': true, 'nginx': false, 'docker': false, 'malware_c2': true };
-        let envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
-        let firewallRules = [];
-
-        const initialVfsTemplate = {
-            "/": {
-                type: "dir", owner: "root",
-                contents: {
-                    "home": {
-                        type: "dir", owner: "root",
-                        contents: {
-                            "sysadmin": {
-                                type: "dir", owner: "sysadmin",
-                                contents: {
-                                    ".bash_history": { type: "file", owner: "sysadmin", content: "cd /\nls -la\ncat /var/log/syslog\nwhoami\nsudo su\n" },
-                                    "readme.txt": { type: "file", owner: "sysadmin", content: "Welcome to Linux Ultimate Edition!\nLine 2\nLine 3" },
-                                    "documents": { type: "dir", owner: "sysadmin", contents: { "secret.txt": { type: "file", owner: "sysadmin", content: "Super Secret Payload." } } }
-                                }
-                            }
-                        }
-                    },
-                    "var": {
-                        type: "dir", owner: "root",
-                        contents: {
-                            "log": {
-                                type: "dir", owner: "root",
-                                contents: {
-                                    "syslog": { type: "file", owner: "root", content: "System startup...\nMounting filesystems...\nWarning: SSH login attempt failed from 192.168.1.105.\nAuthentication failed for sysadmin.\nError: Failed to bind port 80." },
-                                    "auth.log": { type: "file", owner: "root", content: "Failed password for root from 10.0.0.99 port 54321 ssh2\nFailed password for root from 10.0.0.99 port 54322 ssh2\nFailed password for root from 10.0.0.99 port 54323 ssh2\nAccepted publickey for sysadmin from 192.168.0.2 port 49123 ssh2" }
-                                }
-                            }
-                        }
-                    },
-                    "etc": {
-                        type: "dir", owner: "root",
-                        contents: {
-                            "os-release": { type: "file", owner: "root", content: "NAME=\"Gemini OS\"\nVERSION=\"5.0 (MAXXED Security Edition)\"\nID=gemini" },
-                            "passwd": { type: "file", owner: "root", content: "root:x:0:0:root:/root:/bin/bash\nsysadmin:x:1000:1000:sysadmin:/home/sysadmin:/bin/bash" }
-                        }
-                    },
-                    "tmp": {
-                        type: "dir", owner: "root",
-                        contents: {
-                            "malware.bin": { type: "file", owner: "root", content: "\x7FELF...\x01\x02\x03\nConnectingToC2Server...\nhttp://evil-hacker.com/drop\nExecuting Payload" }
-                        }
-                    },
-                    "usr": {
-                        type: "dir", owner: "root",
-                        contents: {
-                            "bin": {
-                                type: "dir", owner: "root",
-                                contents: {
-                                    "ping": { type: "file", owner: "root", perms: "-rwsr-xr-x", content: "ELF Binary Ping" },
-                                    "passwd": { type: "file", owner: "root", perms: "-rwsr-xr-x", content: "ELF Binary Passwd" },
-                                    "sudo": { type: "file", owner: "root", perms: "-rwsr-xr-x", content: "ELF Binary Sudo" },
-                                    "cat": { type: "file", owner: "root", content: "ELF Binary Cat" }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-        let currentPath = "/home/sysadmin";
-        let userAliases = { 'll': 'ls -la', 'la': 'ls -a' };
-        let commandHistory = [];
-        let historyIndex = -1;
-        let playerStats = { xp: 0, completedLessons: [], completedQuests: [] };
-
-        function initVfs() {
-            vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
-            runningServices = { 'ssh': true, 'nginx': false, 'docker': false, 'malware_c2': true };
-            envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
-            firewallRules = [];
-        }
-
-        function resolvePath(targetPath) {
-            if (!targetPath) return { node: getVfsNode(currentPath), path: currentPath };
-            let parts = targetPath.split('/');
-            let absPathParts = targetPath.startsWith('/') ? [] : currentPath.split('/').filter(Boolean);
-            
-            for (let part of parts) {
-                if (part === '' || part === '.') continue;
-                if (part === '..') {
-                    if (absPathParts.length > 0) absPathParts.pop();
-                } else absPathParts.push(part);
-            }
-            
-            let resolvedStr = '/' + absPathParts.join('/');
-            let current = vfs['/'];
-            let parent = null;
-            let finalName = absPathParts.length > 0 ? absPathParts[absPathParts.length-1] : "";
-            
-            for (let i = 0; i < absPathParts.length; i++) {
-                parent = current;
-                if (!current.contents || !current.contents[absPathParts[i]]) return null;
-                current = current.contents[absPathParts[i]];
-            }
-            return { node: current, path: resolvedStr === '//' ? '/' : resolvedStr, parentNode: parent, name: finalName };
-        }
-
-        function getVfsNode(pathStr) { let res = resolvePath(pathStr); return res ? res.node : null; }
-        function formatPromptPath() {
-            if (currentPath === "/home/sysadmin") return "~";
-            if (currentPath.startsWith("/home/sysadmin/")) return "~" + currentPath.substring(14);
-            return currentPath;
-        }
-
-        // --- MAXXED CURRICULUM MODULES ---
-        const learningModules = [
-            {
-                name: "1. Navigation Masterclass",
-                lessons: [
-                    { title: "Where Am I?", module: "Navigation", why: "Verify exact position.", text: "Type <code>pwd</code>", objective: "Type 'pwd'", xp: 100, check: (c,a) => c==="pwd" },
-                    { title: "Looking Around", module: "Navigation", why: "View contents.", text: "Type <code>ls</code>", objective: "Type 'ls'", xp: 100, check: (c,a) => c==="ls" },
-                    { title: "Changing Directories", module: "Navigation", why: "Move around.", text: "Type <code>cd documents</code>", objective: "Type 'cd documents'", xp: 100, check: (c,a) => c==="cd" && a[0]==="documents" }
-                ]
-            },
-            {
-                name: "2. Filesystem Scalpels",
-                lessons: [
-                    { title: "Making Directories", module: "Files", why: "Create isolation.", text: "Type <code>mkdir playground</code>", objective: "Create 'playground'", xp: 100, check: (c,a) => c==="mkdir" && a[0]==="playground" },
-                    { title: "Output Redirection", module: "Files", why: "Write directly to files.", text: "Type <code>echo \"test\" > test.txt</code>", objective: "Use > redirection", xp: 100, check: (c,a) => c==="echo" && a.includes(">") }
-                ]
-            },
-            {
-                name: "3. Text Slicing & Parsing",
-                lessons: [
-                    { title: "Top Inspection", module: "Text", why: "Read massive files safely.", text: "Type <code>head readme.txt</code>", objective: "Use head", xp: 100, check: (c,a) => c==="head" && a[0]==="readme.txt" },
-                    { title: "Global Regex", module: "Text", why: "Filter matches.", text: "Type <code>grep \"Linux\" readme.txt</code>", objective: "Use grep", xp: 100, check: (c,a) => c==="grep" && a.includes("readme.txt") }
-                ]
-            },
-            {
-                name: "4. Deep Filesystem Mastery",
-                lessons: [
-                    { title: "Exposing Hidden Files", module: "Deep Filesystem", why: "Dotfiles are hidden.", text: "Type <code>ls -la</code>", objective: "Use ls -la", xp: 100, check: (c,a) => c==="ls" && (a.includes("-la") || a.includes("-a")) }
-                ]
-            },
-            {
-                name: "5. Advanced Service Control",
-                lessons: [
-                    { title: "Checking Daemons", module: "Services", why: "Manage web servers.", text: "Type <code>systemctl status nginx</code>", objective: "Check nginx status", xp: 300, check: (c,a) => c==="systemctl" && a[0]==="status" && a[1]==="nginx" },
-                    { title: "Starting Services", module: "Services", why: "Boot offline servers.", text: "Type <code>systemctl start nginx</code>", objective: "Start nginx", xp: 300, check: (c,a) => c==="systemctl" && a[0]==="start" && a[1]==="nginx" && runningServices['nginx']===true }
-                ]
-            },
-            {
-                name: "6. Stream Editing",
-                lessons: [
-                    { title: "The Stream Editor", module: "Text", why: "Find and replace instantly.", text: "Type <code>sed 's/Linux/Unix/g' readme.txt</code>", objective: "Use sed substitution", xp: 400, check: (c,a) => c==="sed" && a[0]==="s/Linux/Unix/g" && a[1]==="readme.txt" },
-                    { title: "Data Extraction", module: "Text", why: "Extract columns.", text: "Type <code>awk '{print $1}' readme.txt</code>", objective: "Use awk print", xp: 400, check: (c,a) => c==="awk" && a[0]==="{print $1}" && a[1]==="readme.txt" }
-                ]
-            },
-            {
-                name: "7. System Environment",
-                lessons: [
-                    { title: "Reading The Matrix", module: "Env", why: "View active RAM variables.", text: "Type <code>env</code>", objective: "Type env", xp: 500, check: (c,a) => c==="env" },
-                    { title: "Exporting Variables", module: "Env", why: "Set keys.", text: "Type <code>export API_KEY=123</code>", objective: "Use export", xp: 600, check: (c,a) => c==="export" && a[0].includes("=") }
-                ]
-            },
-            // --- MAXXED RED TEAM ---
-            {
-                name: "8. Red Team (Offensive Ops)",
-                lessons: [
-                    {
-                        title: "Network Mapping", module: "Offensive",
-                        why: "Hackers map networks to find open ports.", text: "Type <code>nmap localhost</code>",
-                        objective: "Scan localhost ports", xp: 800, check: (c,a) => c==="nmap" && a[0]==="localhost"
-                    },
-                    {
-                        title: "Web Enumeration", module: "Offensive",
-                        why: "Use cURL to fetch raw HTTP headers and identify target server software.", text: "Type <code>curl -I http://example.com</code>",
-                        objective: "Fetch headers with curl -I", xp: 900, check: (c,a) => c==="curl" && a.includes("-I")
-                    },
-                    {
-                        title: "Reverse Engineering", module: "Offensive",
-                        why: "Malware is compiled. 'strings' pulls out readable text.", text: "Type <code>strings /tmp/malware.bin</code>",
-                        objective: "Use strings on malware", xp: 1000, check: (c,a) => c==="strings" && a[0]==="/tmp/malware.bin"
-                    },
-                    {
-                        title: "Malware Hashing", module: "Offensive",
-                        why: "Generate an MD5 hash to check if a binary matches known virus databases.", text: "Type <code>md5sum /tmp/malware.bin</code>",
-                        objective: "Hash the malware file", xp: 1000, check: (c,a) => c==="md5sum" && a[0]==="/tmp/malware.bin"
-                    },
-                    {
-                        title: "Privilege Check", module: "Offensive",
-                        why: "See what root commands you can exploit.", text: "Type <code>sudo -l</code>",
-                        objective: "Check sudo privileges", xp: 1200, check: (c,a) => c==="sudo" && a.includes("-l")
-                    }
-                ]
-            },
-            // --- MAXXED BLUE TEAM ---
-            {
-                name: "9. Blue Team (Defensive Ops)",
-                lessons: [
-                    {
-                        title: "Firewall Auditing", module: "Defensive",
-                        why: "Check your active kernel firewall rules.", text: "Type <code>iptables -L</code>",
-                        objective: "List iptables rules", xp: 800, check: (c,a) => c==="iptables" && a.includes("-L")
-                    },
-                    {
-                        title: "Dropping Connections", module: "Defensive",
-                        why: "Block attacking IPs instantly.", text: "Type <code>iptables -A INPUT -s 10.0.0.5 -j DROP</code>",
-                        objective: "Append DROP rule to INPUT", xp: 1000, check: (c,a) => c==="iptables" && a.includes("-A") && a.includes("DROP")
-                    },
-                    {
-                        title: "Log Forensics", module: "Defensive",
-                        why: "Check auth logs for SSH brute-forcing.", text: "Type <code>cat /var/log/auth.log</code>",
-                        objective: "Read the auth log", xp: 1000, check: (c,a) => (c==="cat" || c==="tail") && a[0].includes("auth.log")
-                    },
-                    {
-                        title: "Listening Sockets", module: "Defensive",
-                        why: "Find rogue backdoors listening on open ports.", text: "Type <code>netstat -tuln</code>",
-                        objective: "View network sockets", xp: 1200, check: (c,a) => c==="netstat" && a.includes("-tuln")
-                    },
-                    {
-                        title: "SUID Auditing", module: "Defensive",
-                        why: "Find files that execute as root (SUID bit set) which hackers use for PrivEsc.", text: "Type <code>find / -perm -4000</code>",
-                        objective: "Find SUID binaries", xp: 1500, check: (c,a) => c==="find" && a.includes("-perm") && a.includes("-4000")
-                    },
-                    {
-                        title: "File Integrity", module: "Defensive",
-                        why: "Check if the password file was tampered with using SHA256.", text: "Type <code>sha256sum /etc/passwd</code>",
-                        objective: "Hash the passwd file", xp: 1500, check: (c,a) => c==="sha256sum" && a[0]==="/etc/passwd"
-                    }
-                ]
-            }
-        ];
-
-        // --- BOSS QUESTS ---
-        const quests = [
-            {
-                id: "q1", title: "Log File Investigator", difficulty: "Medium", reward: 300,
-                description: "Grep for 'Warning' inside /var/log/syslog.",
-                objective: "Grep for the word 'Warning'",
-                hint: "Use `grep Warning /var/log/syslog`",
-                check: (cmd, args) => cmd === "grep" && args.includes("Warning") && args.some(a => a.includes("syslog"))
-            },
-            {
-                id: "q2", title: "Web Server Incident", difficulty: "Hard", reward: 600,
-                description: "Start the Nginx service immediately.",
-                objective: "Start nginx service daemon.",
-                hint: "Use `systemctl start nginx`",
-                check: (cmd, args) => runningServices['nginx'] === true && cmd === "systemctl"
-            },
-            {
-                id: "q3", title: "Rogue Socket Hunting (Ultimate)", difficulty: "Ultimate", reward: 1500,
-                description: "We suspect a backdoor is listening on a high port. Use `netstat -tuln` to find it, then use `nmap` to scan localhost to verify it.",
-                objective: "Run netstat and then nmap on localhost.",
-                hint: "Run `netstat -tuln`",
-                check: (cmd, args) => cmd === "netstat" && args.includes("-tuln")
-            },
-            {
-                id: "q4", title: "The Threat Intel Hash (Ultimate)", difficulty: "Ultimate", reward: 2000,
-                description: "Generate an MD5 hash of /tmp/malware.bin to submit to VirusTotal.",
-                objective: "Calculate MD5 checksum of malware.bin",
-                hint: "Run `md5sum /tmp/malware.bin`",
-                check: (cmd, args) => cmd === "md5sum" && args[0] === "/tmp/malware.bin"
-            },
-            {
-                id: "q5", title: "Block the Brute Force (Ultimate)", difficulty: "Ultimate", reward: 2500,
-                description: "Read the `/var/log/auth.log` file. Find the IP addressing failing password attempts, and block it using `iptables` DROP.",
-                objective: "Drop the attacking IP via iptables.",
-                hint: "Check auth.log, find the 10.0.0.X IP, run `iptables -A INPUT -s [IP] -j DROP`",
-                check: (cmd, args) => cmd === "iptables" && args.includes("-A") && args.includes("10.0.0.99") && args.includes("DROP")
-            }
-        ];
-
-        let activeModuleIndex = 0;
-        let activeLessonIndex = 0;
-        let activeTab = 'modules';
-
-        function switchTab(tabId) {
-            activeTab = tabId;
-            document.getElementById('view-modules').classList.add('hidden');
-            document.getElementById('view-quests').classList.add('hidden');
-            document.getElementById('view-cheatsheet').classList.add('hidden');
-            
-            document.getElementById('tab-btn-modules').className = "flex-1 py-3 text-center border-b-2 border-transparent text-slate-400 font-medium hover:bg-slate-900 transition-colors";
-            document.getElementById('tab-btn-quests').className = "flex-1 py-3 text-center border-b-2 border-transparent text-slate-400 font-medium hover:bg-slate-900 transition-colors";
-            document.getElementById('tab-btn-cheatsheet').className = "flex-1 py-3 text-center border-b-2 border-transparent text-slate-400 font-medium hover:bg-slate-900 transition-colors";
-
-            if (tabId === 'modules') {
-                document.getElementById('view-modules').classList.remove('hidden');
-                document.getElementById('tab-btn-modules').className = "flex-1 py-3 text-center border-b-2 border-indigo-500 text-white font-medium hover:bg-slate-900 transition-colors";
-            } else if (tabId === 'quests') {
-                document.getElementById('view-quests').classList.remove('hidden');
-                document.getElementById('tab-btn-quests').className = "flex-1 py-3 text-center border-b-2 border-indigo-500 text-white font-medium hover:bg-slate-900 transition-colors";
-                renderQuests();
-            } else if (tabId === 'cheatsheet') {
-                document.getElementById('view-cheatsheet').classList.remove('hidden');
-                document.getElementById('tab-btn-cheatsheet').className = "flex-1 py-3 text-center border-b-2 border-indigo-500 text-white font-medium hover:bg-slate-900 transition-colors";
-                renderCheatsheet();
-            }
-        }
-
-        function changeModule() {
-            let select = document.getElementById('module-selector');
-            activeModuleIndex = parseInt(select.value);
-            activeLessonIndex = 0;
-            renderLesson();
-        }
-
-        function renderModulesDropdown() {
-            let select = document.getElementById('module-selector');
-            select.innerHTML = '';
-            learningModules.forEach((m, idx) => {
-                let opt = document.createElement('option');
-                opt.value = idx;
-                opt.innerText = m.name;
-                select.appendChild(opt);
-            });
-            select.value = activeModuleIndex;
-        }
-
-        function renderLesson() {
-            let m = learningModules[activeModuleIndex];
-            let l = m.lessons[activeLessonIndex];
-            
-            document.getElementById('lesson-module-tag').innerText = m.name.substring(3);
-            document.getElementById('lesson-index-tag').innerText = `Lesson ${activeLessonIndex + 1}/${m.lessons.length}`;
-            
-            let lessonBody = document.getElementById('active-lesson-body');
-            lessonBody.innerHTML = `
-                <h2 class="text-lg font-black text-white flex items-center gap-1.5">
-                    <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 pulse-emerald"></span>
-                    ${l.title}
-                </h2>
-                <div class="text-slate-400 text-[11px] leading-relaxed border-l-2 border-indigo-500/30 pl-3 italic bg-indigo-500/5 py-1.5 rounded-r">
-                    <strong class="text-slate-300">Context:</strong> ${l.why}
-                </div>
-                <p class="text-sm text-slate-300 leading-relaxed">${l.text}</p>
-            `;
-            
-            document.getElementById('lesson-objective-target').innerHTML = l.objective;
-            document.getElementById('lesson-xp-badge').innerText = `+${l.xp} XP`;
-            
-            renderModulesOverview();
-            updateOverallProgress();
-        }
-
-        function renderModulesOverview() {
-            let container = document.getElementById('modules-list');
-            container.innerHTML = '';
-            
-            learningModules.forEach((mod, mIdx) => {
-                let modCompletedCount = 0;
-                mod.lessons.forEach((les, lIdx) => {
-                    if (playerStats.completedLessons.includes(`${mIdx}_${lIdx}`)) modCompletedCount++;
-                });
-                let modPct = Math.round((modCompletedCount / mod.lessons.length) * 100);
-                
-                let div = document.createElement('div');
-                div.className = `p-3 rounded-xl border text-xs flex flex-col gap-2 transition-all ${activeModuleIndex === mIdx ? 'bg-slate-950 border-indigo-500/30 shadow-md' : 'bg-slate-950/40 border-slate-800'}`;
-                div.innerHTML = `
-                    <div class="flex items-center justify-between cursor-pointer" onclick="selectModuleFromList(${mIdx})">
-                        <span class="font-bold text-slate-300">${mod.name}</span>
-                        <span class="text-slate-500 font-mono">${modPct}% Done</span>
-                    </div>
-                    <div class="w-full bg-slate-900 rounded-full h-1">
-                        <div class="bg-indigo-500 h-1 rounded-full" style="width: ${modPct}%"></div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function selectModuleFromList(idx) {
-            activeModuleIndex = idx;
-            activeLessonIndex = 0;
-            document.getElementById('module-selector').value = idx;
-            renderLesson();
-        }
-
-        function renderQuests() {
-            let container = document.getElementById('quests-container');
-            container.innerHTML = '';
-            
-            quests.forEach((q, qIdx) => {
-                let isCompleted = playerStats.completedQuests.includes(q.id);
-                let div = document.createElement('div');
-                div.className = `p-4 border rounded-xl space-y-3 relative overflow-hidden transition-all duration-300 ${isCompleted ? 'bg-emerald-950/10 border-emerald-500/20' : 'bg-slate-950 border-slate-800'}`;
-                
-                let difficultyColor = q.difficulty === 'Medium' ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20';
-                if(q.difficulty === 'Ultimate') difficultyColor = 'text-purple-400 bg-purple-400/10 border-purple-400/20 shadow-[0_0_15px_rgba(168,85,247,0.2)]';
-
-                div.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="font-mono text-[10px] uppercase px-2 py-0.5 border rounded-full ${isCompleted ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : difficultyColor}">
-                            ${isCompleted ? '✅ Resolved' : q.difficulty}
-                        </span>
-                        <span class="text-xs font-bold text-indigo-400 font-mono">+${q.reward} XP</span>
-                    </div>
-                    <div class="space-y-1">
-                        <h4 class="font-bold text-white text-sm">${q.title}</h4>
-                        <p class="text-slate-400 text-xs leading-relaxed">${q.description}</p>
-                    </div>
-                    <div class="p-2.5 bg-slate-900 rounded border border-slate-800 text-xs font-mono">
-                        <strong class="text-slate-400">Target Condition:</strong> ${q.objective}
-                    </div>
-                    <div class="text-[11px] text-slate-500 italic font-mono flex items-center gap-1">
-                        <span>💡 Hint:</span> ${q.hint}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // --- COMMAND ENGINE & PROGRESSION CHECKS ---
-        const maxGlobalXp = 20000;
-
-        function addXp(amount) {
-            playerStats.xp += amount;
-            
-            let rank = "Terminal Newbie";
-            if (playerStats.xp >= 20000) rank = "Cyber Warfare Director 🦅";
-            else if (playerStats.xp >= 15000) rank = "Global CISO 🛡️👑";
-            else if (playerStats.xp >= 12000) rank = "Red Team Commander 🥷";
-            else if (playerStats.xp >= 9000) rank = "Security Architect 🏰";
-            else if (playerStats.xp >= 7000) rank = "Root Avatar 👁️";
-            else if (playerStats.xp >= 5000) rank = "Kernel Overlord 🌌";
-            else if (playerStats.xp >= 3500) rank = "Terminal Sorcerer 🧙‍♂️";
-            else if (playerStats.xp >= 1500) rank = "Senior SysAdmin 🛡️";
-            else if (playerStats.xp >= 500) rank = "Junior Administrator 💻";
-            
-            document.getElementById('rank-name').innerText = `Rank: ${rank}`;
-            document.getElementById('xp-counter').innerText = `${playerStats.xp} / ${maxGlobalXp} XP`;
-            
-            let pct = Math.min(100, (playerStats.xp / maxGlobalXp) * 100);
-            document.getElementById('xp-progress').style.width = `${pct}%`;
-            
-            saveStats();
-        }
-
-        function updateOverallProgress() {
-            let totalLessons = 0;
-            learningModules.forEach(m => totalLessons += m.lessons.length);
-            let completed = playerStats.completedLessons.length;
-            let percentage = Math.round((completed / totalLessons) * 100);
-            document.getElementById('overall-progress-tag').innerText = `Progress: ${percentage}%`;
-        }
-
-        function saveStats() { localStorage.setItem('linux_learner_maxxed_stats', JSON.stringify(playerStats)); }
-        function loadStats() {
-            let saved = localStorage.getItem('linux_learner_maxxed_stats');
-            if (saved) {
-                try {
-                    playerStats = JSON.parse(saved);
-                    if(!playerStats.completedQuests) playerStats.completedQuests = [];
-                } catch(e) {}
-            }
-            addXp(0);
-        }
-
-        function renderCheatsheet() {
-            let container = document.getElementById('cheatsheet-list');
-            container.innerHTML = '';
-            let query = document.getElementById('cheatsheet-search').value.toLowerCase().trim();
-            let keys = Object.keys(commands).sort();
-            
-            keys.forEach(k => {
-                let cmdObj = commands[k];
-                if (query !== '' && !k.includes(query) && !cmdObj.desc.toLowerCase().includes(query)) return;
-                
-                let isLocked = cmdObj.minXp && playerStats.xp < cmdObj.minXp;
-                
-                let div = document.createElement('div');
-                div.className = `p-3 bg-slate-950 border rounded-xl space-y-1 ${isLocked ? 'border-red-900/40 opacity-70' : 'border-slate-800/80'}`;
-                
-                let badge = isLocked 
-                    ? `<span class="font-mono text-[10px] text-red-400 bg-red-400/10 px-2 py-0.5 rounded border border-red-500/20">🔒 Requires ${cmdObj.minXp} XP</span>`
-                    : `<span class="font-mono text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-500/20">Unlocked</span>`;
-
-                div.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="font-mono text-xs font-bold ${isLocked ? 'text-slate-500' : 'text-indigo-400'}">${k}</span>
-                        ${badge}
-                    </div>
-                    <p class="text-slate-300 text-xs leading-relaxed ${isLocked ? 'blur-[2px]' : ''}">${cmdObj.desc}</p>
-                `;
-                container.appendChild(div);
-            });
-        }
-        function filterCheatsheet() { renderCheatsheet(); }
-
-        // --- TERMINAL COMMAND SYSTEM ---
-        const commands = {
-            'help': {
-                desc: 'Print active index list of terminal sandbox instructions.',
-                run: () => {
-                    let out = "Terminal Index System:\n";
-                    Object.keys(commands).sort().forEach(cmd => {
-                        let isLocked = commands[cmd].minXp && playerStats.xp < commands[cmd].minXp;
-                        if (isLocked) {
-                            out += `  <span class="term-locked">${cmd.padEnd(10)} - [LOCKED - Requires ${commands[cmd].minXp} XP]</span>\n`;
-                        } else {
-                            out += `  <span class="text-indigo-400 font-bold">${cmd.padEnd(10)}</span> - ${commands[cmd].desc}\n`;
-                        }
-                    });
-                    return out;
-                }
-            },
-            'pwd': { desc: 'Print working directory details.', run: () => currentPath },
-            'ls': {
-                desc: 'List directory entries.',
-                run: (args) => {
-                    let showAll = args.includes('-la') || args.includes('-a');
-                    let target = args.filter(a => !a.startsWith('-'))[0] || "";
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">ls: cannot access '${target}': No such file or directory</span>`;
-                    if (res.node.type !== 'dir') return target;
-                    
-                    let out = [];
-                    if (showAll) { out.push(`<span class="term-dir">.</span>`); out.push(`<span class="term-dir">..</span>`); }
-                    for (let key in res.node.contents) {
-                        let node = res.node.contents[key];
-                        if (node.type === 'dir') out.push(`<span class="term-dir">${key}/</span>`);
-                        else out.push(`<span>${key}</span>`);
-                    }
-                    return out.join("   ");
-                }
-            },
-            'cd': {
-                desc: 'Switch active path focus.',
-                run: (args) => {
-                    let target = args[0] || "/home/sysadmin";
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">cd: ${target}: No such file or directory</span>`;
-                    if (res.node.type !== 'dir') return `<span class="term-err">cd: ${target}: Not a directory</span>`;
-                    currentPath = res.path;
-                    document.getElementById('prompt-path').innerText = formatPromptPath();
-                    return "";
-                }
-            },
-            'cat': {
-                desc: 'Read target text file contents onto the stdout.',
-                run: (args) => {
-                    if (args.length === 0) return "cat: standard input stream empty";
-                    let res = resolvePath(args[0]);
-                    if (!res) return `<span class="term-err">cat: ${args[0]}: No such file or directory</span>`;
-                    if (res.node.type === 'dir') return `<span class="term-err">cat: ${args[0]}: Is a directory</span>`;
-                    return res.node.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
-                }
-            },
-            'mkdir': {
-                desc: 'Create folder structures.',
-                run: (args) => {
-                    if (args.length === 0) return `<span class="term-err">mkdir: missing operand</span>`;
-                    let target = args[0];
-                    let parts = target.split('/');
-                    let newDirName = parts.pop();
-                    let parentPath = parts.join('/') || '.';
-                    let parentRes = resolvePath(parentPath);
-                    if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">mkdir: parent folder missing</span>`;
-                    parentRes.node.contents[newDirName] = { type: "dir", owner: "sysadmin", contents: {} };
-                    return "";
-                }
-            },
-            'echo': {
-                desc: 'Write inputs to outputs. Supports redirection >',
-                run: (args) => {
-                    let redirectIndex = args.indexOf('>');
-                    if (redirectIndex !== -1 && redirectIndex < args.length - 1) {
-                        let text = args.slice(0, redirectIndex).join(" ").replace(/^['"]|['"]$/g, '');
-                        let targetFile = args[redirectIndex + 1];
-                        let parts = targetFile.split('/');
-                        let fileName = parts.pop();
-                        let parentPath = parts.join('/') || '.';
-                        let parentRes = resolvePath(parentPath);
-                        if (!parentRes || parentRes.node.type !== 'dir') return `<span class="term-err">bash: path not found</span>`;
-                        parentRes.node.contents[fileName] = { type: "file", owner: "sysadmin", content: text };
-                        return "";
-                    }
-                    return args.join(" ").replace(/^['"]|['"]$/g, '');
-                }
-            },
-            'clear': { desc: 'Clean up screen displays.', run: () => "CLEAR_SIGNAL" },
-            'grep': {
-                desc: 'Filter matches inside text documents.',
-                run: (args) => {
-                    if (args.length < 2) return `<span class="term-err">grep: arguments invalid</span>`;
-                    let pattern = args[0].replace(/['"]/g, '');
-                    let res = resolvePath(args[1]);
-                    if (!res) return `<span class="term-err">grep: target missing</span>`;
-                    if (res.node.type === 'dir') return `<span class="term-err">grep: target is directory</span>`;
-                    let matches = res.node.content.split('\n').filter(line => line.includes(pattern));
-                    if (matches.length === 0) return "No matches found.";
-                    return matches.map(l => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(new RegExp(pattern, 'g'), `<span class="text-red-400 font-bold bg-red-900/30 px-1 rounded">${pattern}</span>`)).join('<br>');
-                }
-            },
-            'head': {
-                desc: 'Peek at top bounding parameters.',
-                run: (args) => {
-                    if (args.length === 0) return `<span class="term-err">head: target missing</span>`;
-                    let res = resolvePath(args[0]);
-                    if (!res) return `<span class="term-err">head: ${args[0]} missing</span>`;
-                    return res.node.content.split('\n').slice(0, 5).join('<br>');
-                }
-            },
-            'systemctl': {
-                desc: 'Control system daemon background services.', minXp: 2000,
-                run: (args) => {
-                    if (args.length < 2) return "Usage: systemctl [start|stop|status] [service]";
-                    let action = args[0], service = args[1];
-                    if (runningServices[service] === undefined) return `Unit ${service}.service could not be found.`;
-                    if (action === 'status') {
-                        let isRun = runningServices[service];
-                        let color = isRun ? "text-green-400" : "text-slate-500";
-                        let state = isRun ? "active (running)" : "inactive (dead)";
-                        return `● ${service}.service - Advanced Application Daemon<br>&nbsp;&nbsp;&nbsp;Active: <span class="${color} font-bold">${state}</span>`;
-                    } else if (action === 'start') { runningServices[service] = true; return "";
-                    } else if (action === 'stop') { runningServices[service] = false; return ""; }
-                    return "systemctl: unknown operational action.";
-                }
-            },
-            'sed': {
-                desc: 'Stream editor for filtering and transforming text.', minXp: 3000,
-                run: (args) => {
-                    if (args.length < 2) return "Usage: sed 's/old/new/g' file";
-                    let pattern = args[0], res = resolvePath(args[1]);
-                    if (!res) return `sed: ${args[1]}: No such file`;
-                    let parts = pattern.split('/');
-                    if (parts.length >= 3 && parts[0] === 's' || parts[0] === "'s") {
-                        let oldText = parts[1], newText = parts[2];
-                        let lines = res.node.content.split('\n');
-                        let updated = lines.map(l => l.replace(new RegExp(oldText, 'g'), newText));
-                        res.node.content = updated.join('\n');
-                        return updated.join('<br>');
-                    }
-                    return "sed: expression syntax error.";
-                }
-            },
-            'awk': {
-                desc: 'Pattern scanning and data extraction language.', minXp: 3000,
-                run: (args) => {
-                    if (args.length < 2) return "Usage: awk '{print $N}' file";
-                    let res = resolvePath(args[1]);
-                    if (!res) return `awk: cannot open file`;
-                    if (args[0].includes('{print $1}')) {
-                        return res.node.content.split('\n').map(l => (l.trim().split(/\s+/)[0] || "")).join('<br>');
-                    }
-                    return "awk: syntax support limited to '{print $1}'.";
-                }
-            },
-            'env': {
-                desc: 'Print active system variables.', minXp: 4000,
-                run: () => Object.entries(envVars).map(([k,v]) => `${k}=${v}`).join('<br>')
-            },
-            'export': {
-                desc: 'Set environment variables for the shell.', minXp: 4000,
-                run: (args) => {
-                    if (args.length === 0) return "Usage: export KEY=VALUE";
-                    let expr = args.join("");
-                    if (expr.includes('=')) {
-                        let parts = expr.split('=');
-                        envVars[parts[0]] = parts[1].replace(/['"]/g, '');
-                    }
-                    return "";
-                }
-            },
-            // --- MAXXED CYBERSECURITY TOOLS ---
-            'curl': {
-                desc: 'Fetch HTTP Headers for OSINT (curl -I).', minXp: 5000,
-                run: (args) => {
-                    if (args.includes('-I')) {
-                        return `HTTP/1.1 200 OK<br>Server: nginx/1.24.0 (Ubuntu)<br>Date: Wed, 21 Oct 2026 07:28:00 GMT<br>Content-Type: text/html<br>Connection: keep-alive<br>X-Powered-By: PHP/8.1.2`;
-                    }
-                    return `&lt;html&gt;Target Acquired&lt;/html&gt;`;
-                }
-            },
-            'sudo': {
-                desc: 'Check root privileges.', minXp: 5000,
-                run: (args) => {
-                    if (args.includes('-l')) {
-                        return `User sysadmin may run the following commands on gemini-sandbox:<br>&nbsp;&nbsp;&nbsp;&nbsp;(ALL : ALL) NOPASSWD: /usr/bin/cat, /usr/bin/systemctl`;
-                    }
-                    return "[sudo] password for sysadmin:";
-                }
-            },
-            'md5sum': {
-                desc: 'Compute MD5 cryptographic message digest.', minXp: 5000,
-                run: (args) => {
-                    if (args.length === 0) return "md5sum: missing file operand";
-                    let target = args[0];
-                    if (target.includes("malware.bin")) return `e99a18c428cb38d5f260853678922e03  ${target}`;
-                    return `d41d8cd98f00b204e9800998ecf8427e  ${target}`;
-                }
-            },
-            'sha256sum': {
-                desc: 'Compute SHA256 cryptographic message digest.', minXp: 5000,
-                run: (args) => {
-                    if (args.length === 0) return "sha256sum: missing file operand";
-                    let target = args[0];
-                    if (target.includes("passwd")) return `5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8  ${target}`;
-                    return `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ${target}`;
-                }
-            },
-            'nmap': {
-                desc: 'Network exploration and port scanner.', minXp: 5000,
-                run: (args) => {
-                    if (args.length === 0) return "nmap: missing target IP";
-                    let target = args[0];
-                    return `Starting Nmap 7.93<br>Nmap scan report for ${target}<br>PORT&nbsp;&nbsp;&nbsp;&nbsp;STATE&nbsp;SERVICE<br>22/tcp&nbsp;&nbsp;open&nbsp;&nbsp;ssh<br>80/tcp&nbsp;&nbsp;open&nbsp;&nbsp;http<br>4444/tcp&nbsp;open&nbsp;&nbsp;krb524<br>Nmap done: 1 IP address scanned in 0.25 seconds`;
-                }
-            },
-            'strings': {
-                desc: 'Extract printable strings from binary files.', minXp: 5000,
-                run: (args) => {
-                    if (args.length === 0) return "strings: missing file operand";
-                    let res = resolvePath(args[0]);
-                    if (!res) return `strings: ${args[0]}: No such file`;
-                    if (res.node.type === 'dir') return `strings: ${args[0]}: Is a directory`;
-                    let text = res.node.content;
-                    let matches = text.match(/[a-zA-Z0-9-_.://]{4,}/g);
-                    if (matches) return matches.join('<br>');
-                    return "strings: no printable characters found.";
-                }
-            },
-            'netstat': {
-                desc: 'Print network connections, routing tables, and interface stats.', minXp: 6000,
-                run: (args) => {
-                    return `Active Internet connections (only servers)<br>Proto Recv-Q Send-Q Local Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Foreign Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State<br>tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0.0.0.0:22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN<br>tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0.0.0.0:80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN<br><span class="text-red-400 font-bold">tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0.0.0.0:4444&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN</span>`;
-                }
-            },
-            'find': {
-                desc: 'Search for files in a directory hierarchy.', minXp: 6000,
-                run: (args) => {
-                    if (args.includes('-perm') && args.includes('-4000')) {
-                        return `/usr/bin/ping<br>/usr/bin/passwd<br><span class="text-red-400 font-bold">/usr/bin/sudo</span>`;
-                    }
-                    let target = args[0] || ".";
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">find: '${target}': No such path</span>`;
-                    let output = [];
-                    function traverse(node, currentPathStr) {
-                        output.push(currentPathStr);
-                        if (node.type === 'dir') {
-                            for (let key in node.contents) {
-                                let nextPath = currentPathStr.endsWith('/') ? currentPathStr + key : currentPathStr + '/' + key;
-                                if (currentPathStr === '.') nextPath = './' + key;
-                                traverse(node.contents[key], nextPath);
-                            }
-                        }
-                    }
-                    traverse(res.node, target);
-                    return output.join('<br>');
-                }
-            },
-            'iptables': {
-                desc: 'IPv4 packet filtering and firewalls.', minXp: 6000,
-                run: (args) => {
-                    if (args.includes('-L')) {
-                        let out = "Chain INPUT (policy ACCEPT)<br>target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prot&nbsp;opt&nbsp;source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destination<br>";
-                        firewallRules.forEach(r => {
-                            out += `<span class="text-red-400 font-bold">DROP</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;--&nbsp;&nbsp;${r.padEnd(20)} anywhere<br>`;
-                        });
-                        return out;
-                    }
-                    if (args.includes('-A') && args.includes('INPUT') && args.includes('DROP')) {
-                        let sIndex = args.indexOf('-s');
-                        if (sIndex !== -1 && args[sIndex+1]) {
-                            firewallRules.push(args[sIndex+1]);
-                            return "iptables: Rule appended to drop incoming traffic.";
-                        }
-                    }
-                    return "iptables: no command specified. Use -L to list or -A to append.";
-                }
-            }
-        };
-
-        // --- TERMINAL ENGINE EXECUTION ---
-        const terminalOutput = document.getElementById('terminal-output');
-        const cmdInput = document.getElementById('cmd-input');
-        const container = document.getElementById('terminal-container');
-
-        function printToTerminal(htmlContent, isCommand = false) {
-            const div = document.createElement('div');
-            div.className = "mb-1 leading-relaxed";
-            if (isCommand) div.innerHTML = `<span class="term-prompt">sysadmin@gemini</span>:<span class="term-path">${formatPromptPath()}</span>$ ${htmlContent}`;
-            else div.innerHTML = htmlContent;
-            terminalOutput.appendChild(div);
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
-
-        function executeCommand(rawCommand) {
-            let cmdStr = rawCommand.trim();
-            if (cmdStr === "") return;
-            printToTerminal(cmdStr, true);
-            let args = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
-            let cmdName = args.shift();
-
-            if (commands[cmdName]) {
-                if (commands[cmdName].minXp && playerStats.xp < commands[cmdName].minXp) {
-                    printToTerminal(`<span class="text-red-400 font-bold bg-red-900/30 px-2 py-1 rounded inline-block mt-1">🔒 Level Locked: This advanced command requires ${commands[cmdName].minXp} XP.</span>`);
-                    return;
-                }
-                try {
-                    let output = commands[cmdName].run(args, cmdStr);
-                    if (output === "CLEAR_SIGNAL") terminalOutput.innerHTML = "";
-                    else if (output !== "") printToTerminal(output);
-                    verifyObjectives(cmdName, args, output);
-                } catch (e) { printToTerminal(`<span class="term-err">Internal execution exception.</span>`); }
-            } else {
-                printToTerminal(`<span class="term-err">${cmdName}: command not found</span>`);
-            }
-        }
-
-        function verifyObjectives(cmd, args, outputText) {
-            let activeModule = learningModules[activeModuleIndex];
-            let activeLesson = activeModule.lessons[activeLessonIndex];
-            let lessonIDString = `${activeModuleIndex}_${activeLessonIndex}`;
-            
-            if (!playerStats.completedLessons.includes(lessonIDString)) {
-                if (activeLesson.check(cmd, args, outputText)) {
-                    playerStats.completedLessons.push(lessonIDString);
-                    addXp(activeLesson.xp);
-                    printToTerminal(`<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-mono text-xs flex items-center justify-between">
-                        <span>🏆 Objective Accomplished!</span><span>+${activeLesson.xp} XP</span>
-                    </div>`);
-                    if (activeLessonIndex < activeModule.lessons.length - 1) activeLessonIndex++;
-                    else printToTerminal(`<div class="my-2 p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded font-mono text-xs">🎉 Module complete! You've masterfully scaled this skillset.</div>`);
-                    renderLesson();
-                }
-            }
-
-            quests.forEach(q => {
-                if (!playerStats.completedQuests.includes(q.id)) {
-                    if (q.check(cmd, args, outputText)) {
-                        playerStats.completedQuests.push(q.id);
-                        addXp(q.reward);
-                        printToTerminal(`<div class="my-3 p-3 bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.2)] rounded font-mono text-xs">
-                            🔥 Ultimate Boss Quest Cleared: "${q.title}"!<br>Reward allocated: +${q.reward} XP.
-                        </div>`);
-                        if (activeTab === 'quests') renderQuests();
-                    }
-                }
-            });
-        }
-
-        function resetSandbox() {
-            if (confirm("Reset Virtual Filesystem? XP stats will be kept, but files reset.")) {
-                initVfs();
-                currentPath = "/home/sysadmin";
-                document.getElementById('prompt-path').innerText = formatPromptPath();
-                printToTerminal(`<span class="text-red-400 font-mono font-bold">System Hard Reset Complete.</span>`);
-            }
-        }
-
-        cmdInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                let cmd = this.value;
-                if (cmd.trim() !== '') {
-                    commandHistory.push(cmd);
-                    historyIndex = commandHistory.length;
-                }
-                executeCommand(cmd);
-                this.value = '';
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (historyIndex > 0) {
-                    historyIndex--;
-                    this.value = commandHistory[historyIndex];
-                }
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (historyIndex < commandHistory.length - 1) {
-                    historyIndex++;
-                    this.value = commandHistory[historyIndex];
-                } else {
-                    historyIndex = commandHistory.length;
-                    this.value = '';
-                }
-            }
-        });
-
-        container.addEventListener('click', () => cmdInput.focus());
-
-        window.onload = () => {
-            initVfs();
-            loadStats();
-            renderModulesDropdown();
-            renderLesson();
-            cmdInput.focus();
-        };
-    </script>
 </body>
 </html>
