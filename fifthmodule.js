@@ -33,7 +33,7 @@ const module5_networking = {
         { title: "Find TCP Protocols", why: "Filter out UDP via grep.", text: "Type <code>grep \"tcp\" ports.txt</code>", objective: "Grep tcp from ports.txt", xp: 20, check: (c,a) => c==="grep" && a.includes("tcp") && a.includes("ports.txt") },
         { title: "Slice Socket Headers", why: "Look at the top two lines of the report.", text: "Type <code>head -n 2 ports.txt</code>", objective: "Head slice 2 lines from ports.txt", xp: 20, check: (c,a) => c==="head" && a.includes("-n") && a.includes("2") && a.includes("ports.txt") },
 
-        // --- NMAP PORT SCANNING (26-45) ---
+        // --- NMAP PORT SCANNING (26-46) ---
         { title: "Basic Local Scan", why: "Nmap maps out open ports on a target. Scan yourself.", text: "Type <code>nmap localhost</code>", objective: "Type nmap localhost", xp: 15, check: (c,a) => c==="nmap" && a[0]==="localhost" },
         { title: "IP Target Scan", why: "Scan the raw loopback IP.", text: "Type <code>nmap 127.0.0.1</code>", objective: "Type nmap 127.0.0.1", xp: 15, check: (c,a) => c==="nmap" && a[0]==="127.0.0.1" },
         { title: "Remote Target Scan", why: "Scan an external host.", text: "Type <code>nmap google.com</code>", objective: "Type nmap google.com", xp: 15, check: (c,a) => c==="nmap" && a[0]==="google.com" },
@@ -44,6 +44,7 @@ const module5_networking = {
         { title: "Service Version Scan", why: "The -sV flag tries to find out EXACTLY what software is running.", text: "Type <code>nmap -sV localhost</code>", objective: "Type nmap -sV localhost", xp: 25, check: (c,a) => c==="nmap" && a.includes("-sV") },
         { title: "Stealth SYN Scan", why: "The -sS flag scans quietly without completing the handshake.", text: "Type <code>nmap -sS localhost</code>", objective: "Type nmap -sS localhost", xp: 25, check: (c,a) => c==="nmap" && a.includes("-sS") },
         { title: "OS Fingerprinting", why: "The -O flag tries to guess the Operating System of the target.", text: "Type <code>nmap -O localhost</code>", objective: "Type nmap -O localhost", xp: 25, check: (c,a) => c==="nmap" && a.includes("-O") },
+        { title: "Fast Port Scan", why: "The -F flag speeds up the scan by only checking the top 100 ports.", text: "Type <code>nmap -F localhost</code>", objective: "Type nmap -F localhost", xp: 20, check: (c,a) => c==="nmap" && a.includes("-F") },
         { title: "Log Target Scan", why: "Write your Nmap results to a forensic file.", text: "Type <code>nmap localhost > scan.txt</code>", objective: "Redirect nmap to scan.txt", xp: 25, check: (c,a) => c==="nmap" && a.includes(">") && a.includes("scan.txt") },
         { title: "Read Scan Log", why: "Verify the contents of your port scan.", text: "Type <code>cat scan.txt</code>", objective: "Read scan.txt", xp: 10, check: (c,a) => c==="cat" && a[0]==="scan.txt" },
         { title: "Count Scan Rows", why: "Check the size of the report.", text: "Type <code>wc -l scan.txt</code>", objective: "Line count scan.txt", xp: 15, check: (c,a) => c==="wc" && a.includes("-l") && a.includes("scan.txt") },
@@ -54,7 +55,7 @@ const module5_networking = {
         { title: "Grep Nmap Footprints", why: "Find where Nmap inserted its tool headers.", text: "Type <code>grep \"Nmap\" scan.txt</code>", objective: "Grep Nmap from scan.txt", xp: 20, check: (c,a) => c==="grep" && a.includes("Nmap") && a.includes("scan.txt") },
         { title: "Slice Scan Headers", why: "Read the top 3 lines of the report.", text: "Type <code>head -n 3 scan.txt</code>", objective: "Head slice 3 lines from scan.txt", xp: 20, check: (c,a) => c==="head" && a.includes("-n") && a.includes("3") && a.includes("scan.txt") },
 
-        // --- STRINGS & BINARY FORENSICS (46-60) ---
+        // --- STRINGS & BINARY FORENSICS (47-60) ---
         { title: "Strings Forensics", why: "Extract readable text directly from compiled malware.", text: "Type <code>strings /tmp/malware.bin</code>", objective: "Run strings on malware", xp: 15, check: (c,a) => c==="strings" && a[0]==="/tmp/malware.bin" },
         { title: "Log Malware Strings", why: "Pipe the extracted binary text to a log for analysis.", text: "Type <code>strings /tmp/malware.bin > strings.txt</code>", objective: "Redirect strings into strings.txt", xp: 20, check: (c,a) => c==="strings" && a.includes(">") && a.includes("strings.txt") },
         { title: "Read Strings Log", why: "View the extracted forensic data.", text: "Type <code>cat strings.txt</code>", objective: "Read strings.txt", xp: 10, check: (c,a) => c==="cat" && a[0]==="strings.txt" },

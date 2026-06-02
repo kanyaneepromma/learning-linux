@@ -1,4 +1,4 @@
-// ninethmodule.js
+// ninthmodule.js
 // Module 9: Enterprise Penetration Testing & Defense (100 Lessons)
 
 const module9_technical = {
@@ -20,8 +20,13 @@ const module9_technical = {
         { title: "Verbose Scan", why: "Show details in real-time.", text: "Type <code>nmap -v 10.0.0.50</code>", objective: "Use -v", xp: 15, check: (c,a) => c==="nmap" && a.includes("-v") },
         { title: "Timing Template 3", why: "Balanced scan speed.", text: "Type <code>nmap -T3 10.0.0.50</code>", objective: "Use -T3", xp: 15, check: (c,a) => c==="nmap" && a.includes("-T3") },
         { title: "Timing Template 4", why: "Aggressive scan speed.", text: "Type <code>nmap -T4 10.0.0.50</code>", objective: "Use -T4", xp: 15, check: (c,a) => c==="nmap" && a.includes("-T4") },
+        { title: "Stealth SYN Scan", why: "Avoid full TCP handshakes.", text: "Type <code>nmap -sS 10.0.0.50</code>", objective: "Use -sS", xp: 20, check: (c,a) => c==="nmap" && a.includes("-sS") },
+        { title: "Combined Engine", why: "Run default scripts and versions.", text: "Type <code>nmap -sC -sV 10.0.0.50</code>", objective: "Use -sC and -sV", xp: 20, check: (c,a) => c==="nmap" && a.includes("-sC") && a.includes("-sV") },
+        { title: "Network Traceroute", why: "Map network hops to target.", text: "Type <code>nmap --traceroute 10.0.0.50</code>", objective: "Use --traceroute", xp: 20, check: (c,a) => c==="nmap" && a.includes("--traceroute") },
+        { title: "Aggressive OS", why: "Force OS prediction.", text: "Type <code>nmap -O --osscan-guess 10.0.0.50</code>", objective: "Use --osscan-guess", xp: 25, check: (c,a) => c==="nmap" && a.includes("--osscan-guess") },
+        { title: "Specific Ports", why: "Scan only web ports.", text: "Type <code>nmap -p 80,443,8080 10.0.0.50</code>", objective: "Use -p 80,443,8080", xp: 15, check: (c,a) => c==="nmap" && a.includes("80,443,8080") },
 
-        // --- PHASE 2: WEB RECON & ENUM (16-35) ---
+        // --- PHASE 2: WEB RECON & ENUM (21-40) ---
         { title: "HTTP Headers", why: "Fingerprint web servers.", text: "Type <code>curl -I 10.0.0.50</code>", objective: "Use curl -I", xp: 15, check: (c,a) => c==="curl" && a.includes("-I") },
         { title: "Follow Redirects", why: "Follow 301/302.", text: "Type <code>curl -L 10.0.0.50</code>", objective: "Use curl -L", xp: 15, check: (c,a) => c==="curl" && a.includes("-L") },
         { title: "Verbose Fetch", why: "See the handshake.", text: "Type <code>curl -v 10.0.0.50</code>", objective: "Use curl -v", xp: 15, check: (c,a) => c==="curl" && a.includes("-v") },
@@ -37,8 +42,13 @@ const module9_technical = {
         { title: "Post Request", why: "Simulate a login attempt.", text: "Type <code>curl -X POST 10.0.0.50/login</code>", objective: "Curl POST login", xp: 30, check: (c,a) => c==="curl" && a.includes("-X") && a.includes("POST") },
         { title: "Authentication Form", why: "Check hidden fields.", text: "Type <code>curl 10.0.0.50/login.html</code>", objective: "Curl login page", xp: 20, check: (c,a) => c==="curl" && a[0].includes("login.html") },
         { title: "Upload Probe", why: "Check for file upload endpoints.", text: "Type <code>curl 10.0.0.50/upload.php</code>", objective: "Curl upload.php", xp: 30, check: (c,a) => c==="curl" && a[0].includes("upload.php") },
+        { title: "Insecure SSL", why: "Ignore invalid certs.", text: "Type <code>curl -k https://10.0.0.50</code>", objective: "Use curl -k", xp: 20, check: (c,a) => c==="curl" && a.includes("-k") },
+        { title: "Basic Auth", why: "Pass credentials via URL.", text: "Type <code>curl -u admin:admin 10.0.0.50</code>", objective: "Use curl -u", xp: 25, check: (c,a) => c==="curl" && a.includes("-u") },
+        { title: "Spoof Header", why: "Spoof internal IPs to bypass WAF.", text: "Type <code>curl -H \"X-Forwarded-For: 127.0.0.1\" 10.0.0.50</code>", objective: "Use curl -H", xp: 35, check: (c,a) => c==="curl" && a.includes("-H") },
+        { title: "Options Method", why: "Check allowed HTTP methods.", text: "Type <code>curl -X OPTIONS 10.0.0.50</code>", objective: "Use curl -X OPTIONS", xp: 25, check: (c,a) => c==="curl" && a.includes("-X") && a.includes("OPTIONS") },
+        { title: "Silent Output", why: "Suppress progress bars.", text: "Type <code>curl -s 10.0.0.50 > /dev/null</code>", objective: "Use curl -s", xp: 15, check: (c,a) => c==="curl" && a.includes("-s") },
 
-        // --- PHASE 3: EXPLOIT & SHELL (36-60) ---
+        // --- PHASE 3: EXPLOIT & SHELL (41-65) ---
         { title: "Binary Download", why: "Grab exploit.", text: "Type <code>curl -O 10.0.0.50/shell.elf</code>", objective: "Curl -O shell.elf", xp: 25, check: (c,a) => c==="curl" && a.includes("-O") },
         { title: "Permissions Check", why: "Check file.", text: "Type <code>ls -l shell.elf</code>", objective: "ls -l shell.elf", xp: 10, check: (c,a) => c==="ls" && a.includes("shell.elf") },
         { title: "Executable Bit", why: "Add execute permission.", text: "Type <code>chmod +x shell.elf</code>", objective: "chmod +x", xp: 20, check: (c,a) => c==="chmod" && a.includes("+x") },
@@ -81,6 +91,11 @@ const module9_technical = {
         { title: "Audit Ports", why: "List open sockets.", text: "Type <code>ss -tuln</code>", objective: "ss -tuln", xp: 15, check: (c,a) => c==="ss" && a.includes("-tuln") },
         { title: "Check Load", why: "Check load average.", text: "Type <code>uptime</code>", objective: "uptime", xp: 10, check: (c) => c==="uptime" },
         { title: "Final Triage", why: "Check user logins.", text: "Type <code>w</code>", objective: "Type w", xp: 10, check: (c) => c==="w" },
+        { title: "Block Ping", why: "Prevent ping scans via ICMP.", text: "Type <code>iptables -A INPUT -p icmp -j DROP</code>", objective: "Block ICMP in iptables", xp: 35, check: (c,a) => c==="iptables" && a.includes("icmp") && a.includes("DROP") },
+        { title: "Secure Root Dir", why: "Lock down the admin directory.", text: "Type <code>chmod 700 /root</code>", objective: "chmod 700 /root", xp: 25, check: (c,a) => c==="chmod" && a.includes("700") && a.includes("/root") },
+        { title: "Fix Shadow Ownership", why: "Ensure only root owns the hash file.", text: "Type <code>chown root:root /etc/shadow</code>", objective: "chown root:root /etc/shadow", xp: 30, check: (c,a) => c==="chown" && a.includes("root:root") && a.includes("/etc/shadow") },
+        { title: "Disable Bluetooth", why: "Hardening: Turn off unnecessary services.", text: "Type <code>systemctl disable bluetooth</code>", objective: "systemctl disable bluetooth", xp: 25, check: (c,a) => c==="systemctl" && a.includes("disable") && a.includes("bluetooth") },
+        { title: "Mask Print Service", why: "Hardening: Prevent CUPS from starting entirely.", text: "Type <code>systemctl mask cups</code>", objective: "systemctl mask cups", xp: 25, check: (c,a) => c==="systemctl" && a.includes("mask") && a.includes("cups") },
 
         // --- PHASE 5: THREAT HUNTING FORENSICS (86-100) ---
         { title: "Auth Log Search", why: "Search for failures.", text: "Type <code>grep \"Failed\" /var/log/auth.log</code>", objective: "Grep auth.log", xp: 20, check: (c,a) => c==="grep" && a.includes("Failed") },
