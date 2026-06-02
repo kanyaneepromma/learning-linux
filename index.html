@@ -1,202 +1,373 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ultimate Linux Learning Terminal & Sandbox</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%230f172a'/><text x='12' y='70' font-family='monospace' font-size='55' font-weight='bold' fill='%2334d399'>&gt;_</text></svg>">
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%230f172a'/><text x='12' y='70' font-family='monospace' font-size='55' font-weight='bold' fill='%2334d399'>&gt;_</text></svg>"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0b0f19;
-            color: #f1f5f9;
-            overflow: hidden;
-        }
-        .terminal-font {
-            font-family: 'Fira Code', monospace;
-        }
-        
-        /* Custom Scrollbars */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155; 
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569; 
-        }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #0b0f19;
+        color: #f1f5f9;
+        overflow: hidden;
+      }
+      .terminal-font {
+        font-family: "Fira Code", monospace;
+      }
 
-        /* Animations */
-        .pulse-emerald {
-            animation: pulse-glow 2s infinite;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            50% { box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.2); }
-        }
+      /* Custom Scrollbars */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f172a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+      }
 
-        /* Seamless Input Field */
-        #cmd-input {
-            background: transparent;
-            border: none;
-            outline: none;
-            color: inherit;
-            font-family: inherit;
-            font-size: inherit;
-            width: 100%;
+      /* Animations */
+      .pulse-emerald {
+        animation: pulse-glow 2s infinite;
+      }
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
         }
-        
-        /* Terminal Highlights */
-        .term-dir { color: #60a5fa; font-weight: bold; }
-        .term-exec { color: #34d399; font-weight: bold; }
-        .term-err { color: #f87171; }
-        .term-prompt { color: #34d399; font-weight: bold; }
-        .term-path { color: #60a5fa; font-weight: bold; }
-        .term-locked { color: #94a3b8; font-style: italic; }
+        50% {
+          box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.2);
+        }
+      }
+
+      /* Seamless Input Field */
+      #cmd-input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        width: 100%;
+      }
+
+      /* Terminal Highlights */
+      .term-dir {
+        color: #60a5fa;
+        font-weight: bold;
+      }
+      .term-exec {
+        color: #34d399;
+        font-weight: bold;
+      }
+      .term-err {
+        color: #f87171;
+      }
+      .term-prompt {
+        color: #34d399;
+        font-weight: bold;
+      }
+      .term-path {
+        color: #60a5fa;
+        font-weight: bold;
+      }
+      .term-locked {
+        color: #94a3b8;
+        font-style: italic;
+      }
     </style>
-</head>
-<body class="h-screen w-screen flex flex-col md:flex-row overflow-hidden">
+  </head>
+  <body class="h-screen w-screen flex flex-col md:flex-row overflow-hidden">
+    <div
+      class="w-full md:w-5/12 lg:w-4/12 h-1/2 md:h-full bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col shadow-2xl z-20"
+    >
+      <div
+        class="p-4 border-b border-slate-800 bg-slate-950 flex flex-col gap-2"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-sm font-bold text-white tracking-wide">
+                Linux Apprentice Console
+              </h1>
+              <span class="text-xs text-slate-400 font-mono" id="rank-name"
+                >Rank: Terminal Newbie</span
+              >
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block font-mono"
+              >XP System</span
+            >
+            <span
+              class="text-sm font-black text-indigo-400 font-mono"
+              id="xp-counter"
+              >0 / 30000 XP</span
+            >
+          </div>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div
+            id="xp-progress"
+            class="bg-indigo-500 h-1.5 transition-all duration-500"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
 
-    <div class="w-full md:w-5/12 lg:w-4/12 h-1/2 md:h-full bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col shadow-2xl z-20">
-        
-        <div class="p-4 border-b border-slate-800 bg-slate-950 flex flex-col gap-2">
+      <div class="flex border-b border-slate-800 bg-slate-950 text-sm">
+        <button
+          onclick="switchTab('modules')"
+          id="tab-btn-modules"
+          class="flex-1 py-3 text-center border-b-2 border-indigo-500 text-white font-medium hover:bg-slate-900 transition-colors"
+        >
+          📖 Modules
+        </button>
+        <button
+          onclick="switchTab('quests')"
+          id="tab-btn-quests"
+          class="flex-1 py-3 text-center border-b-2 border-transparent text-slate-400 font-medium hover:bg-slate-900 transition-colors"
+        >
+          🏆 Quests
+        </button>
+        <button
+          onclick="switchTab('cheatsheet')"
+          id="tab-btn-cheatsheet"
+          class="flex-1 py-3 text-center border-b-2 border-transparent text-slate-400 font-medium hover:bg-slate-900 transition-colors"
+        >
+          🛠️ Commands
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
+        <div id="view-modules" class="space-y-4">
+          <div class="space-y-1">
+            <label
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+              >Curriculum Path</label
+            >
+            <select
+              id="module-selector"
+              onchange="changeModule()"
+              class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            ></select>
+          </div>
+
+          <div
+            class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4 relative overflow-hidden"
+            id="active-lesson-card"
+          >
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                    </div>
-                    <div>
-                        <h1 class="text-sm font-bold text-white tracking-wide">Linux Apprentice Console</h1>
-                        <span class="text-xs text-slate-400 font-mono" id="rank-name">Rank: Terminal Newbie</span>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="text-xs text-slate-400 block font-mono">XP System</span>
-                    <span class="text-sm font-black text-indigo-400 font-mono" id="xp-counter">0 / 30000 XP</span>
-                </div>
+              <span
+                class="text-xs font-semibold text-indigo-400 uppercase tracking-wider font-mono"
+                id="lesson-module-tag"
+                >Module 1</span
+              >
+              <span
+                class="text-xs bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded"
+                id="lesson-index-tag"
+                >Lesson 1/5</span
+              >
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div id="xp-progress" class="bg-indigo-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
+            <div id="active-lesson-body" class="space-y-3"></div>
+            <div
+              class="border border-slate-800 bg-slate-900/50 rounded-lg p-3 space-y-2"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="text-xs font-bold text-slate-400 uppercase font-mono tracking-wider"
+                  >Mission Target</span
+                >
+                <span
+                  class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 rounded-full font-mono font-bold"
+                  id="lesson-xp-badge"
+                  >+100 XP</span
+                >
+              </div>
+              <p
+                class="text-xs text-slate-300 font-mono bg-slate-950/40 p-2 border border-slate-800/60 rounded"
+                id="lesson-objective-target"
+              ></p>
             </div>
+          </div>
+
+          <div class="space-y-2">
+            <h3
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+              Modules Overview
+            </h3>
+            <div id="modules-list" class="space-y-2"></div>
+          </div>
         </div>
 
-        <div class="flex border-b border-slate-800 bg-slate-950 text-sm">
-            <button onclick="switchTab('modules')" id="tab-btn-modules" class="flex-1 py-3 text-center border-b-2 border-indigo-500 text-white font-medium hover:bg-slate-900 transition-colors">
-                📖 Modules
-            </button>
-            <button onclick="switchTab('quests')" id="tab-btn-quests" class="flex-1 py-3 text-center border-b-2 border-transparent text-slate-400 font-medium hover:bg-slate-900 transition-colors">
-                🏆 Quests
-            </button>
-            <button onclick="switchTab('cheatsheet')" id="tab-btn-cheatsheet" class="flex-1 py-3 text-center border-b-2 border-transparent text-slate-400 font-medium hover:bg-slate-900 transition-colors">
-                🛠️ Commands
-            </button>
+        <div id="view-quests" class="hidden space-y-4">
+          <div
+            class="p-3 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20 text-xs"
+          >
+            <strong>Boss Quests Mode:</strong> Multi-step problem solving.
+          </div>
+          <div id="quests-container" class="space-y-3"></div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
-            
-            <div id="view-modules" class="space-y-4">
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Curriculum Path</label>
-                    <select id="module-selector" onchange="changeModule()" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                    </select>
-                </div>
-
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4 relative overflow-hidden" id="active-lesson-card">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider font-mono" id="lesson-module-tag">Module 1</span>
-                        <span class="text-xs bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded" id="lesson-index-tag">Lesson 1/5</span>
-                    </div>
-                    <div id="active-lesson-body" class="space-y-3">
-                        </div>
-                    <div class="border border-slate-800 bg-slate-900/50 rounded-lg p-3 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-400 uppercase font-mono tracking-wider">Mission Target</span>
-                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 rounded-full font-mono font-bold" id="lesson-xp-badge">+100 XP</span>
-                        </div>
-                        <p class="text-xs text-slate-300 font-mono bg-slate-950/40 p-2 border border-slate-800/60 rounded" id="lesson-objective-target"></p>
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Modules Overview</h3>
-                    <div id="modules-list" class="space-y-2"></div>
-                </div>
-            </div>
-
-            <div id="view-quests" class="hidden space-y-4">
-                <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20 text-xs">
-                    <strong>Boss Quests Mode:</strong> Multi-step problem solving.
-                </div>
-                <div id="quests-container" class="space-y-3"></div>
-            </div>
-
-            <div id="view-cheatsheet" class="hidden space-y-4">
-                <input type="text" id="cheatsheet-search" placeholder="Search commands..." oninput="filterCheatsheet()" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                <div id="cheatsheet-list" class="space-y-3"></div>
-            </div>
-
+        <div id="view-cheatsheet" class="hidden space-y-4">
+          <input
+            type="text"
+            id="cheatsheet-search"
+            placeholder="Search commands..."
+            oninput="filterCheatsheet()"
+            class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
+          <div id="cheatsheet-list" class="space-y-3"></div>
         </div>
-        <div class="p-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400 font-mono">
-            <span>💡 Double-press <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">Tab</kbd> to complete!</span>
-            <span id="overall-progress-tag">Progress: 0%</span>
-        </div>
+      </div>
+      <div
+        class="p-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400 font-mono"
+      >
+        <span
+          >💡 Double-press
+          <kbd
+            class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700"
+            >Tab</kbd
+          >
+          to complete!</span
+        >
+        <span id="overall-progress-tag">Progress: 0%</span>
+      </div>
     </div>
 
-    <div class="w-full md:w-7/12 lg:w-8/12 h-1/2 md:h-full bg-black flex flex-col relative" id="terminal-container">
-        
-        <div class="h-10 bg-slate-950 flex items-center justify-between px-4 select-none border-b border-slate-900">
-            <div class="flex items-center gap-2">
-                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
-                <span class="ml-2 text-xs font-bold text-slate-400 font-mono flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    sysadmin@gemini-sandbox:~
-                </span>
-            </div>
-            <button onclick="resetSandbox()" class="text-[10px] bg-slate-900 border border-slate-800 hover:bg-red-950/40 hover:text-red-400 text-slate-400 px-2 py-1 rounded transition-all font-mono">⚡ Hard Reset</button>
+    <div
+      class="w-full md:w-7/12 lg:w-8/12 h-1/2 md:h-full bg-black flex flex-col relative"
+      id="terminal-container"
+    >
+      <div
+        class="h-10 bg-slate-950 flex items-center justify-between px-4 select-none border-b border-slate-900"
+      >
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+          <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+          <span
+            class="ml-2 text-xs font-bold text-slate-400 font-mono flex items-center gap-1"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-3.5 w-3.5 text-indigo-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            sysadmin@gemini-sandbox:~
+          </span>
         </div>
+        <button
+          onclick="resetSandbox()"
+          class="text-[10px] bg-slate-900 border border-slate-800 hover:bg-red-950/40 hover:text-red-400 text-slate-400 px-2 py-1 rounded transition-all font-mono"
+        >
+          ⚡ Hard Reset
+        </button>
+      </div>
 
-        <div class="flex-1 overflow-y-auto p-4 terminal-font text-sm md:text-base space-y-1.5" id="terminal-output">
-            <div class="text-slate-500 font-mono text-xs border-b border-slate-900/60 pb-3 mb-3">
-                <span>Gemini Linux Sandbox v6.0 (Mega Architect Edition)</span><br>
-                <span>Type 'help' to inspect command indices.</span>
-            </div>
-            <div class="mb-4">
-                <span class="text-indigo-400 font-bold">Welcome to the Mega Sandbox.</span><br>
-                <span class="text-slate-400">Over 100+ rapid-fire lessons have been loaded. Get to work!</span>
-            </div>
+      <div
+        class="flex-1 overflow-y-auto p-4 terminal-font text-sm md:text-base space-y-1.5"
+        id="terminal-output"
+      >
+        <div
+          class="text-slate-500 font-mono text-xs border-b border-slate-900/60 pb-3 mb-3"
+        >
+          <span>Gemini Linux Sandbox v6.0 (Mega Architect Edition)</span><br />
+          <span>Type 'help' to inspect command indices.</span>
         </div>
-
-        <div id="autocomplete-indicator" class="px-4 py-1 bg-slate-950/80 border-t border-slate-900 terminal-font text-xs text-slate-500 hidden font-semibold"></div>
-
-        <div class="px-4 pb-4 terminal-font text-sm md:text-base flex items-center w-full" id="input-line">
-            <span id="prompt" class="whitespace-pre flex-shrink-0">
-                <span class="term-prompt">sysadmin@gemini</span>:<span class="term-path" id="prompt-path">~</span>$ 
-            </span>
-            <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus class="ml-2 flex-1">
+        <div class="mb-4">
+          <span class="text-indigo-400 font-bold"
+            >Welcome to the Mega Sandbox.</span
+          ><br />
+          <span class="text-slate-400"
+            >Over 100+ rapid-fire lessons have been loaded. Get to work!</span
+          >
         </div>
+      </div>
+
+      <div
+        id="autocomplete-indicator"
+        class="px-4 py-1 bg-slate-950/80 border-t border-slate-900 terminal-font text-xs text-slate-500 hidden font-semibold"
+      ></div>
+
+      <div
+        class="px-4 pb-4 terminal-font text-sm md:text-base flex items-center w-full"
+        id="input-line"
+      >
+        <span id="prompt" class="whitespace-pre flex-shrink-0">
+          <span class="term-prompt">sysadmin@gemini</span>:<span
+            class="term-path"
+            id="prompt-path"
+            >~</span
+          >$
+        </span>
+        <input
+          type="text"
+          id="cmd-input"
+          autocomplete="off"
+          spellcheck="false"
+          autofocus
+          class="ml-2 flex-1"
+        />
+      </div>
     </div>
 
-    <script src="firstmodule.js"></script>
-    <script src="secondmodule.js"></script>
-    <script src="thirdmodule.js"></script>
-    <script src="fourthmodule.js"></script>
-    <script src="fifthmodule.js"></script>
-    <script src="sixthmodule.js"></script>
-    <script src="seventhmodule.js"></script>
-    <script src="eighthmodule.js"></script>
-    <script src="ninthmodule.js"></script>
-    <script src="script.js"></script>
-
-</body>
+    <script src="scripts/security.js"></script>
+    <script src="modules/firstmodule.js"></script>
+    <script src="modules/secondmodule.js"></script>
+    <script src="modules/thirdmodule.js"></script>
+    <script src="modules/fourthmodule.js"></script>
+    <script src="modules/fifthmodule.js"></script>
+    <script src="modules/sixthmodule.js"></script>
+    <script src="modules/seventhmodule.js"></script>
+    <script src="modules/eighthmodule.js"></script>
+    <script src="modules/ninthmodule.js"></script>
+    <script src="modules/tenthmodule.js"></script>
+    <script src="modules/eleventhmodule.js"></script>
+    <script src="modules/twelfthmodule.js"></script>
+    <script src="scripts/command.js"></script>
+    <script src="scripts/module.js"></script>
+    <script src="scripts/script.js"></script>
+  </body>
 </html>

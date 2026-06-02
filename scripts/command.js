@@ -1,393 +1,6 @@
-// --- SECURITY HOOK ---
-document.addEventListener("contextmenu", (e) => e.preventDefault());
-document.addEventListener("keydown", (e) => {
-  if (
-    e.key === "F12" ||
-    (e.ctrlKey &&
-      e.shiftKey &&
-      ["I", "J", "C"].includes(e.key.toUpperCase())) ||
-    (e.ctrlKey && e.key.toUpperCase() === "U")
-  )
-    e.preventDefault();
-});
+// command.js
+// This file contains the logic for every simulated terminal command.
 
-// --- VFS DATABASES ---
-let vfs = {};
-let runningServices = { ssh: true, nginx: false, docker: false };
-let envVars = { PATH: "/usr/bin:/bin", USER: "sysadmin", TERM: "xterm" };
-let firewallRules = [];
-let currentPath = "/home/sysadmin";
-let userAliases = { ll: "ls -la" };
-let commandHistory = [];
-let historyIndex = -1;
-let playerStats = { xp: 0, completedLessons: [], completedQuests: [], discoveredCommands: [] };
-
-const initialVfsTemplate = {
-  "/": {
-    type: "dir",
-    owner: "root",
-    contents: {
-      home: {
-        type: "dir",
-        owner: "root",
-        contents: {
-          sysadmin: {
-            type: "dir",
-            owner: "sysadmin",
-            contents: {
-              ".bash_profile": { type: "file", owner: "sysadmin", content: "export PATH=$PATH:/opt/bin" },
-              "notes.txt": { type: "file", owner: "sysadmin", content: "Learn Linux\nMaster Terminal\nBecome Root" },
-              projects: { type: "dir", owner: "sysadmin", contents: {} },
-            },
-          },
-        },
-      },
-      var: {
-        type: "dir",
-        owner: "root",
-        contents: {
-          log: {
-            type: "dir",
-            owner: "root",
-            contents: {
-              syslog: { type: "file", owner: "root", content: "Booting kernel...\nNetwork UP\nNginx failed to start" },
-              "auth.log": { type: "file", owner: "root", content: "Failed pass for root from 10.0.0.99" },
-            },
-          },
-        },
-      },
-      etc: {
-        type: "dir",
-        owner: "root",
-        contents: {
-          passwd: { type: "file", owner: "root", content: "root:x:0:0:root:/root:/bin/bash\nsysadmin:x:1000:1000::/home/sysadmin:/bin/bash" },
-        },
-      },
-      tmp: {
-        type: "dir",
-        owner: "root",
-        contents: {
-          "malware.bin": { type: "file", owner: "root", content: "\x7FELF\nConnecting to http://evil.com" },
-        },
-      },
-    },
-  },
-};
-
-function initVfs() {
-  vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
-  currentPath = "/home/sysadmin";
-}
-
-function resolvePath(targetPath) {
-  if (!targetPath) return { node: getVfsNode(currentPath), path: currentPath };
-  if (targetPath === "~") targetPath = "/home/sysadmin";
-  if (targetPath.startsWith("~/"))
-    targetPath = "/home/sysadmin" + targetPath.substring(1);
-
-  let parts = targetPath.split("/");
-  let absPathParts = targetPath.startsWith("/") ? [] : currentPath.split("/").filter(Boolean);
-
-  for (let part of parts) {
-    if (part === "" || part === ".") continue;
-    if (part === "..") {
-      if (absPathParts.length > 0) absPathParts.pop();
-    } else {
-      absPathParts.push(part);
-    }
-  }
-
-  let resolvedStr = "/" + absPathParts.join("/");
-  let current = vfs["/"];
-  let parent = null;
-  let finalName = absPathParts.length > 0 ? absPathParts[absPathParts.length - 1] : "";
-
-  for (let i = 0; i < absPathParts.length; i++) {
-    parent = current;
-    if (!current.contents || !current.contents[absPathParts[i]]) return null;
-    current = current.contents[absPathParts[i]];
-  }
-  return {
-    node: current,
-    path: resolvedStr === "//" ? "/" : resolvedStr,
-    parentNode: parent,
-    name: finalName,
-  };
-}
-
-function getVfsNode(pathStr) {
-  let res = resolvePath(pathStr);
-  return res ? res.node : null;
-}
-
-function formatPromptPath() {
-  return currentPath.startsWith("/home/sysadmin")
-    ? currentPath.replace("/home/sysadmin", "~")
-    : currentPath;
-}
-
-// --- THE FULLY EXPANDED MEGA CURRICULUM ---
-const learningModules = [
-  module1_navigation,
-  module2_fileops,
-  module3_textman,
-  module4_diagnostics,
-  module5_networking,
-  module6_redteam,
-  module7_blueteam,
-  module8_purpleteam,
-  module9_enterprise,
-];
-
-// --- 12 ULTIMATE CYBER QUESTS ---
-const quests = [
-  {
-    id: "q1", title: "The Appender", difficulty: "Medium", reward: 200,
-    description: "Create a file named `log.txt`, echo 'Start' into it, then append `>>` 'End' to it.",
-    objective: "echo Start > log.txt, then echo End >> log.txt",
-    check: () => { let n = getVfsNode("/home/sysadmin/log.txt"); return n && n.content.includes("Start") && n.content.includes("End"); }
-  },
-  {
-    id: "q2", title: "Hidden Cleaner", difficulty: "Hard", reward: 300,
-    description: "Navigate to `/home/sysadmin`, create a hidden directory `.trash`, and move `notes.txt` into it.",
-    objective: "mkdir .trash && mv notes.txt .trash/",
-    check: () => { let n = getVfsNode("/home/sysadmin/.trash/notes.txt"); return n !== null; }
-  },
-  {
-    id: "q3", title: "Log Investigator", difficulty: "Hard", reward: 400,
-    description: "Grep for 'Failed' inside /var/log/auth.log.",
-    objective: "Use grep Failed on auth.log",
-    check: (c, a) => c === "grep" && a.includes("Failed") && a.some((x) => x.includes("auth.log"))
-  },
-  {
-    id: "q4", title: "System Rebooter", difficulty: "Ultimate", reward: 800,
-    description: "Check `systemctl status nginx`, then start it.",
-    objective: "Start the nginx daemon",
-    check: () => runningServices["nginx"] === true
-  },
-  {
-    id: "q5", title: "Network Recon", difficulty: "Hard", reward: 500,
-    description: "Perform an aggressive Nmap scan on localhost and save the output to `recon.txt`.",
-    objective: "nmap -A localhost > recon.txt",
-    check: (c, a) => c === "nmap" && a.includes("-A") && a.includes("localhost") && a.includes(">") && a.includes("recon.txt")
-  },
-  {
-    id: "q6", title: "Rogue Terminator", difficulty: "Medium", reward: 400,
-    description: "A malicious process is running on PID 1337. Send a SIGKILL (-9) to terminate it.",
-    objective: "kill -9 1337",
-    check: (c, a) => c === "kill" && a.includes("-9") && a.includes("1337")
-  },
-  {
-    id: "q7", title: "The Firewall Architect", difficulty: "Ultimate", reward: 1000,
-    description: "The host `10.0.0.99` is attacking! Use iptables to append (-A) a rule to the INPUT chain to DROP their source (-s) traffic.",
-    objective: "iptables -A INPUT -s 10.0.0.99 -j DROP",
-    check: (c, a) => c === "iptables" && a.includes("INPUT") && a.includes("10.0.0.99") && a.includes("DROP")
-  },
-  {
-    id: "q8", title: "Evidence Destroyer", difficulty: "Hard", reward: 600,
-    description: "You've finished your Red Team operation. Overwrite your `~/.bash_history` file with nothing (an empty string) using echo.",
-    objective: "echo \"\" > ~/.bash_history",
-    check: (c, a) => c === "echo" && a.includes(">") && a.includes("~/.bash_history")
-  },
-  {
-    id: "q9", title: "Persistence Hunter", difficulty: "Medium", reward: 400,
-    description: "Check the active scheduled tasks for the current user to see if a backdoor is installed.",
-    objective: "crontab -l",
-    check: (c, a) => c === "crontab" && a.includes("-l")
-  },
-  {
-    id: "q10", title: "Data Exfiltrator", difficulty: "Ultimate", reward: 1200,
-    description: "Archive the file `secret.txt` into a compressed tarball named `loot.tar.gz`.",
-    objective: "tar -czvf loot.tar.gz secret.txt",
-    check: (c, a) => c === "tar" && a.includes("-czvf") && a.includes("loot.tar.gz")
-  },
-  {
-    id: "q11", title: "Malware Profiler", difficulty: "Hard", reward: 800,
-    description: "Generate a cryptographic SHA256 hash of the binary `/tmp/exploit.bin` and append it to `ir_log.txt`.",
-    objective: "sha256sum /tmp/exploit.bin >> ir_log.txt",
-    check: (c, a) => c === "sha256sum" && a.includes("/tmp/exploit.bin") && a.includes(">>") && a.includes("ir_log.txt")
-  },
-  {
-    id: "q12", title: "SUID Privilege Escalation", difficulty: "Ultimate", reward: 1500,
-    description: "Search the entire root filesystem (`/`) for files with the SUID permission bit set (`-perm -4000`).",
-    objective: "find / -perm -4000",
-    check: (c, a) => c === "find" && a.includes("/") && a.includes("-perm") && a.includes("-4000")
-  }
-];
-
-let activeModuleIndex = 0;
-let activeLessonIndex = 0;
-let activeTab = "modules";
-
-function switchTab(tabId) {
-  activeTab = tabId;
-  ["modules", "quests", "cheatsheet"].forEach((t) => {
-    document.getElementById(`view-${t}`).classList.add("hidden");
-    document.getElementById(`tab-btn-${t}`).classList.remove("border-indigo-500", "text-white");
-    document.getElementById(`tab-btn-${t}`).classList.add("border-transparent", "text-slate-400");
-  });
-  document.getElementById(`view-${tabId}`).classList.remove("hidden");
-  document.getElementById(`tab-btn-${tabId}`).classList.remove("border-transparent", "text-slate-400");
-  document.getElementById(`tab-btn-${tabId}`).classList.add("border-indigo-500", "text-white");
-  
-  if (tabId === "quests") renderQuests();
-  if (tabId === "cheatsheet") renderCheatsheet();
-}
-
-function changeModule() {
-  activeModuleIndex = parseInt(document.getElementById("module-selector").value);
-  activeLessonIndex = 0;
-  renderLesson();
-}
-
-function renderModulesDropdown() {
-  let select = document.getElementById("module-selector");
-  select.innerHTML = "";
-  learningModules.forEach((m, idx) => {
-    select.innerHTML += `<option value="${idx}">${m.name}</option>`;
-  });
-  select.value = activeModuleIndex;
-}
-
-function renderLesson() {
-  let m = learningModules[activeModuleIndex];
-  let l = m.lessons[activeLessonIndex];
-  document.getElementById("lesson-module-tag").innerText = m.name.split(" ")[1];
-  document.getElementById("lesson-index-tag").innerText = `Lesson ${activeLessonIndex + 1}/${m.lessons.length}`;
-  document.getElementById("active-lesson-body").innerHTML = `
-        <h2 class="text-lg font-black text-white flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full bg-indigo-500 pulse-emerald"></span>${l.title}</h2>
-        <div class="text-slate-400 text-[11px] leading-relaxed border-l-2 border-indigo-500/30 pl-3 italic bg-indigo-500/5 py-1.5 rounded-r"><strong class="text-slate-300">Context:</strong> ${l.why}</div>
-        <p class="text-sm text-slate-300 leading-relaxed">${l.text}</p>`;
-  document.getElementById("lesson-objective-target").innerHTML = l.objective;
-  document.getElementById("lesson-xp-badge").innerText = `+${l.xp} XP`;
-  renderModulesOverview();
-  updateOverallProgress();
-}
-
-function renderModulesOverview() {
-  let container = document.getElementById("modules-list");
-  container.innerHTML = "";
-  learningModules.forEach((mod, mIdx) => {
-    let count = 0;
-    mod.lessons.forEach((les, lIdx) => {
-      if (playerStats.completedLessons.includes(`${mIdx}_${lIdx}`)) count++;
-    });
-    let pct = Math.round((count / mod.lessons.length) * 100);
-    container.innerHTML += `
-            <div class="p-3 rounded-xl border text-xs flex flex-col gap-2 transition-all ${activeModuleIndex === mIdx ? "bg-slate-950 border-indigo-500/30" : "bg-slate-950/40 border-slate-800"}">
-                <div class="flex items-center justify-between cursor-pointer" onclick="selectModuleFromList(${mIdx})">
-                    <span class="font-bold text-slate-300">${mod.name}</span><span class="text-slate-500 font-mono">${pct}%</span>
-                </div>
-                <div class="w-full bg-slate-900 rounded-full h-1"><div class="bg-indigo-500 h-1 rounded-full" style="width: ${pct}%"></div></div>
-            </div>`;
-  });
-}
-
-function selectModuleFromList(idx) {
-  activeModuleIndex = idx;
-  activeLessonIndex = 0;
-  document.getElementById("module-selector").value = idx;
-  renderLesson();
-}
-
-function renderQuests() {
-  let container = document.getElementById("quests-container");
-  container.innerHTML = "";
-  quests.forEach((q) => {
-    let done = playerStats.completedQuests.includes(q.id);
-    let col =
-      q.difficulty === "Ultimate" ? "text-purple-400 bg-purple-400/10 border-purple-400/20"
-        : q.difficulty === "Medium" ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
-        : "text-red-400 bg-red-400/10 border-red-400/20";
-    
-    container.innerHTML += `
-            <div class="p-4 border rounded-xl space-y-3 transition-all duration-300 ${done ? "bg-emerald-950/20 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]" : "bg-slate-950 border-slate-800"}">
-                <div class="flex items-center justify-between">
-                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 border rounded-full ${done ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : col}">${done ? "✅ Resolved" : q.difficulty}</span>
-                    <span class="text-xs font-bold ${done ? 'text-emerald-400' : 'text-indigo-400'}">+${q.reward} XP</span>
-                </div>
-                <h4 class="font-bold text-white text-sm ${done ? 'line-through text-emerald-400/70' : ''}">${q.title}</h4>
-                <p class="text-slate-400 text-xs">${q.description}</p>
-            </div>`;
-  });
-}
-
-function renderCheatsheet() {
-  let container = document.getElementById("cheatsheet-list");
-  container.innerHTML = "";
-  let query = document.getElementById("cheatsheet-search").value.toLowerCase().trim();
-  let keys = Object.keys(commands).sort();
-  
-  // Fetch discovered commands array to apply Fog of War
-  let discovered = playerStats.discoveredCommands || [];
-
-  keys.forEach((k) => {
-    let cmdObj = commands[k];
-    if (query !== "" && !k.includes(query) && !cmdObj.desc.toLowerCase().includes(query)) return;
-
-    let isUnlocked = discovered.includes(k);
-
-    let div = document.createElement("div");
-    div.className = `p-3 border rounded-xl space-y-1 transition-all duration-500 ${isUnlocked ? "bg-slate-950 border-slate-800/80" : "bg-slate-950/40 border-slate-800/40 opacity-60"}`;
-
-    let badge = isUnlocked
-        ? `<span class="font-mono text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-500/20">Unlocked</span>`
-        : `<span class="font-mono text-[10px] text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700/50">Locked</span>`;
-
-    div.innerHTML = `
-        <div class="flex items-center justify-between">
-            <span class="font-mono text-xs font-bold ${isUnlocked ? "text-indigo-400" : "text-slate-500"}">${k}</span>
-            ${badge}
-        </div>
-        <p class="text-xs leading-relaxed transition-all duration-500 ${isUnlocked ? "text-slate-300" : "text-slate-600 blur-[3px] select-none"}">
-            ${isUnlocked ? cmdObj.desc : 'Execute this command in the terminal at least once to reveal its description.'}
-        </p>
-    `;
-    container.appendChild(div);
-  });
-}
-
-function filterCheatsheet() {
-  renderCheatsheet();
-}
-
-// --- PROGRESSION ---
-const maxGlobalXp = 45000;
-function addXp(amount) {
-  playerStats.xp += amount;
-  let r = "Terminal Newbie";
-  if (playerStats.xp >= 45000) r = "Linux Kernel God 👑🌌";
-  else if (playerStats.xp >= 25000) r = "Global CISO 🛡️";
-  else if (playerStats.xp >= 10000) r = "Red Team Ops 🥷";
-  else if (playerStats.xp >= 2000) r = "SysAdmin 💻";
-
-  document.getElementById("rank-name").innerText = `Rank: ${r}`;
-  document.getElementById("xp-counter").innerText = `${playerStats.xp} / ${maxGlobalXp} XP`;
-  document.getElementById("xp-progress").style.width = `${Math.min(100, (playerStats.xp / maxGlobalXp) * 100)}%`;
-  localStorage.setItem("linux_mega_stats", JSON.stringify(playerStats));
-}
-
-function updateOverallProgress() {
-  let t = 0;
-  learningModules.forEach((m) => (t += m.lessons.length));
-  document.getElementById("overall-progress-tag").innerText = `Progress: ${Math.round((playerStats.completedLessons.length / t) * 100)}%`;
-}
-
-function loadStats() {
-  let saved = localStorage.getItem("linux_mega_stats");
-  if (saved) {
-    try {
-      playerStats = JSON.parse(saved);
-      if (!playerStats.completedQuests) playerStats.completedQuests = [];
-      if (!playerStats.discoveredCommands) playerStats.discoveredCommands = []; // Initialize tracker
-    } catch (e) {}
-  } else {
-    playerStats.discoveredCommands = [];
-  }
-  addXp(0);
-}
-
-// --- THE FULLY EXPANDED COMMAND PARSER ENGINE ---
 const commands = {
   help: {
     desc: "Show commands.",
@@ -408,16 +21,13 @@ const commands = {
       let sLong = args.includes("-l") || args.includes("-la") || args.includes("-al");
       let target = args.filter((a) => !a.startsWith("-"))[0] || "";
       let res = resolvePath(target);
-
       if (!res) return `<span class="term-err">ls: cannot access '${target}'</span>`;
       if (res.node.type !== "dir") return target;
-
       let out = [];
       if (sAll) {
         out.push(sLong ? `drwxr-xr-x 2 ${res.node.owner} 4096 .` : `<span class="term-dir">.</span>`);
         out.push(sLong ? `drwxr-xr-x 3 root 4096 ..` : `<span class="term-dir">..</span>`);
       }
-
       for (let key in res.node.contents) {
         let n = res.node.contents[key];
         if (sLong) {
@@ -447,9 +57,7 @@ const commands = {
         let parts = t.split("/");
         let n = parts.pop();
         let pRes = resolvePath(parts.join("/") || ".");
-        if (pRes && pRes.node.type === "dir") {
-          pRes.node.contents[n] = { type: "dir", owner: "sysadmin", contents: {} };
-        }
+        if (pRes && pRes.node.type === "dir") pRes.node.contents[n] = { type: "dir", owner: "sysadmin", contents: {} };
       });
       return "";
     },
@@ -461,9 +69,7 @@ const commands = {
         let parts = t.split("/");
         let n = parts.pop();
         let pRes = resolvePath(parts.join("/") || ".");
-        if (pRes && pRes.node.type === "dir") {
-          pRes.node.contents[n] = { type: "file", owner: "sysadmin", content: "" };
-        }
+        if (pRes && pRes.node.type === "dir") pRes.node.contents[n] = { type: "file", owner: "sysadmin", content: "" };
       });
       return "";
     },
@@ -487,9 +93,7 @@ const commands = {
     desc: "Remove empty dir.",
     run: (args) => {
       let res = resolvePath(args[0]);
-      if (res && res.node.type === "dir" && Object.keys(res.node.contents).length === 0) {
-        delete res.parentNode.contents[res.name];
-      }
+      if (res && res.node.type === "dir" && Object.keys(res.node.contents).length === 0) delete res.parentNode.contents[res.name];
       return "";
     },
   },
@@ -500,12 +104,8 @@ const commands = {
       if (src && dest && dest.node.type === "dir") {
         dest.node.contents[src.name] = JSON.parse(JSON.stringify(src.node));
       } else if (src) {
-        let destParts = args[1].split("/");
-        let n = destParts.pop();
-        let pRes = resolvePath(destParts.join("/") || ".");
-        if (pRes) {
-          pRes.node.contents[n] = JSON.parse(JSON.stringify(src.node));
-        }
+        let destParts = args[1].split("/"); let n = destParts.pop(); let pRes = resolvePath(destParts.join("/") || ".");
+        if (pRes) pRes.node.contents[n] = JSON.parse(JSON.stringify(src.node));
       }
       return "";
     },
@@ -515,16 +115,10 @@ const commands = {
     run: (args) => {
       let src = resolvePath(args[0]), dest = resolvePath(args[1]);
       if (src && dest && dest.node.type === "dir") {
-        dest.node.contents[src.name] = src.node;
-        delete src.parentNode.contents[src.name];
+        dest.node.contents[src.name] = src.node; delete src.parentNode.contents[src.name];
       } else if (src) {
-        let destParts = args[1].split("/");
-        let n = destParts.pop();
-        let pRes = resolvePath(destParts.join("/") || ".");
-        if (pRes) {
-          pRes.node.contents[n] = src.node;
-          delete src.parentNode.contents[src.name];
-        }
+        let destParts = args[1].split("/"); let n = destParts.pop(); let pRes = resolvePath(destParts.join("/") || ".");
+        if (pRes) { pRes.node.contents[n] = src.node; delete src.parentNode.contents[src.name]; }
       }
       return "";
     },
@@ -536,20 +130,15 @@ const commands = {
       if (apIdx !== -1) {
         let text = args.slice(0, apIdx).join(" ").replace(/^['"]|['"]$/g, "");
         let f = resolvePath(args[apIdx + 1]);
-        if (f && f.node.type === "file") {
-          f.node.content += "\n" + text;
-        } else {
-          let p = args[apIdx + 1].split("/");
-          let n = p.pop();
-          let r = resolvePath(p.join("/") || ".");
+        if (f && f.node.type === "file") f.node.content += "\n" + text;
+        else {
+          let p = args[apIdx + 1].split("/"); let n = p.pop(); let r = resolvePath(p.join("/") || ".");
           if (r) r.node.contents[n] = { type: "file", content: text };
         }
         return "";
       } else if (wrIdx !== -1) {
         let text = args.slice(0, wrIdx).join(" ").replace(/^['"]|['"]$/g, "");
-        let p = args[wrIdx + 1].split("/");
-        let n = p.pop();
-        let r = resolvePath(p.join("/") || ".");
+        let p = args[wrIdx + 1].split("/"); let n = p.pop(); let r = resolvePath(p.join("/") || ".");
         if (r) r.node.contents[n] = { type: "file", content: text };
         return "";
       }
@@ -644,8 +233,7 @@ const commands = {
   logger: {
     desc: "Enter messages into the system log.",
     run: (args) => {
-      let msg = args.join(" ").replace(/['"]/g, "");
-      let syslog = resolvePath("/var/log/syslog");
+      let msg = args.join(" ").replace(/['"]/g, ""); let syslog = resolvePath("/var/log/syslog");
       if (syslog && syslog.node.type === "file") syslog.node.content += `\nOct 21 11:30:00 server logger: ${msg}`;
       return "";
     },
@@ -750,7 +338,158 @@ const commands = {
       if (args.includes("-L")) return "Chain INPUT (policy ACCEPT)\ntarget     prot opt source               destination\nDROP       all  --  10.0.0.99            anywhere\n\nChain FORWARD (policy ACCEPT)\n\nChain OUTPUT (policy ACCEPT)";
       return "iptables: Rule successfully appended.";
     }
-  }
+  },
+  useradd: { desc: "Create a new user or update default new user information.", run: () => "" },
+  passwd: { desc: "Update user's authentication tokens.", run: () => "Changing password for user.\nNew password: \nRetype new password: \npasswd: all authentication tokens updated successfully." },
+  groupadd: { desc: "Create a new group.", run: () => "" },
+  usermod: { desc: "Modify a user account.", run: () => "" },
+  userdel: { desc: "Delete a user account and related files.", run: () => "" },
+  groupdel: { desc: "Delete a group.", run: () => "" },
+  chgrp: { desc: "Change group ownership.", run: () => "" },
+  apt: {
+    desc: "Advanced Package Tool.",
+    run: (args) => {
+      if (args.includes("update")) return "Hit:1 http://archive.ubuntu.com/ubuntu focal InRelease\nGet:2 http://security.ubuntu.com/ubuntu focal-security InRelease [114 kB]\nFetched 114 kB in 1s (112 kB/s)\nReading package lists... Done";
+      if (args.includes("install")) return "Reading package lists... Done\nBuilding dependency tree       \nReading state information... Done\nThe following NEW packages will be installed:\n  htop\n0 upgraded, 1 newly installed, 0 to remove.\nSetting up htop (2.2.0-2build1) ...\nProcessing triggers for man-db (2.9.1-1) ...";
+      if (args.includes("search")) return "Sorting...\nFull Text Search...\nhtop/focal,now 2.2.0-2build1 amd64 [installed]\n  interactive processes viewer";
+      if (args.includes("show")) return "Package: htop\nVersion: 2.2.0-2build1\nMaintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>\nDescription: interactive processes viewer";
+      if (args.includes("remove") || args.includes("purge") || args.includes("autoremove")) return "Reading package lists... Done\nBuilding dependency tree\nRemoving packages... Done";
+      if (args.includes("list")) return "Listing...\nhtop/focal,now 2.2.0-2build1 amd64 [installed]\ncurl/focal,now 7.68.0-1ubuntu2.7 amd64 [installed]";
+      return "apt: Command line package manager.";
+    },
+  },
+  wget: { desc: "The non-interactive network downloader.", run: () => "Resolving repo.com (repo.com)... 192.168.1.50\nConnecting to repo.com|192.168.1.50|:80... connected.\nHTTP request sent, awaiting response... 200 OK\nSaving to: 'tool.deb'\n\ntool.deb       100%[===================>]   2.50M  --.-KB/s    in 0.1s" },
+  dpkg: {
+    desc: "Package manager for Debian.",
+    run: (args) => {
+      if (args.includes("-i")) return "Selecting previously unselected package tool.\n(Reading database ... 102345 files and directories currently installed.)\nPreparing to unpack tool.deb ...\nUnpacking tool (1.0) ...\nSetting up tool (1.0) ...";
+      if (args.includes("-L")) return "/usr\n/usr/bin\n/usr/bin/tool\n/etc/tool.conf";
+      if (args.includes("-S")) return "tool: /usr/bin/tool";
+      return "dpkg: package managed.";
+    },
+  },
+  top: { desc: "Display Linux processes.", run: () => "top - 12:45:00 up 14 days,  3:12,  1 user,  load average: 0.05, 0.03, 0.01\nTasks: 110 total,   1 running, 109 sleeping,   0 stopped,   0 zombie\n%Cpu(s):  1.5 us,  0.5 sy,  0.0 ni, 98.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st\nMiB Mem :  16000.0 total,   4000.0 free,  12000.0 used,   1000.0 buff/cache" },
+  htop: { desc: "Interactive process viewer.", run: () => "1  [||||||||||||                      25.0%]\n2  [|||                                5.0%]\nMem[|||||||||||||||||||||||||   1.23G/16.0G]\nSwp[                                 0K/0K]\n\n  PID USER      PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command\n 1337 root       20   0 50000 15000  4000 S  2.0  0.1  0:05.12 /tmp/shell.sh" },
+  sleep: { desc: "Delay for a specified amount of time.", run: () => "[1] 1400" },
+  jobs: { desc: "List active jobs.", run: () => "[1]+  Running                 sleep 300 &" },
+  fg: { desc: "Move job to the foreground.", run: () => "sleep 300" },
+  bg: { desc: "Move a job to the background.", run: () => "[1]+ sleep 300 &" },
+  nohup: { desc: "Run a command immune to hangups.", run: () => "nohup: ignoring input and appending output to 'nohup.out'" },
+  pgrep: { desc: "Look up processes based on name.", run: () => "1400" },
+  killall: { desc: "Kill processes by name.", run: () => "" },
+  pstree: { desc: "Display a tree of processes.", run: () => "systemd─┬─sshd───sshd───bash\n        ├─nginx───4*[nginx]\n        └─cron" },
+  watch: { desc: "Execute a program periodically.", run: () => "Every 2.0s: df -h\n\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/sda1        40G  8.0G   32G  20% /" },
+  gzip: { desc: "Compress or expand files.", run: () => "" },
+  gunzip: { desc: "Compress or expand files.", run: () => "" },
+  zcat: { desc: "Concatenate compressed files and print.", run: () => "Learn Linux\nMaster Terminal\nBecome Root" },
+  scp: { desc: "Secure copy (remote file copy program).", run: () => "notes.txt                                     100%   34     0.0KB/s   00:00" },
+  unzip: { desc: "List, test and extract compressed files in a ZIP archive.", run: () => "Archive:  kernel.zip\n  inflating: kernel.bin\n  inflating: config.txt" },
+  lsblk: { desc: "List block devices.", run: () => "NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT\nsda      8:0    0   40G  0 disk \n└─sda1   8:1    0   40G  0 part /\nsdb      8:16   0   16G  0 disk \n└─sdb1   8:17   0   16G  0 part " },
+  fdisk: { desc: "Manipulate disk partition table.", run: () => "Disk /dev/sda: 40 GiB, 42949672960 bytes, 83886080 sectors\nUnits: sectors of 1 * 512 = 512 bytes\nDevice     Boot Start      End  Sectors Size Id Type\n/dev/sda1  * 2048 83886046 83883999  40G 83 Linux" },
+  mount: { desc: "Mount a filesystem.", run: () => "" },
+  umount: { desc: "Unmount file systems.", run: () => "" },
+  lscpu: { desc: "Display information about the CPU architecture.", run: () => "Architecture:                    x86_64\nCPU op-mode(s):                  32-bit, 64-bit\nByte Order:                      Little Endian\nCPU(s):                          4" },
+  lsusb: { desc: "List USB devices.", run: () => "Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub\nBus 001 Device 002: ID 046d:c52b Logitech, Inc. Unifying Receiver" },
+  lshw: { desc: "Extract detailed information on the hardware configuration.", run: () => "H/W path         Device      Class          Description\n=======================================================\n                             system         Computer\n/0                           bus            Motherboard\n/0/0                         memory         16GiB System memory\n/0/1                         processor      Intel(R) Core(TM) i7 CPU" },
+  which: { desc: "Locate a command.", run: () => "/usr/bin/htop" },
+  hydra: {
+    desc: "A very fast network logon cracker.",
+    run: (args) => {
+      if (args.includes("-V")) return "Attempt 1: admin:password\nAttempt 2: admin:123456\n[22][ssh] host: 10.0.0.50   login: admin   password: password123\n1 of 1 target successfully completed, 1 valid password found";
+      return "Hydra v9.1 (c) 2020 by van Hauser/THC\n[DATA] max 16 tasks per server, overall 16 tasks\n[22][ssh] host: 10.0.0.50   login: admin   password: password123\n1 of 1 target successfully completed, 1 valid password found";
+    },
+  },
+  gobuster: {
+    desc: "Directory/File, DNS and VHost busting tool written in Go.",
+    run: (args) => {
+      if (args.includes("dns")) return "Found: sub.evil.com\nFound: dev.evil.com\nFound: test.evil.com";
+      if (args.includes("vhost")) return "Found: admin.evil.com\nFound: staging.evil.com";
+      return "===============================================================\nGobuster v3.1.0\n===============================================================\n/images               (Status: 301)\n/admin                (Status: 301)\n/config.php           (Status: 200)\n/robots.txt           (Status: 200)\n===============================================================";
+    },
+  },
+  sqlmap: {
+    desc: "Automatic SQL injection and database takeover tool.",
+    run: (args) => {
+      if (args.includes("--dump") || args.includes("--dump-all")) return "Database: admin_db\nTable: users\n[2 entries]\n+----+--------+------------------+\n| id | user   | password         |\n+----+--------+------------------+\n| 1  | admin  | p@ssword!        |\n| 2  | root   | super_secret_123 |\n+----+--------+------------------+\n[info] table 'admin_db.users' dumped to CSV file";
+      if (args.includes("--dbs")) return "available databases [3]:\n[*] admin_db\n[*] information_schema\n[*] public_db";
+      if (args.includes("--tables")) return "Database: admin_db\n[2 tables]\n+----------------+\n| users          |\n| configurations |\n+----------------+";
+      if (args.includes("--os-shell")) return "os-shell> whoami\nroot\nos-shell> echo 'Pwned'\nPwned";
+      return "    sqlmap/1.5.8 - automatic SQL injection and database takeover tool\n    http://sqlmap.org\n\n[INFO] testing connection to the target URL\n[INFO] GET parameter 'id' is 'MySQL >= 5.0 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (FLOOR)' injectable";
+    },
+  },
+  msfvenom: {
+    desc: "Metasploit payload generator and encoder.",
+    run: (args) => {
+      if (args.includes("-l") && args.includes("payloads")) return "Framework Payloads (592 total)\n==============================\n    Name                                 Description\n    ----                                 -----------\n    windows/shell_reverse_tcp            Spawn a piped command shell\n    linux/x64/meterpreter/reverse_tcp    Inject the meterpreter server payload";
+      let format = args.includes("exe") ? "exe" : args.includes("elf") ? "elf" : "raw";
+      let size = Math.floor(Math.random() * 500) + 150;
+      return `No platform was selected, choosing from payload\nNo arch selected, selecting arch from payload\nFound 1 compatible encoders\nAttempting to encode payload with 1 iterations of x86/shikata_ga_nai\nPayload size: ${size} bytes\nFinal size of ${format} file: ${size + 1024} bytes\nSaved as output file.`;
+    },
+  },
+  john: {
+    desc: "John the Ripper password cracker.",
+    run: (args) => {
+      if (args.includes("--show")) return "admin:password123:1000:1000::/home/admin:/bin/bash\nroot:super_secret_123:0:0:root:/root:/bin/bash\n\n2 password hashes cracked, 0 left";
+      return "Using default input encoding: UTF-8\nLoaded 2 password hashes with 2 different salts\nPress 'q' or Ctrl-C to abort, almost any other key for status\npassword123      (admin)\nsuper_secret_123 (root)\n2g 0:00:00:01 DONE (2026-10-21 12:00) 1.538g/s 2000p/s 2000c/s 2000C/s\nUse the \"--show\" option to display all of the cracked passwords reliably";
+    },
+  },
+  unshadow: { desc: "Combines passwd and shadow files.", run: () => "root:$6$xyz123$abc...:0:0:root:/root:/bin/bash\nadmin:$6$qrs456$def...:1000:1000::/home/admin:/bin/bash" },
+  zip2john: { desc: "Extract hash from zip file for john.", run: () => "secure.zip:$pkzip2$1*2*1*0*8*24*42d3*1*...*secure.zip" },
+  ssh2john: { desc: "Extract hash from ssh private key for john.", run: () => "id_rsa:$ssh2$1*2*1*...*id_rsa" },
+  hashcat: {
+    desc: "Advanced password recovery utility.",
+    run: (args) => {
+      if (args.includes("--show")) return "8743b52063cd84097a65d1633f5c74f5:password123\n\n1/1 (100.00%) digests recovered";
+      return "hashcat (v6.1.1) starting...\n\nDictionary cache hit:\n* Filename..: rockyou.txt\n* Passwords.: 14344385\n* Bytes.....: 139921507\n* Keyspace..: 14344385\n\n8743b52063cd84097a65d1633f5c74f5:password123\n\nSession..........: hashcat\nStatus...........: Cracked\nHash.Name........: MD5\nHash.Target......: 8743b52063cd84097a65d1633f5c74f5\nTime.Started.....: Wed Oct 21 12:00:00 2026, (0 secs)\nTime.Estimated...: Wed Oct 21 12:00:00 2026, (0 secs)\nSpeed.Dev.#1.....:  15.0 MH/s (0.01ms) @ Accel:256 Loops:1 Thr:256 Vec:1\nRecovered........: 1/1 (100.00%) Digests";
+    },
+  },
+  nc: {
+    desc: "Arbitrary TCP and UDP connections and listens.",
+    run: (args) => {
+      if (args.includes("-l") || args.includes("listen")) return "Listening on 0.0.0.0 4444\nConnection received on 10.0.0.50 56789\nroot@target:~# ";
+      if (args.includes("-z")) return "Connection to 10.0.0.50 22 port [tcp/ssh] succeeded!\nConnection to 10.0.0.50 80 port [tcp/http] succeeded!";
+      return "Connected to 10.0.0.50.\nroot@target:~# ";
+    },
+  },
+  python3: {
+    desc: "Run the Python 3 interpreter.",
+    run: (args) => {
+      if (args.includes("http.server")) return "Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...";
+      if (args.includes("* 1000")) return "A".repeat(1000);
+      if (args.includes("print")) return "Hacked";
+      return "root@target:~# ";
+    },
+  },
+  php: { desc: "Run the PHP command line interpreter.", run: () => "" },
+  ruby: { desc: "Run the Ruby interpreter.", run: () => "" },
+  perl: { desc: "Run the Perl interpreter.", run: () => "" },
+  stty: { desc: "Change and print terminal line settings.", run: () => "" },
+  export: { desc: "Set environment variables.", run: () => "Variable exported to environment." },
+  bash: { desc: "GNU Bourne-Again SHell.", run: () => "root@target:~# " },
+  env: { desc: "Print environment variables.", run: () => "PATH=/usr/bin:/bin\nUSER=sysadmin\nTERM=xterm\nTARGET=10.0.0.50\nLANG=en_US.UTF-8" },
+  alias: { desc: "Define or display aliases.", run: (args) => args.length > 0 ? "" : "alias ll='ls -la'\nalias grep='grep --color=auto'" },
+  source: { desc: "Execute commands from a file in the current shell.", run: () => "" },
+  read: { desc: "Read a line from standard input.", run: () => "Enter IP: 10.0.0.50" },
+  expr: { desc: "Evaluate expressions.", run: () => "20" },
+  unset: { desc: "Remove variable or function names.", run: () => "" },
+  if: { desc: "Conditional statement block.", run: () => "True" },
+  for: { desc: "Loop over items.", run: () => "1\n2\n3\n4\n5\nLoop completed." },
+  while: { desc: "Loop while condition is true.", run: () => "Processing line...\nLoop completed." },
+  seq: { desc: "Print a sequence of numbers.", run: (args) => args.includes("2") ? "1\n3\n5\n7\n9" : "1\n2\n3\n4\n5" },
+  cut: { desc: "Remove sections from each line of files.", run: () => "root\ndaemon\nsysadmin" },
+  awk: { desc: "Pattern scanning and text processing language.", run: () => "root\ndaemon\nsysadmin" },
+  sed: { desc: "Stream editor for filtering and transforming text.", run: () => "I love Linux" },
+  sort: { desc: "Sort lines of text files.", run: (args) => args.includes("-r") ? "c\nb\na" : args.includes("-n") ? "1\n2\n10" : "a\nb\nc" },
+  uniq: { desc: "Report or omit repeated lines.", run: (args) => args.includes("-c") ? "   2 a\n   1 b" : "a\nb" },
+  tr: { desc: "Translate or delete characters.", run: (args) => args.includes("-d") ? "hello" : args.includes("A-Z") ? "LINUX" : "zpple" },
+  tee: { desc: "Read from standard input and write to standard output and files.", run: () => "Data written to file and stdout." },
+  base64: { desc: "Base64 encode/decode data.", run: (args) => args.includes("-d") ? "Secret" : "U2VjcmV0" },
+  xxd: { desc: "Make a hexdump or do the reverse.", run: () => "00000000: 726f 6f74 3a78 3a30 3a30 3a72 6f6f 743a  root:x:0:0:root:\n00000010: 2f72 6f6f 743a 2f62 696e 2f62 6173 680a  /root:/bin/bash." },
+  md5sum: { desc: "Compute and check MD5 message digest.", run: () => "21232f297a57a5a743894a0e4a801fc3  -" },
+  sha1sum: { desc: "Compute and check SHA1 message digest.", run: () => "d033e22ae348aeb5660fc2140aec35850c4da997  -" },
+  jq: { desc: "Command-line JSON processor.", run: (args) => args.includes(".name") ? '"root"' : '{\n  "name": "root"\n}' },
+  diff: { desc: "Compare files line by line.", run: () => "1c1\n< root:x:0:0:root:/root:/bin/bash\n---\n> root:x:0:" },
+  "!1": { desc: "Execute command from history.", run: () => "Executing history command..." },
 };
 
 const terminalOutput = document.getElementById("terminal-output");
@@ -798,20 +537,30 @@ function executeCommand(rawCommand) {
       let l = m.lessons[activeLessonIndex];
       let lId = `${activeModuleIndex}_${activeLessonIndex}`;
 
-      if (!playerStats.completedLessons.includes(lId) && l.check(cmdName, args, output)) {
+      if (
+        !playerStats.completedLessons.includes(lId) &&
+        l.check(cmdName, args, output, cmdStr)
+      ) {
         playerStats.completedLessons.push(lId);
         addXp(l.xp);
-        printToTerminal(`<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs">🏆 Objective Accomplished! +${l.xp} XP</div>`);
+        printToTerminal(
+          `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs">🏆 Objective Accomplished! +${l.xp} XP</div>`,
+        );
         if (activeLessonIndex < m.lessons.length - 1) activeLessonIndex++;
         renderLesson();
       }
 
       // Verify Quests
       quests.forEach((q) => {
-        if (!playerStats.completedQuests.includes(q.id) && q.check(cmdName, args, output)) {
+        if (
+          !playerStats.completedQuests.includes(q.id) &&
+          q.check(cmdName, args, output, cmdStr)
+        ) {
           playerStats.completedQuests.push(q.id);
           addXp(q.reward);
-          printToTerminal(`<div class="my-2 p-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded text-xs shadow-[0_0_15px_rgba(168,85,247,0.2)]">🔥 Quest Cleared: ${q.title}! +${q.reward} XP</div>`);
+          printToTerminal(
+            `<div class="my-2 p-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded text-xs shadow-[0_0_15px_rgba(168,85,247,0.2)]">🔥 Quest Cleared: ${q.title}! +${q.reward} XP</div>`,
+          );
           if (activeTab === "quests") renderQuests();
         }
       });
@@ -819,7 +568,9 @@ function executeCommand(rawCommand) {
       printToTerminal(`<span class="term-err">Execution Error.</span>`);
     }
   } else {
-    printToTerminal(`<span class="term-err">${cmdName}: command not found</span>`);
+    printToTerminal(
+      `<span class="term-err">${cmdName}: command not found</span>`,
+    );
   }
 }
 
@@ -827,7 +578,9 @@ function resetSandbox() {
   if (confirm("Hard reset? XP is saved, files are reset.")) {
     initVfs();
     document.getElementById("prompt-path").innerText = formatPromptPath();
-    printToTerminal("<span class='text-red-400 font-bold'>Reset Complete.</span>");
+    printToTerminal(
+      "<span class='text-red-400 font-bold'>Reset Complete.</span>",
+    );
   }
 }
 
@@ -856,7 +609,9 @@ cmdInput.addEventListener("keydown", (e) => {
   }
 });
 
-document.getElementById("terminal-container").addEventListener("click", () => cmdInput.focus());
+document
+  .getElementById("terminal-container")
+  .addEventListener("click", () => cmdInput.focus());
 
 window.onload = () => {
   initVfs();
@@ -865,3 +620,4 @@ window.onload = () => {
   renderLesson();
   cmdInput.focus();
 };
+}
