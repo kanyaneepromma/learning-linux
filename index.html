@@ -247,6 +247,7 @@
         let vfs = {};
         let runningServices = { 'ssh': true, 'nginx': false, 'docker': false };
         let envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
+        let rogueProcessKilled = false;
 
         const initialVfsTemplate = {
             "/": {
@@ -313,6 +314,7 @@
             vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
             runningServices = { 'ssh': true, 'nginx': false, 'docker': false };
             envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
+            rogueProcessKilled = false;
         }
 
         // Helper: Resolves path safely returning { node, path, parentNode, fileName } or null
@@ -567,6 +569,37 @@
                 objective: "Use awk to print $1 on /etc/os-release.",
                 hint: "Run `awk '{print $1}' /etc/os-release`",
                 check: (cmd, args) => cmd === "awk" && args[0] === "{print $1}" && args.some(a => a.includes("os-release"))
+            },
+            {
+                id: "q4", title: "The Process Assassin", difficulty: "Hard", reward: 500,
+                description: "A rogue process named <code>crypto_miner</code> is eating up 99% of our CPU! Use <code>ps</code> or <code>top</code> to find its PID, then use <code>kill</code> to terminate it.",
+                objective: "Terminate the crypto_miner process using its PID.",
+                hint: "Run 'ps', find the number under PID for crypto_miner, then run 'kill [PID]'.",
+                check: (cmd, args) => cmd === "kill" && args[0] === "666" && rogueProcessKilled
+            },
+            {
+                id: "q5", title: "Production Environment", difficulty: "Medium", reward: 400,
+                description: "The deployment system is failing because it doesn't know the environment! Export an environment variable named <code>API_KEY</code> with the exact value <code>84920402</code>.",
+                objective: "Export API_KEY=84920402 to the environment.",
+                hint: "Use 'export API_KEY=84920402'. Verify with 'env'.",
+                check: (cmd, args) => envVars['API_KEY'] === '84920402'
+            },
+            {
+                id: "q6", title: "The Sed Sabotage", difficulty: "Expert", reward: 800,
+                description: "We are moving out of sandbox mode! Use the stream editor (sed) to globally replace the word 'Interactive' with 'Production' inside the <code>/etc/os-release</code> file.",
+                objective: "Use sed to replace 'Interactive' with 'Production' in /etc/os-release.",
+                hint: "Run `sed 's/Interactive/Production/g' /etc/os-release`",
+                check: (cmd, args) => cmd === "sed" && args[0] === "s/Interactive/Production/g" && args.some(a => a.includes("os-release"))
+            },
+            {
+                id: "q7", title: "The File Architect", difficulty: "Hard", reward: 600,
+                description: "Chain your commands! In your home directory (<code>/home/sysadmin</code>), create a directory named <code>vault</code>. Inside <code>vault</code>, create a file named <code>bank.txt</code> and write the exact word <code>secured</code> into it.",
+                objective: "Create vault/bank.txt containing the text 'secured'.",
+                hint: "Use 'mkdir vault', then 'echo \"secured\" > vault/bank.txt'.",
+                check: (cmd, args) => {
+                    let n = getVfsNode("/home/sysadmin/vault/bank.txt");
+                    return n && n.type === 'file' && n.content.includes("secured");
+                }
             }
         ];
 
@@ -1037,6 +1070,40 @@
                         envVars[parts[0]] = parts[1].replace(/['"]/g, '');
                     }
                     return "";
+                }
+            },
+            'ps': {
+                desc: 'Process diagnostics overview showing running processes in local shells.',
+                run: () => {
+                    let out = "&nbsp;&nbsp;PID&nbsp;TTY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TIME&nbsp;CMD<br>&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:02&nbsp;initd<br>&nbsp;&nbsp;245&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:01&nbsp;bash<br>&nbsp;1234&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:00&nbsp;daemon_service";
+                    if (!rogueProcessKilled) {
+                        out += "<br>&nbsp;&nbsp;<span class='text-red-400 font-bold'>666</span>&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99:99:99&nbsp;<span class='text-red-400 font-bold'>crypto_miner</span>";
+                    }
+                    out += "<br>&nbsp;2056&nbsp;tty1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:00&nbsp;ps";
+                    return out;
+                }
+            },
+            'top': {
+                desc: 'Launch real-time performance diagnostics overlay.',
+                run: () => {
+                    let cpuLoad = rogueProcessKilled ? "0.05, 0.08, 0.12" : "99.99, 99.99, 99.99";
+                    let out = `top - 15:13:52 up 5 days, 1 user, load average: ${cpuLoad}<br>Tasks: <span class="font-bold">112</span> total,   <span class="font-bold">1</span> running, <span class="font-bold">111</span> sleeping<br>MiB Mem : <span class="font-bold">16384.0</span> total, <span class="font-bold">12192.0</span> free, <span class="font-bold">4192.0</span> used<br><br>&nbsp;&nbsp;PID USER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PR&nbsp;&nbsp;NI&nbsp;&nbsp;&nbsp;&nbsp;VIRT&nbsp;&nbsp;&nbsp;&nbsp;RES&nbsp;&nbsp;&nbsp;&nbsp;SHR S&nbsp;&nbsp;%CPU&nbsp;&nbsp;%MEM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TIME+ COMMAND`;
+                    if (!rogueProcessKilled) {
+                        out += `<br>&nbsp;&nbsp;<span class='text-red-400 font-bold'>666</span> hacker&nbsp;&nbsp;&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;999999&nbsp;&nbsp;9999&nbsp;&nbsp;&nbsp;9999 R&nbsp;&nbsp;<span class='text-red-400 font-bold'>99.9</span>&nbsp;&nbsp;80.0&nbsp;&nbsp;99:99.99 <span class='text-red-400 font-bold'>crypto_miner</span>`;
+                    }
+                    out += `<br>&nbsp;1234 sysadmin&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;24000&nbsp;&nbsp;&nbsp;5000&nbsp;&nbsp;&nbsp;3000 S&nbsp;&nbsp;&nbsp;0.8&nbsp;&nbsp;&nbsp;0.1&nbsp;&nbsp;&nbsp;0:04.15 daemon_service<br>&nbsp;&nbsp;&nbsp;&nbsp;1 root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;168000&nbsp;&nbsp;11000&nbsp;&nbsp;&nbsp;8000 S&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;0.1&nbsp;&nbsp;&nbsp;0:05.12 initd`;
+                    return out;
+                }
+            },
+            'kill': {
+                desc: 'Kill running threads using specific target identification numbers (PID).',
+                run: (args) => {
+                    if (args.length === 0) return "kill: targeting pid index values missing";
+                    if (args[0] === '666' && !rogueProcessKilled) {
+                        rogueProcessKilled = true;
+                        return "Signal sent. Process 666 (crypto_miner) terminated successfully.";
+                    }
+                    return `bash: kill: (${args[0]}) - No such process`;
                 }
             }
         };
