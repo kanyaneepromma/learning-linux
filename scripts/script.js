@@ -308,6 +308,10 @@ function filterCheatsheet() {
 // --- PROGRESSION ---
 const maxGlobalXp = 45000;
 function addXp(amount) {
+  if (amount > 0) {
+      playSound('success');
+      showFloatingXP(amount);
+  }
   playerStats.xp += amount;
   let r = "Terminal Newbie";
   if (playerStats.xp >= 45000) r = "Linux Kernel God 👑🌌";
@@ -414,9 +418,15 @@ function executeCommand(rawCommand) {
         }
       });
     } catch (e) {
+      playSound('error'); // Play buzz
+      document.getElementById("terminal-container").classList.add("shake-error"); // Shake screen
+      setTimeout(() => document.getElementById("terminal-container").classList.remove("shake-error"), 300);
       printToTerminal(`<span class="term-err">Execution Error.</span>`);
     }
   } else {
+    playSound('error'); // Play buzz
+    document.getElementById("terminal-container").classList.add("shake-error"); // Shake screen
+    setTimeout(() => document.getElementById("terminal-container").classList.remove("shake-error"), 300);
     printToTerminal(
       `<span class="term-err">${cmdName}: command not found</span>`,
     );
@@ -434,6 +444,7 @@ function resetSandbox() {
 }
 
 cmdInput.addEventListener("keydown", (e) => {
+  playSound('type')
   if (e.key === "Enter") {
     let cmd = cmdInput.value;
     if (cmd.trim() !== "") {
