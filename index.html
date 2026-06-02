@@ -53,7 +53,7 @@
 </head>
 <body class="h-screen w-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- Left Panel: Learning Suite (Guided Modules, Quests, Cheatsheet) -->
+    <!-- Left Panel: Learning Suite -->
     <div class="w-full md:w-5/12 lg:w-4/12 h-1/2 md:h-full bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col shadow-2xl z-20">
         
         <!-- Top Status Bar: Level, XP and Stats -->
@@ -70,11 +70,10 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-mono">XP System</span>
-                    <span class="text-sm font-black text-indigo-400 font-mono" id="xp-counter">0 / 15000 XP</span>
+                    <span class="text-sm font-black text-indigo-400 font-mono" id="xp-counter">0 / 20000 XP</span>
                 </div>
             </div>
             
-            <!-- XP Progress Bar -->
             <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                 <div id="xp-progress" class="bg-indigo-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
             </div>
@@ -111,9 +110,7 @@
                         <span class="text-xs bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded" id="lesson-index-tag">Lesson 1/5</span>
                     </div>
 
-                    <div id="active-lesson-body" class="space-y-3">
-                        <!-- Content Injected Dynamically -->
-                    </div>
+                    <div id="active-lesson-body" class="space-y-3"></div>
 
                     <!-- Task Verification Card -->
                     <div class="border border-slate-800 bg-slate-900/50 rounded-lg p-3 space-y-2">
@@ -121,16 +118,13 @@
                             <span class="text-xs font-bold text-slate-400 uppercase font-mono tracking-wider">Mission Target</span>
                             <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 rounded-full font-mono font-bold" id="lesson-xp-badge">+100 XP</span>
                         </div>
-                        <p class="text-xs text-slate-300 font-mono bg-slate-950/40 p-2 border border-slate-800/60 rounded" id="lesson-objective-target">
-                            <!-- Injected dynamically -->
-                        </p>
+                        <p class="text-xs text-slate-300 font-mono bg-slate-950/40 p-2 border border-slate-800/60 rounded" id="lesson-objective-target"></p>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Modules Overview</h3>
-                    <div id="modules-list" class="space-y-2">
-                    </div>
+                    <div id="modules-list" class="space-y-2"></div>
                 </div>
             </div>
 
@@ -139,8 +133,7 @@
                 <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20 text-xs">
                     <strong>Boss Quests Mode:</strong> Solve real-world admin problems. The validation engine tests your Virtual Filesystem (VFS) states. Read hints carefully!
                 </div>
-                <div id="quests-container" class="space-y-3">
-                </div>
+                <div id="quests-container" class="space-y-3"></div>
             </div>
 
             <!-- VIEW C: COMMAND REFERENCE (CHEATSHEET) -->
@@ -151,13 +144,11 @@
                 <div class="flex items-center gap-2">
                     <input type="text" id="cheatsheet-search" placeholder="Search commands..." oninput="filterCheatsheet()" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 </div>
-                <div id="cheatsheet-list" class="space-y-3">
-                </div>
+                <div id="cheatsheet-list" class="space-y-3"></div>
             </div>
 
         </div>
 
-        <!-- Bottom Tip Footer -->
         <div class="p-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400 font-mono">
             <span>💡 Try double-pressing <kbd class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300 font-bold border border-slate-700">Tab</kbd> to complete!</span>
             <span id="overall-progress-tag">Progress: 0%</span>
@@ -184,18 +175,17 @@
 
         <div class="flex-1 overflow-y-auto p-4 terminal-font text-sm md:text-base space-y-1.5" id="terminal-output">
             <div class="text-slate-500 font-mono text-xs border-b border-slate-900/60 pb-3 mb-3">
-                <span>Gemini Linux Sandbox v4.0 (Ultimate Security Edition)</span><br>
+                <span>Gemini Linux Sandbox v5.0 (MAXXED Security Edition)</span><br>
                 <span>Current virtual architecture: x86_64, VFS: Memory Storage</span><br>
                 <span>Type 'help' to inspect command indices. Advanced CTF commands unlock via XP.</span>
             </div>
             <div class="mb-4">
-                <span class="text-indigo-400 font-bold">Welcome back to Gemini Linux Sandbox.</span><br>
-                <span class="text-slate-400">Playground for SysAdmin & Red/Blue Team operations. Level up to unlock iptables, nmap, and strings!</span>
+                <span class="text-indigo-400 font-bold">Welcome to the Ultimate Cyber Sandbox.</span><br>
+                <span class="text-slate-400">Master SysAdmin, Red Team (OSINT/Exploit), and Blue Team (Auditing/Firewalls). Let's go!</span>
             </div>
         </div>
 
-        <div id="autocomplete-indicator" class="px-4 py-1 bg-slate-950/80 border-t border-slate-900 terminal-font text-xs text-slate-500 hidden font-semibold">
-        </div>
+        <div id="autocomplete-indicator" class="px-4 py-1 bg-slate-950/80 border-t border-slate-900 terminal-font text-xs text-slate-500 hidden font-semibold"></div>
 
         <div class="px-4 pb-4 terminal-font text-sm md:text-base flex items-center w-full" id="input-line">
             <span id="prompt" class="whitespace-pre flex-shrink-0">
@@ -209,17 +199,14 @@
         // --- ANTI-INSPECT SECURITY HOOK ---
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', event => {
-            // Block F12
             if (event.key === 'F12') event.preventDefault();
-            // Block Ctrl+Shift+I / J / C
             if (event.ctrlKey && event.shiftKey && ['I', 'J', 'C'].includes(event.key.toUpperCase())) event.preventDefault();
-            // Block Ctrl+U (View Source)
             if (event.ctrlKey && event.key.toUpperCase() === 'U') event.preventDefault();
         });
 
         // --- VIRTUAL STATE DATABASES ---
         let vfs = {};
-        let runningServices = { 'ssh': true, 'nginx': false, 'docker': false };
+        let runningServices = { 'ssh': true, 'nginx': false, 'docker': false, 'malware_c2': true };
         let envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
         let firewallRules = [];
 
@@ -234,16 +221,8 @@
                                 type: "dir", owner: "sysadmin",
                                 contents: {
                                     ".bash_history": { type: "file", owner: "sysadmin", content: "cd /\nls -la\ncat /var/log/syslog\nwhoami\nsudo su\n" },
-                                    "readme.txt": { 
-                                        type: "file", owner: "sysadmin",
-                                        content: "Welcome to Linux Ultimate Edition!\nLine 2\nLine 3" 
-                                    },
-                                    "documents": { 
-                                        type: "dir", owner: "sysadmin",
-                                        contents: {
-                                            "secret.txt": { type: "file", owner: "sysadmin", content: "You found the secret document! Good job navigating directories." }
-                                        } 
-                                    }
+                                    "readme.txt": { type: "file", owner: "sysadmin", content: "Welcome to Linux Ultimate Edition!\nLine 2\nLine 3" },
+                                    "documents": { type: "dir", owner: "sysadmin", contents: { "secret.txt": { type: "file", owner: "sysadmin", content: "Super Secret Payload." } } }
                                 }
                             }
                         }
@@ -254,7 +233,8 @@
                             "log": {
                                 type: "dir", owner: "root",
                                 contents: {
-                                    "syslog": { type: "file", owner: "root", content: "System startup...\nMounting filesystems...\nWarning: SSH login attempt failed from 192.168.1.105.\nAuthentication failed for sysadmin.\nError: Failed to bind port 80." }
+                                    "syslog": { type: "file", owner: "root", content: "System startup...\nMounting filesystems...\nWarning: SSH login attempt failed from 192.168.1.105.\nAuthentication failed for sysadmin.\nError: Failed to bind port 80." },
+                                    "auth.log": { type: "file", owner: "root", content: "Failed password for root from 10.0.0.99 port 54321 ssh2\nFailed password for root from 10.0.0.99 port 54322 ssh2\nFailed password for root from 10.0.0.99 port 54323 ssh2\nAccepted publickey for sysadmin from 192.168.0.2 port 49123 ssh2" }
                                 }
                             }
                         }
@@ -262,7 +242,7 @@
                     "etc": {
                         type: "dir", owner: "root",
                         contents: {
-                            "os-release": { type: "file", owner: "root", content: "NAME=\"Gemini OS\"\nVERSION=\"4.0 (Ultimate Security Edition)\"\nID=gemini\nHOME_URL=\"https://google.com\"" },
+                            "os-release": { type: "file", owner: "root", content: "NAME=\"Gemini OS\"\nVERSION=\"5.0 (MAXXED Security Edition)\"\nID=gemini" },
                             "passwd": { type: "file", owner: "root", content: "root:x:0:0:root:/root:/bin/bash\nsysadmin:x:1000:1000:sysadmin:/home/sysadmin:/bin/bash" }
                         }
                     },
@@ -270,6 +250,20 @@
                         type: "dir", owner: "root",
                         contents: {
                             "malware.bin": { type: "file", owner: "root", content: "\x7FELF...\x01\x02\x03\nConnectingToC2Server...\nhttp://evil-hacker.com/drop\nExecuting Payload" }
+                        }
+                    },
+                    "usr": {
+                        type: "dir", owner: "root",
+                        contents: {
+                            "bin": {
+                                type: "dir", owner: "root",
+                                contents: {
+                                    "ping": { type: "file", owner: "root", perms: "-rwsr-xr-x", content: "ELF Binary Ping" },
+                                    "passwd": { type: "file", owner: "root", perms: "-rwsr-xr-x", content: "ELF Binary Passwd" },
+                                    "sudo": { type: "file", owner: "root", perms: "-rwsr-xr-x", content: "ELF Binary Sudo" },
+                                    "cat": { type: "file", owner: "root", content: "ELF Binary Cat" }
+                                }
+                            }
                         }
                     }
                 }
@@ -280,19 +274,17 @@
         let userAliases = { 'll': 'ls -la', 'la': 'ls -a' };
         let commandHistory = [];
         let historyIndex = -1;
-
         let playerStats = { xp: 0, completedLessons: [], completedQuests: [] };
 
         function initVfs() {
             vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
-            runningServices = { 'ssh': true, 'nginx': false, 'docker': false };
+            runningServices = { 'ssh': true, 'nginx': false, 'docker': false, 'malware_c2': true };
             envVars = { 'PATH': '/usr/bin:/bin', 'USER': 'sysadmin', 'TERM': 'xterm-256color' };
             firewallRules = [];
         }
 
         function resolvePath(targetPath) {
             if (!targetPath) return { node: getVfsNode(currentPath), path: currentPath };
-            
             let parts = targetPath.split('/');
             let absPathParts = targetPath.startsWith('/') ? [] : currentPath.split('/').filter(Boolean);
             
@@ -300,9 +292,7 @@
                 if (part === '' || part === '.') continue;
                 if (part === '..') {
                     if (absPathParts.length > 0) absPathParts.pop();
-                } else {
-                    absPathParts.push(part);
-                }
+                } else absPathParts.push(part);
             }
             
             let resolvedStr = '/' + absPathParts.join('/');
@@ -318,188 +308,128 @@
             return { node: current, path: resolvedStr === '//' ? '/' : resolvedStr, parentNode: parent, name: finalName };
         }
 
-        function getVfsNode(pathStr) {
-            let res = resolvePath(pathStr);
-            return res ? res.node : null;
-        }
-
+        function getVfsNode(pathStr) { let res = resolvePath(pathStr); return res ? res.node : null; }
         function formatPromptPath() {
             if (currentPath === "/home/sysadmin") return "~";
             if (currentPath.startsWith("/home/sysadmin/")) return "~" + currentPath.substring(14);
             return currentPath;
         }
 
-        // --- CORE CURRICULUM MODULES ---
+        // --- MAXXED CURRICULUM MODULES ---
         const learningModules = [
             {
                 name: "1. Navigation Masterclass",
                 lessons: [
-                    {
-                        title: "Where Am I?", module: "Navigation",
-                        why: "Directories in Linux are layered. Before running commands, you must verify your exact position.",
-                        text: "Run the command <code>pwd</code> (Print Working Directory) to identify your exact path in the virtual machine.",
-                        objective: "Type exactly 'pwd' in your terminal and press enter.", xp: 100,
-                        check: (cmd, args) => cmd === "pwd"
-                    },
-                    {
-                        title: "Looking Around", module: "Navigation",
-                        why: "In visual interfaces, files are icons. In the command line, you need tools to view what is in a container folder.",
-                        text: "Type <code>ls</code> (List) to list the folders and files in your home directory.",
-                        objective: "Type exactly 'ls' to list the files inside the current working path.", xp: 100,
-                        check: (cmd, args) => cmd === "ls"
-                    },
-                    {
-                        title: "Changing Directories", module: "Navigation",
-                        why: "Double clicking folders is replaced by cd. You must explicitly name folders you want to enter.",
-                        text: "Type <code>cd documents</code> to enter your virtual document store.",
-                        objective: "Type 'cd documents' and hit enter.", xp: 100,
-                        check: (cmd, args) => cmd === "cd" && args[0] === "documents"
-                    }
+                    { title: "Where Am I?", module: "Navigation", why: "Verify exact position.", text: "Type <code>pwd</code>", objective: "Type 'pwd'", xp: 100, check: (c,a) => c==="pwd" },
+                    { title: "Looking Around", module: "Navigation", why: "View contents.", text: "Type <code>ls</code>", objective: "Type 'ls'", xp: 100, check: (c,a) => c==="ls" },
+                    { title: "Changing Directories", module: "Navigation", why: "Move around.", text: "Type <code>cd documents</code>", objective: "Type 'cd documents'", xp: 100, check: (c,a) => c==="cd" && a[0]==="documents" }
                 ]
             },
             {
                 name: "2. Filesystem Scalpels",
                 lessons: [
-                    {
-                        title: "Making Directories", module: "Filesystem",
-                        why: "Creating directories is critical to maintaining safe isolation boundaries for web apps.",
-                        text: "Type <code>mkdir playground</code> to make a new directory in your current home directory.",
-                        objective: "Create a directory called 'playground' using mkdir.", xp: 100,
-                        check: (cmd, args) => cmd === "mkdir" && args[0] === "playground" && getVfsNode(currentPath + "/playground") !== null
-                    },
-                    {
-                        title: "Writing with Output Redirection", module: "Filesystem",
-                        why: "Standard redirection using '>' channels outputs into target files directly.",
-                        text: "Write text inside your new configuration file. Type <code>echo \"PORT=8080\" > server.conf</code>.",
-                        objective: "Direct content into server.conf via redirection (>).", xp: 100,
-                        check: (cmd, args) => cmd === "echo" && args.includes(">") && args.includes("server.conf")
-                    }
+                    { title: "Making Directories", module: "Files", why: "Create isolation.", text: "Type <code>mkdir playground</code>", objective: "Create 'playground'", xp: 100, check: (c,a) => c==="mkdir" && a[0]==="playground" },
+                    { title: "Output Redirection", module: "Files", why: "Write directly to files.", text: "Type <code>echo \"test\" > test.txt</code>", objective: "Use > redirection", xp: 100, check: (c,a) => c==="echo" && a.includes(">") }
                 ]
             },
             {
                 name: "3. Text Slicing & Parsing",
                 lessons: [
-                    {
-                        title: "Top Inspection (head)", module: "Text Parsing",
-                        why: "When opening a heavy multi-gigabyte document, loading everything is fatal. Read just the top.",
-                        text: "Let's slice off the top 5 lines of a text source using <code>head readme.txt</code>.",
-                        objective: "Read top file parameters using 'head readme.txt'.", xp: 100,
-                        check: (cmd, args) => cmd === "head" && args[0] === "readme.txt"
-                    },
-                    {
-                        title: "Global Regular Expressions (grep)", module: "Text Parsing",
-                        why: "Filter patterns out of complex arrays instantly.",
-                        text: "Find references to Linux. Type <code>grep \"Linux\" readme.txt</code>.",
-                        objective: "Filter matches containing 'Linux' using grep.", xp: 100,
-                        check: (cmd, args) => cmd === "grep" && args.includes("readme.txt")
-                    }
+                    { title: "Top Inspection", module: "Text", why: "Read massive files safely.", text: "Type <code>head readme.txt</code>", objective: "Use head", xp: 100, check: (c,a) => c==="head" && a[0]==="readme.txt" },
+                    { title: "Global Regex", module: "Text", why: "Filter matches.", text: "Type <code>grep \"Linux\" readme.txt</code>", objective: "Use grep", xp: 100, check: (c,a) => c==="grep" && a.includes("readme.txt") }
                 ]
             },
             {
                 name: "4. Deep Filesystem Mastery",
                 lessons: [
-                    {
-                        title: "Exposing Hidden Files", module: "Deep Filesystem",
-                        why: "In Linux, any file or folder that starts with a dot (.) is hidden by default.",
-                        text: "Let's find hidden files in your home directory. Type <code>ls -la</code> to see all files.",
-                        objective: "Type 'ls -la' or 'ls -a' to expose hidden dotfiles.", xp: 100,
-                        check: (cmd, args) => cmd === "ls" && (args.includes("-la") || args.includes("-a"))
-                    }
+                    { title: "Exposing Hidden Files", module: "Deep Filesystem", why: "Dotfiles are hidden.", text: "Type <code>ls -la</code>", objective: "Use ls -la", xp: 100, check: (c,a) => c==="ls" && (a.includes("-la") || a.includes("-a")) }
                 ]
             },
             {
                 name: "5. Advanced Service Control",
                 lessons: [
-                    {
-                        title: "Checking Service Daemons", module: "Services",
-                        why: "Advanced SysAdmins manage background tasks (daemons) like web servers using systemctl.",
-                        text: "Check if the Nginx web server is running. Type <code>systemctl status nginx</code>.",
-                        objective: "Verify the status of the 'nginx' service.", xp: 300,
-                        check: (cmd, args) => cmd === "systemctl" && args[0] === "status" && args[1] === "nginx"
-                    },
-                    {
-                        title: "Starting Background Services", module: "Services",
-                        why: "When a server reboots, some services might not start. You must orchestrate them manually.",
-                        text: "Start the web server by typing <code>systemctl start nginx</code>.",
-                        objective: "Start the nginx background daemon.", xp: 300,
-                        check: (cmd, args) => cmd === "systemctl" && args[0] === "start" && args[1] === "nginx" && runningServices['nginx'] === true
-                    }
+                    { title: "Checking Daemons", module: "Services", why: "Manage web servers.", text: "Type <code>systemctl status nginx</code>", objective: "Check nginx status", xp: 300, check: (c,a) => c==="systemctl" && a[0]==="status" && a[1]==="nginx" },
+                    { title: "Starting Services", module: "Services", why: "Boot offline servers.", text: "Type <code>systemctl start nginx</code>", objective: "Start nginx", xp: 300, check: (c,a) => c==="systemctl" && a[0]==="start" && a[1]==="nginx" && runningServices['nginx']===true }
                 ]
             },
             {
-                name: "6. Stream Editing (sed & awk)",
+                name: "6. Stream Editing",
                 lessons: [
-                    {
-                        title: "The Stream Editor (sed)", module: "Text Manipulation",
-                        why: "Sed is a tool used to find and replace text instantly across massive files.",
-                        text: "Replace 'Linux' with 'Unix' inside the readme file! Type: <code>sed 's/Linux/Unix/g' readme.txt</code>",
-                        objective: "Use sed string substitution syntax (s/old/new/g).", xp: 400,
-                        check: (cmd, args) => cmd === "sed" && args[0] === "s/Linux/Unix/g" && args[1] === "readme.txt"
-                    },
-                    {
-                        title: "Data Extraction (awk)", module: "Text Manipulation",
-                        why: "Awk is a full programming language designed for text processing.",
-                        text: "Extract just the first column of words from our readme file. Type <code>awk '{print $1}' readme.txt</code>",
-                        objective: "Use awk to print column $1.", xp: 400,
-                        check: (cmd, args) => cmd === "awk" && args[0] === "{print $1}" && args[1] === "readme.txt"
-                    }
+                    { title: "The Stream Editor", module: "Text", why: "Find and replace instantly.", text: "Type <code>sed 's/Linux/Unix/g' readme.txt</code>", objective: "Use sed substitution", xp: 400, check: (c,a) => c==="sed" && a[0]==="s/Linux/Unix/g" && a[1]==="readme.txt" },
+                    { title: "Data Extraction", module: "Text", why: "Extract columns.", text: "Type <code>awk '{print $1}' readme.txt</code>", objective: "Use awk print", xp: 400, check: (c,a) => c==="awk" && a[0]==="{print $1}" && a[1]==="readme.txt" }
                 ]
             },
             {
-                name: "7. The System Environment",
+                name: "7. System Environment",
                 lessons: [
-                    {
-                        title: "Reading The Matrix", module: "Environment",
-                        why: "Linux relies on hidden variables in RAM (like PATH) to know where to find commands.",
-                        text: "View all currently active environment variables by typing <code>env</code>.",
-                        objective: "Print active environment properties.", xp: 500,
-                        check: (cmd, args) => cmd === "env"
-                    },
-                    {
-                        title: "Exporting Variables", module: "Environment",
-                        why: "You often need to define API keys or runtime variables before launching an application.",
-                        text: "Set an application environment variable. Type <code>export APP_ENV=production</code>",
-                        objective: "Declare an environment variable using export.", xp: 600,
-                        check: (cmd, args) => cmd === "export" && args[0] === "APP_ENV=production" && envVars["APP_ENV"] === "production"
-                    }
+                    { title: "Reading The Matrix", module: "Env", why: "View active RAM variables.", text: "Type <code>env</code>", objective: "Type env", xp: 500, check: (c,a) => c==="env" },
+                    { title: "Exporting Variables", module: "Env", why: "Set keys.", text: "Type <code>export API_KEY=123</code>", objective: "Use export", xp: 600, check: (c,a) => c==="export" && a[0].includes("=") }
                 ]
             },
-            // --- NEW SECURITY MODULES (RED / BLUE TEAM) ---
+            // --- MAXXED RED TEAM ---
             {
                 name: "8. Red Team (Offensive Ops)",
                 lessons: [
                     {
-                        title: "Network Mapping (nmap)", module: "Offensive Security",
-                        why: "Before attacking or defending a server, you must know what ports are open to the internet.",
-                        text: "Scan localhost to see what services are running. Type <code>nmap localhost</code>.",
-                        objective: "Run an nmap scan on localhost.", xp: 800,
-                        check: (cmd, args) => cmd === "nmap" && args[0] === "localhost"
+                        title: "Network Mapping", module: "Offensive",
+                        why: "Hackers map networks to find open ports.", text: "Type <code>nmap localhost</code>",
+                        objective: "Scan localhost ports", xp: 800, check: (c,a) => c==="nmap" && a[0]==="localhost"
                     },
                     {
-                        title: "Reverse Engineering (strings)", module: "Offensive Security",
-                        why: "Malware is usually compiled binary code. You can't read it with 'cat'. But 'strings' extracts hidden text from binaries.",
-                        text: "We have a suspicious file at /tmp/malware.bin. Extract text from it. Type <code>strings /tmp/malware.bin</code>.",
-                        objective: "Use 'strings' to extract text from a binary.", xp: 900,
-                        check: (cmd, args) => cmd === "strings" && args[0] === "/tmp/malware.bin"
+                        title: "Web Enumeration", module: "Offensive",
+                        why: "Use cURL to fetch raw HTTP headers and identify target server software.", text: "Type <code>curl -I http://example.com</code>",
+                        objective: "Fetch headers with curl -I", xp: 900, check: (c,a) => c==="curl" && a.includes("-I")
+                    },
+                    {
+                        title: "Reverse Engineering", module: "Offensive",
+                        why: "Malware is compiled. 'strings' pulls out readable text.", text: "Type <code>strings /tmp/malware.bin</code>",
+                        objective: "Use strings on malware", xp: 1000, check: (c,a) => c==="strings" && a[0]==="/tmp/malware.bin"
+                    },
+                    {
+                        title: "Malware Hashing", module: "Offensive",
+                        why: "Generate an MD5 hash to check if a binary matches known virus databases.", text: "Type <code>md5sum /tmp/malware.bin</code>",
+                        objective: "Hash the malware file", xp: 1000, check: (c,a) => c==="md5sum" && a[0]==="/tmp/malware.bin"
+                    },
+                    {
+                        title: "Privilege Check", module: "Offensive",
+                        why: "See what root commands you can exploit.", text: "Type <code>sudo -l</code>",
+                        objective: "Check sudo privileges", xp: 1200, check: (c,a) => c==="sudo" && a.includes("-l")
                     }
                 ]
             },
+            // --- MAXXED BLUE TEAM ---
             {
                 name: "9. Blue Team (Defensive Ops)",
                 lessons: [
                     {
-                        title: "Firewall Inspection (iptables)", module: "Defensive Security",
-                        why: "Iptables is the standard Linux kernel firewall. Blue teamers use it to block attacker IPs.",
-                        text: "Check your current firewall rules. Type <code>iptables -L</code> to list the tables.",
-                        objective: "List active iptables rules.", xp: 800,
-                        check: (cmd, args) => cmd === "iptables" && args.includes("-L")
+                        title: "Firewall Auditing", module: "Defensive",
+                        why: "Check your active kernel firewall rules.", text: "Type <code>iptables -L</code>",
+                        objective: "List iptables rules", xp: 800, check: (c,a) => c==="iptables" && a.includes("-L")
                     },
                     {
-                        title: "Dropping Malicious Traffic", module: "Defensive Security",
-                        why: "If an IP is brute-forcing your server, you must drop their packets instantly at the kernel level.",
-                        text: "Block the IP 10.0.0.5. Type <code>iptables -A INPUT -s 10.0.0.5 -j DROP</code>.",
-                        objective: "Append (-A) a rule to the INPUT chain to DROP an IP.", xp: 1000,
-                        check: (cmd, args) => cmd === "iptables" && args.includes("-A") && args.includes("INPUT") && args.includes("10.0.0.5") && args.includes("DROP")
+                        title: "Dropping Connections", module: "Defensive",
+                        why: "Block attacking IPs instantly.", text: "Type <code>iptables -A INPUT -s 10.0.0.5 -j DROP</code>",
+                        objective: "Append DROP rule to INPUT", xp: 1000, check: (c,a) => c==="iptables" && a.includes("-A") && a.includes("DROP")
+                    },
+                    {
+                        title: "Log Forensics", module: "Defensive",
+                        why: "Check auth logs for SSH brute-forcing.", text: "Type <code>cat /var/log/auth.log</code>",
+                        objective: "Read the auth log", xp: 1000, check: (c,a) => (c==="cat" || c==="tail") && a[0].includes("auth.log")
+                    },
+                    {
+                        title: "Listening Sockets", module: "Defensive",
+                        why: "Find rogue backdoors listening on open ports.", text: "Type <code>netstat -tuln</code>",
+                        objective: "View network sockets", xp: 1200, check: (c,a) => c==="netstat" && a.includes("-tuln")
+                    },
+                    {
+                        title: "SUID Auditing", module: "Defensive",
+                        why: "Find files that execute as root (SUID bit set) which hackers use for PrivEsc.", text: "Type <code>find / -perm -4000</code>",
+                        objective: "Find SUID binaries", xp: 1500, check: (c,a) => c==="find" && a.includes("-perm") && a.includes("-4000")
+                    },
+                    {
+                        title: "File Integrity", module: "Defensive",
+                        why: "Check if the password file was tampered with using SHA256.", text: "Type <code>sha256sum /etc/passwd</code>",
+                        objective: "Hash the passwd file", xp: 1500, check: (c,a) => c==="sha256sum" && a[0]==="/etc/passwd"
                     }
                 ]
             }
@@ -509,31 +439,38 @@
         const quests = [
             {
                 id: "q1", title: "Log File Investigator", difficulty: "Medium", reward: 300,
-                description: "Search the log files inside <code>/var/log</code> directory and locate the warning message.",
-                objective: "Grep for the word 'Warning' inside the file '/var/log/syslog'.",
-                hint: "Use 'grep' followed by the search pattern and then the absolute path of syslog.",
+                description: "Grep for 'Warning' inside /var/log/syslog.",
+                objective: "Grep for the word 'Warning'",
+                hint: "Use `grep Warning /var/log/syslog`",
                 check: (cmd, args) => cmd === "grep" && args.includes("Warning") && args.some(a => a.includes("syslog"))
             },
             {
                 id: "q2", title: "Web Server Incident", difficulty: "Hard", reward: 600,
-                description: "The website went down! You need to check the status of the Nginx service, and if it's dead, start it immediately.",
-                objective: "Start the nginx service daemon.",
-                hint: "First use 'systemctl status nginx', then 'systemctl start nginx'.",
+                description: "Start the Nginx service immediately.",
+                objective: "Start nginx service daemon.",
+                hint: "Use `systemctl start nginx`",
                 check: (cmd, args) => runningServices['nginx'] === true && cmd === "systemctl"
             },
             {
-                id: "q3", title: "APT Breach Analysis (Ultimate)", difficulty: "Ultimate", reward: 1500,
-                description: "A suspicious file was found at /tmp/malware.bin. It's a compiled binary so 'cat' won't work. We need to find the Hacker's C2 server URL hidden inside the code.",
-                objective: "Extract readable text from /tmp/malware.bin using strings.",
-                hint: "Run `strings /tmp/malware.bin`",
-                check: (cmd, args) => cmd === "strings" && args[0] === "/tmp/malware.bin"
+                id: "q3", title: "Rogue Socket Hunting (Ultimate)", difficulty: "Ultimate", reward: 1500,
+                description: "We suspect a backdoor is listening on a high port. Use `netstat -tuln` to find it, then use `nmap` to scan localhost to verify it.",
+                objective: "Run netstat and then nmap on localhost.",
+                hint: "Run `netstat -tuln`",
+                check: (cmd, args) => cmd === "netstat" && args.includes("-tuln")
             },
             {
-                id: "q4", title: "Block the Attacker (Ultimate)", difficulty: "Ultimate", reward: 2000,
-                description: "The logs show a brute force attack coming from IP 192.168.1.105. Configure the kernel firewall to DROP all packets from this source IP immediately.",
-                objective: "Use iptables to append a DROP rule to the INPUT chain for 192.168.1.105.",
-                hint: "Run `iptables -A INPUT -s 192.168.1.105 -j DROP`",
-                check: (cmd, args) => cmd === "iptables" && args.includes("-A") && args.includes("INPUT") && args.includes("192.168.1.105") && args.includes("DROP")
+                id: "q4", title: "The Threat Intel Hash (Ultimate)", difficulty: "Ultimate", reward: 2000,
+                description: "Generate an MD5 hash of /tmp/malware.bin to submit to VirusTotal.",
+                objective: "Calculate MD5 checksum of malware.bin",
+                hint: "Run `md5sum /tmp/malware.bin`",
+                check: (cmd, args) => cmd === "md5sum" && args[0] === "/tmp/malware.bin"
+            },
+            {
+                id: "q5", title: "Block the Brute Force (Ultimate)", difficulty: "Ultimate", reward: 2500,
+                description: "Read the `/var/log/auth.log` file. Find the IP addressing failing password attempts, and block it using `iptables` DROP.",
+                objective: "Drop the attacking IP via iptables.",
+                hint: "Check auth.log, find the 10.0.0.X IP, run `iptables -A INPUT -s [IP] -j DROP`",
+                check: (cmd, args) => cmd === "iptables" && args.includes("-A") && args.includes("10.0.0.99") && args.includes("DROP")
             }
         ];
 
@@ -678,13 +615,14 @@
         }
 
         // --- COMMAND ENGINE & PROGRESSION CHECKS ---
-        const maxGlobalXp = 15000;
+        const maxGlobalXp = 20000;
 
         function addXp(amount) {
             playerStats.xp += amount;
             
             let rank = "Terminal Newbie";
-            if (playerStats.xp >= 15000) rank = "Global CISO 🛡️👑";
+            if (playerStats.xp >= 20000) rank = "Cyber Warfare Director 🦅";
+            else if (playerStats.xp >= 15000) rank = "Global CISO 🛡️👑";
             else if (playerStats.xp >= 12000) rank = "Red Team Commander 🥷";
             else if (playerStats.xp >= 9000) rank = "Security Architect 🏰";
             else if (playerStats.xp >= 7000) rank = "Root Avatar 👁️";
@@ -710,9 +648,9 @@
             document.getElementById('overall-progress-tag').innerText = `Progress: ${percentage}%`;
         }
 
-        function saveStats() { localStorage.setItem('linux_learner_ultimate_stats', JSON.stringify(playerStats)); }
+        function saveStats() { localStorage.setItem('linux_learner_maxxed_stats', JSON.stringify(playerStats)); }
         function loadStats() {
-            let saved = localStorage.getItem('linux_learner_ultimate_stats');
+            let saved = localStorage.getItem('linux_learner_maxxed_stats');
             if (saved) {
                 try {
                     playerStats = JSON.parse(saved);
@@ -772,7 +710,7 @@
             },
             'pwd': { desc: 'Print working directory details.', run: () => currentPath },
             'ls': {
-                desc: 'List directory entries. Parameters: [target_path], [-la]',
+                desc: 'List directory entries.',
                 run: (args) => {
                     let showAll = args.includes('-la') || args.includes('-a');
                     let target = args.filter(a => !a.startsWith('-'))[0] || "";
@@ -845,19 +783,6 @@
                 }
             },
             'clear': { desc: 'Clean up screen displays.', run: () => "CLEAR_SIGNAL" },
-            'rm': {
-                desc: 'Remove files or directories (-r).',
-                run: (args) => {
-                    if (args.length === 0) return `<span class="term-err">rm: missing targets</span>`;
-                    let recursive = args[0] === '-r' || args[0] === '-rf';
-                    let target = recursive ? args[1] : args[0];
-                    let res = resolvePath(target);
-                    if (!res) return `<span class="term-err">rm: ${target} not found</span>`;
-                    if (res.node.type === 'dir' && !recursive) return `<span class="term-err">rm: cannot remove directory without -r</span>`;
-                    delete res.parentNode.contents[res.name];
-                    return "";
-                }
-            },
             'grep': {
                 desc: 'Filter matches inside text documents.',
                 run: (args) => {
@@ -880,7 +805,6 @@
                     return res.node.content.split('\n').slice(0, 5).join('<br>');
                 }
             },
-            // --- Advanced Tools ---
             'systemctl': {
                 desc: 'Control system daemon background services.', minXp: 2000,
                 run: (args) => {
@@ -892,11 +816,8 @@
                         let color = isRun ? "text-green-400" : "text-slate-500";
                         let state = isRun ? "active (running)" : "inactive (dead)";
                         return `● ${service}.service - Advanced Application Daemon<br>&nbsp;&nbsp;&nbsp;Active: <span class="${color} font-bold">${state}</span>`;
-                    } else if (action === 'start') {
-                        runningServices[service] = true; return "";
-                    } else if (action === 'stop') {
-                        runningServices[service] = false; return "";
-                    }
+                    } else if (action === 'start') { runningServices[service] = true; return "";
+                    } else if (action === 'stop') { runningServices[service] = false; return ""; }
                     return "systemctl: unknown operational action.";
                 }
             },
@@ -945,37 +866,101 @@
                     return "";
                 }
             },
-            // --- SECURITY TOOLS (CYBERSEC ULTIMATE) ---
+            // --- MAXXED CYBERSECURITY TOOLS ---
+            'curl': {
+                desc: 'Fetch HTTP Headers for OSINT (curl -I).', minXp: 5000,
+                run: (args) => {
+                    if (args.includes('-I')) {
+                        return `HTTP/1.1 200 OK<br>Server: nginx/1.24.0 (Ubuntu)<br>Date: Wed, 21 Oct 2026 07:28:00 GMT<br>Content-Type: text/html<br>Connection: keep-alive<br>X-Powered-By: PHP/8.1.2`;
+                    }
+                    return `&lt;html&gt;Target Acquired&lt;/html&gt;`;
+                }
+            },
+            'sudo': {
+                desc: 'Check root privileges.', minXp: 5000,
+                run: (args) => {
+                    if (args.includes('-l')) {
+                        return `User sysadmin may run the following commands on gemini-sandbox:<br>&nbsp;&nbsp;&nbsp;&nbsp;(ALL : ALL) NOPASSWD: /usr/bin/cat, /usr/bin/systemctl`;
+                    }
+                    return "[sudo] password for sysadmin:";
+                }
+            },
+            'md5sum': {
+                desc: 'Compute MD5 cryptographic message digest.', minXp: 5000,
+                run: (args) => {
+                    if (args.length === 0) return "md5sum: missing file operand";
+                    let target = args[0];
+                    if (target.includes("malware.bin")) return `e99a18c428cb38d5f260853678922e03  ${target}`;
+                    return `d41d8cd98f00b204e9800998ecf8427e  ${target}`;
+                }
+            },
+            'sha256sum': {
+                desc: 'Compute SHA256 cryptographic message digest.', minXp: 5000,
+                run: (args) => {
+                    if (args.length === 0) return "sha256sum: missing file operand";
+                    let target = args[0];
+                    if (target.includes("passwd")) return `5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8  ${target}`;
+                    return `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ${target}`;
+                }
+            },
             'nmap': {
-                desc: 'Network exploration tool and security / port scanner.', minXp: 5000,
+                desc: 'Network exploration and port scanner.', minXp: 5000,
                 run: (args) => {
                     if (args.length === 0) return "nmap: missing target IP";
                     let target = args[0];
-                    return `Starting Nmap 7.93 ( https://nmap.org )<br>Nmap scan report for ${target}<br>Host is up (0.0020s latency).<br>Not shown: 998 closed tcp ports<br>PORT&nbsp;&nbsp;&nbsp;STATE&nbsp;SERVICE<br>22/tcp&nbsp;open&nbsp;&nbsp;ssh<br>80/tcp&nbsp;open&nbsp;&nbsp;http<br><br>Nmap done: 1 IP address scanned in 0.25 seconds`;
+                    return `Starting Nmap 7.93<br>Nmap scan report for ${target}<br>PORT&nbsp;&nbsp;&nbsp;&nbsp;STATE&nbsp;SERVICE<br>22/tcp&nbsp;&nbsp;open&nbsp;&nbsp;ssh<br>80/tcp&nbsp;&nbsp;open&nbsp;&nbsp;http<br>4444/tcp&nbsp;open&nbsp;&nbsp;krb524<br>Nmap done: 1 IP address scanned in 0.25 seconds`;
                 }
             },
             'strings': {
-                desc: 'Print the sequences of printable characters in files (Reverse Engineering).', minXp: 5000,
+                desc: 'Extract printable strings from binary files.', minXp: 5000,
                 run: (args) => {
                     if (args.length === 0) return "strings: missing file operand";
                     let res = resolvePath(args[0]);
                     if (!res) return `strings: ${args[0]}: No such file`;
                     if (res.node.type === 'dir') return `strings: ${args[0]}: Is a directory`;
-                    
-                    // Simple regex to extract printable strings (mocking string extraction)
                     let text = res.node.content;
                     let matches = text.match(/[a-zA-Z0-9-_.://]{4,}/g);
                     if (matches) return matches.join('<br>');
                     return "strings: no printable characters found.";
                 }
             },
+            'netstat': {
+                desc: 'Print network connections, routing tables, and interface stats.', minXp: 6000,
+                run: (args) => {
+                    return `Active Internet connections (only servers)<br>Proto Recv-Q Send-Q Local Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Foreign Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State<br>tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0.0.0.0:22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN<br>tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0.0.0.0:80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN<br><span class="text-red-400 font-bold">tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0.0.0.0:4444&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN</span>`;
+                }
+            },
+            'find': {
+                desc: 'Search for files in a directory hierarchy.', minXp: 6000,
+                run: (args) => {
+                    if (args.includes('-perm') && args.includes('-4000')) {
+                        return `/usr/bin/ping<br>/usr/bin/passwd<br><span class="text-red-400 font-bold">/usr/bin/sudo</span>`;
+                    }
+                    let target = args[0] || ".";
+                    let res = resolvePath(target);
+                    if (!res) return `<span class="term-err">find: '${target}': No such path</span>`;
+                    let output = [];
+                    function traverse(node, currentPathStr) {
+                        output.push(currentPathStr);
+                        if (node.type === 'dir') {
+                            for (let key in node.contents) {
+                                let nextPath = currentPathStr.endsWith('/') ? currentPathStr + key : currentPathStr + '/' + key;
+                                if (currentPathStr === '.') nextPath = './' + key;
+                                traverse(node.contents[key], nextPath);
+                            }
+                        }
+                    }
+                    traverse(res.node, target);
+                    return output.join('<br>');
+                }
+            },
             'iptables': {
-                desc: 'Administration tool for IPv4 packet filtering and firewalls.', minXp: 6000,
+                desc: 'IPv4 packet filtering and firewalls.', minXp: 6000,
                 run: (args) => {
                     if (args.includes('-L')) {
                         let out = "Chain INPUT (policy ACCEPT)<br>target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prot&nbsp;opt&nbsp;source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destination<br>";
                         firewallRules.forEach(r => {
-                            out += `DROP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;--&nbsp;&nbsp;${r.padEnd(20)} anywhere<br>`;
+                            out += `<span class="text-red-400 font-bold">DROP</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;--&nbsp;&nbsp;${r.padEnd(20)} anywhere<br>`;
                         });
                         return out;
                     }
@@ -986,7 +971,7 @@
                             return "iptables: Rule appended to drop incoming traffic.";
                         }
                     }
-                    return "iptables v1.8.7: no command specified. Use -L to list or -A to append.";
+                    return "iptables: no command specified. Use -L to list or -A to append.";
                 }
             }
         };
