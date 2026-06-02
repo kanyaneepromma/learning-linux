@@ -87,26 +87,3 @@ body {
     color: #34d399; /* Matrix Green default */
     font-family: 'Fira Code', monospace;
 }
-
-/* Terminal ANSI-style Rainbow Colors */
-.term-dir { color: #60a5fa; font-weight: bold; } /* Blue Folders */
-.term-exec { color: #fbbf24; font-weight: bold; } /* Amber Executables */
-.term-err { color: #f87171; font-weight: bold; } /* Red Errors */
-.term-prompt { color: #f472b6; font-weight: bold; } /* Pink Prompt */
-.term-path { color: #34d399; font-weight: bold; } /* Emerald Path */
-
-/* Fix the Input Line Blending Issue */
-#input-line {
-    background: #0a0a0a;
-    border-top: 1px solid #1e293b;
-}
-
-#cmd-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #ffffff; /* FORCE WHITE TEXT */
-    font-family: 'Fira Code', monospace;
-    font-size: 14px;
-    caret-color: #f472b6; /* Pink cursor */
-}
