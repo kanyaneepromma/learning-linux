@@ -34,7 +34,6 @@
             background: #475569; 
         }
 
-        /* Animations */
         .pulse-emerald {
             animation: pulse-glow 2s infinite;
         }
@@ -228,6 +227,17 @@
     </div>
 
     <script>
+        // --- ANTI-INSPECT SECURITY HOOK ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', event => {
+            // Block F12
+            if (event.key === 'F12') event.preventDefault();
+            // Block Ctrl+Shift+I / J / C
+            if (event.ctrlKey && event.shiftKey && ['I', 'J', 'C'].includes(event.key.toUpperCase())) event.preventDefault();
+            // Block Ctrl+U (View Source)
+            if (event.ctrlKey && event.key.toUpperCase() === 'U') event.preventDefault();
+        });
+
         // --- VIRTUAL FILE SYSTEM (VFS) STATE DATABASE ---
         let vfs = {};
 
@@ -334,7 +344,7 @@
             return currentPath;
         }
 
-        // --- STREAMING_CHUNK: Compiling Modules and Structured Curriculum Lessons ---
+        // --- STREAMING_CHUNK: Compiling Modules and Curriculum Data ---
         const learningModules = [
             {
                 name: "1. Navigation Masterclass",
@@ -711,7 +721,7 @@
             }
         ];
 
-        // --- STREAMING_CHUNK: Setting up Boss Quests and Sandbox Challenges ---
+        // --- STREAMING_CHUNK: Instantiating Quests Data Objects ---
         const quests = [
             {
                 id: "q1",
@@ -789,7 +799,7 @@
         let activeLessonIndex = 0;
         let activeTab = 'modules';
 
-        // --- STREAMING_CHUNK: Wiring Core Navigation and Dynamic Renderings ---
+        // --- STREAMING_CHUNK: View Switching and DOM Manipulation Functions ---
         
         function switchTab(tabId) {
             activeTab = tabId;
@@ -937,7 +947,7 @@
             });
         }
 
-        // --- STREAMING_CHUNK: Designing the search index and Command Cheatsheet ---
+        // --- STREAMING_CHUNK: Setting up Command Cheatsheet and Statistics ---
         function renderCheatsheet() {
             let container = document.getElementById('cheatsheet-list');
             container.innerHTML = '';
@@ -1016,7 +1026,7 @@
             addXp(0); // Update gauges
         }
 
-        // --- STREAMING_CHUNK: Compiling Sandbox Shell Commands ---
+        // --- STREAMING_CHUNK: Initializing Terminal Sandbox Command Logic ---
         
         const commands = {
             'help': {
