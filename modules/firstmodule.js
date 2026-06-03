@@ -43,7 +43,11 @@ const module1_navigation = {
       text: "Type <code>ls -la</code>",
       objective: "Type ls -la",
       xp: 10,
-      check: (c, a) => c === "ls" && (a.includes("-la") || a.includes("-al") || (a.includes("-l") && a.includes("-a"))),
+      check: (c, a) =>
+        c === "ls" &&
+        (a.includes("-la") ||
+          a.includes("-al") ||
+          (a.includes("-l") && a.includes("-a"))),
     },
 
     // --- NAVIGATION: CD ---
@@ -167,7 +171,11 @@ const module1_navigation = {
       text: "Type <code>find / -type d</code>",
       objective: "Type find / -type d",
       xp: 40,
-      check: (c, a) => c === "find" && a.includes("/") && a.includes("-type") && a.includes("d"),
+      check: (c, a) =>
+        c === "find" &&
+        a.includes("/") &&
+        a.includes("-type") &&
+        a.includes("d"),
     },
     {
       title: "Global Find Files",
@@ -175,47 +183,66 @@ const module1_navigation = {
       text: "Type <code>find / -type f</code>",
       objective: "Type find / -type f",
       xp: 40,
-      check: (c, a) => c === "find" && a.includes("/") && a.includes("-type") && a.includes("f"),
+      check: (c, a) =>
+        c === "find" &&
+        a.includes("/") &&
+        a.includes("-type") &&
+        a.includes("f"),
     },
     {
       title: "Find by Name",
       why: "We can pass a specific string to search for using the <b>-name</b> flag. Here, we are asking Linux to scour the entire hard drive (starting at /) for a file exactly named 'passwd', which contains the system user data.",
-      text: "Type <code>find / -name \"passwd\"</code>",
-      objective: "Type find / -name \"passwd\"",
+      text: 'Type <code>find / -name "passwd"</code>',
+      objective: 'Type find / -name "passwd"',
       xp: 45,
-      check: (c, a) => c === "find" && a.includes("-name") && a.some((x) => x.includes("passwd")),
+      check: (c, a) =>
+        c === "find" &&
+        a.includes("-name") &&
+        a.some((x) => x.includes("passwd")),
     },
     {
       title: "Find by Ext",
       why: "The asterisk (*) is a wildcard. It means 'anything'. By searching for <b>*.txt</b>, you are telling the system: 'I don't care what the name is, as long as it ends with .txt.'",
-      text: "Type <code>find / -name \"*.txt\"</code>",
-      objective: "Type find / -name \"*.txt\"",
+      text: 'Type <code>find / -name "*.txt"</code>',
+      objective: 'Type find / -name "*.txt"',
       xp: 45,
-      check: (c, a) => c === "find" && a.includes("-name") && a.some((x) => x.includes("*.txt")),
+      check: (c, a) =>
+        c === "find" &&
+        a.includes("-name") &&
+        a.some((x) => x.includes("*.txt")),
     },
     {
       title: "Find by Ext 2",
       why: "Let's find all configuration files on the system using the .conf extension wildcard.",
-      text: "Type <code>find / -name \"*.conf\"</code>",
-      objective: "Type find / -name \"*.conf\"",
+      text: 'Type <code>find / -name "*.conf"</code>',
+      objective: 'Type find / -name "*.conf"',
       xp: 30,
-      check: (c, a) => c === "find" && a.includes("-name") && a.some((x) => x.includes("*.conf")),
+      check: (c, a) =>
+        c === "find" &&
+        a.includes("-name") &&
+        a.some((x) => x.includes("*.conf")),
     },
     {
       title: "Find by Ext 3",
       why: "Let's find all the system log files.",
-      text: "Type <code>find / -name \"*.log\"</code>",
-      objective: "Type find / -name \"*.log\"",
+      text: 'Type <code>find / -name "*.log"</code>',
+      objective: 'Type find / -name "*.log"',
       xp: 30,
-      check: (c, a) => c === "find" && a.includes("-name") && a.some((x) => x.includes("*.log")),
+      check: (c, a) =>
+        c === "find" &&
+        a.includes("-name") &&
+        a.some((x) => x.includes("*.log")),
     },
     {
       title: "Find by Ext 4",
       why: "Let's find all the bash scripts on the system (.sh). Hackers often look for these to find automation tasks they can hijack.",
-      text: "Type <code>find / -name \"*.sh\"</code>",
-      objective: "Type find / -name \"*.sh\"",
+      text: 'Type <code>find / -name "*.sh"</code>',
+      objective: 'Type find / -name "*.sh"',
       xp: 30,
-      check: (c, a) => c === "find" && a.includes("-name") && a.some((x) => x.includes("*.sh")),
+      check: (c, a) =>
+        c === "find" &&
+        a.includes("-name") &&
+        a.some((x) => x.includes("*.sh")),
     },
 
     // --- READING: CAT & GREP ---
@@ -246,50 +273,64 @@ const module1_navigation = {
     {
       title: "Grep User",
       why: "If a file is 10,000 lines long, `cat` is useless. <b>grep</b> (Global Regular Expression Print) searches inside files. It filters out everything except the specific word you asked for. Let's pull out only the line containing 'root'.",
-      text: "Type <code>grep \"root\" /etc/passwd</code>",
-      objective: "Type grep \"root\" /etc/passwd",
+      text: 'Type <code>grep "root" /etc/passwd</code>',
+      objective: 'Type grep "root" /etc/passwd',
       xp: 40,
-      check: (c, a) => c === "grep" && a.some((x) => x.includes("root")) && a.includes("/etc/passwd"),
+      check: (c, a) =>
+        c === "grep" &&
+        a.some((x) => x.includes("root")) &&
+        a.includes("/etc/passwd"),
     },
     {
       title: "Grep Error",
       why: "Let's filter the massive authentication log for any line that contains the word 'failed'. This is how defenders spot brute-force attacks.",
-      text: "Type <code>grep \"failed\" /var/log/auth.log</code>",
-      objective: "Type grep \"failed\" /var/log/auth.log",
+      text: 'Type <code>grep "failed" /var/log/auth.log</code>',
+      objective: 'Type grep "failed" /var/log/auth.log',
       xp: 40,
-      check: (c, a) => c === "grep" && a.some((x) => x.includes("failed")) && a.includes("/var/log/auth.log"),
+      check: (c, a) =>
+        c === "grep" &&
+        a.some((x) => x.includes("failed")) &&
+        a.includes("/var/log/auth.log"),
     },
     {
       title: "Grep Warning",
       why: "Let's filter the kernel syslog for any line containing the word 'error'.",
-      text: "Type <code>grep \"error\" /var/log/syslog</code>",
-      objective: "Type grep \"error\" /var/log/syslog",
+      text: 'Type <code>grep "error" /var/log/syslog</code>',
+      objective: 'Type grep "error" /var/log/syslog',
       xp: 40,
-      check: (c, a) => c === "grep" && a.some((x) => x.includes("error")) && a.includes("/var/log/syslog"),
+      check: (c, a) =>
+        c === "grep" &&
+        a.some((x) => x.includes("error")) &&
+        a.includes("/var/log/syslog"),
     },
     {
       title: "Grep IP",
       why: "You can also search for numbers! Let's filter the auth log to track the activity of a specific IP address.",
-      text: "Type <code>grep \"10.0.0.99\" /var/log/auth.log</code>",
-      objective: "Type grep \"10.0.0.99\" /var/log/auth.log",
+      text: 'Type <code>grep "10.0.0.99" /var/log/auth.log</code>',
+      objective: 'Type grep "10.0.0.99" /var/log/auth.log',
       xp: 40,
-      check: (c, a) => c === "grep" && a.some((x) => x.includes("10.0.0.99")) && a.includes("/var/log/auth.log"),
+      check: (c, a) =>
+        c === "grep" &&
+        a.some((x) => x.includes("10.0.0.99")) &&
+        a.includes("/var/log/auth.log"),
     },
     {
       title: "Grep Case Insensitive",
       why: "By default, grep is case-sensitive ('Fail' is different from 'fail'). Adding the <b>-i</b> flag makes the search case-insensitive, returning both.",
-      text: "Type <code>grep -i \"fail\" /var/log/auth.log</code>",
-      objective: "Type grep -i \"fail\"",
+      text: 'Type <code>grep -i "fail" /var/log/auth.log</code>',
+      objective: 'Type grep -i "fail"',
       xp: 45,
-      check: (c, a) => c === "grep" && a.includes("-i") && a.some((x) => x.includes("fail")),
+      check: (c, a) =>
+        c === "grep" && a.includes("-i") && a.some((x) => x.includes("fail")),
     },
     {
       title: "Grep Word",
       why: "Sometimes 'root' might show up inside another word (like 'chroot'). The <b>-w</b> flag forces grep to only return matches where your search term is an exact, standalone word.",
-      text: "Type <code>grep -w \"root\" /etc/passwd</code>",
-      objective: "Type grep -w \"root\"",
+      text: 'Type <code>grep -w "root" /etc/passwd</code>',
+      objective: 'Type grep -w "root"',
       xp: 45,
-      check: (c, a) => c === "grep" && a.includes("-w") && a.some((x) => x.includes("root")),
+      check: (c, a) =>
+        c === "grep" && a.includes("-w") && a.some((x) => x.includes("root")),
     },
 
     // --- MANIPULATION: MKDIR, TOUCH, RM, CP, MV ---
@@ -307,7 +348,8 @@ const module1_navigation = {
       text: "Type <code>mkdir -p a/b/c</code>",
       objective: "Type mkdir -p a/b/c",
       xp: 30,
-      check: (c, a) => c === "mkdir" && a.includes("-p") && a.some((x) => x.includes("a/b/c")),
+      check: (c, a) =>
+        c === "mkdir" && a.includes("-p") && a.some((x) => x.includes("a/b/c")),
     },
     {
       title: "Make Test Dir",
@@ -379,7 +421,8 @@ const module1_navigation = {
       text: "Type <code>rm -r test_dir</code>",
       objective: "Type rm -r test_dir",
       xp: 30,
-      check: (c, a) => c === "rm" && a.includes("-r") && a.some((x) => x.includes("test_dir")),
+      check: (c, a) =>
+        c === "rm" && a.includes("-r") && a.some((x) => x.includes("test_dir")),
     },
     {
       title: "Remove Nested",
@@ -395,7 +438,8 @@ const module1_navigation = {
       text: "Type <code>cp payload.sh payload_backup.sh</code>",
       objective: "Type cp payload.sh payload_backup.sh",
       xp: 25,
-      check: (c, a) => c === "cp" && a[0] === "payload.sh" && a[1] === "payload_backup.sh",
+      check: (c, a) =>
+        c === "cp" && a[0] === "payload.sh" && a[1] === "payload_backup.sh",
     },
     {
       title: "Copy Log",
@@ -403,7 +447,8 @@ const module1_navigation = {
       text: "Type <code>cp debug.log debug.bak</code>",
       objective: "Type cp debug.log debug.bak",
       xp: 20,
-      check: (c, a) => c === "cp" && a[0] === "debug.log" && a[1] === "debug.bak",
+      check: (c, a) =>
+        c === "cp" && a[0] === "debug.log" && a[1] === "debug.bak",
     },
     {
       title: "Move File",
@@ -411,7 +456,8 @@ const module1_navigation = {
       text: "Type <code>mv payload.sh exploit/</code>",
       objective: "Type mv payload.sh exploit/",
       xp: 25,
-      check: (c, a) => c === "mv" && a[0] === "payload.sh" && a[1] === "exploit/",
+      check: (c, a) =>
+        c === "mv" && a[0] === "payload.sh" && a[1] === "exploit/",
     },
     {
       title: "Rename File",
@@ -419,7 +465,8 @@ const module1_navigation = {
       text: "Type <code>mv debug.bak debug_old.log</code>",
       objective: "Type mv debug.bak debug_old.log",
       xp: 30,
-      check: (c, a) => c === "mv" && a[0] === "debug.bak" && a[1] === "debug_old.log",
+      check: (c, a) =>
+        c === "mv" && a[0] === "debug.bak" && a[1] === "debug_old.log",
     },
 
     // --- ARCHIVING: TAR ---
@@ -429,7 +476,10 @@ const module1_navigation = {
       text: "Type <code>tar -cvf backup.tar exploit/</code>",
       objective: "Type tar -cvf",
       xp: 40,
-      check: (c, a) => c === "tar" && a.includes("-cvf") && a.some((x) => x.includes("backup.tar")),
+      check: (c, a) =>
+        c === "tar" &&
+        a.includes("-cvf") &&
+        a.some((x) => x.includes("backup.tar")),
     },
     {
       title: "Tar Extract",
@@ -437,7 +487,10 @@ const module1_navigation = {
       text: "Type <code>tar -xvf backup.tar</code>",
       objective: "Type tar -xvf",
       xp: 40,
-      check: (c, a) => c === "tar" && a.includes("-xvf") && a.some((x) => x.includes("backup.tar")),
+      check: (c, a) =>
+        c === "tar" &&
+        a.includes("-xvf") &&
+        a.some((x) => x.includes("backup.tar")),
     },
     {
       title: "Tar Gzip",
@@ -445,7 +498,10 @@ const module1_navigation = {
       text: "Type <code>tar -czvf backup.tar.gz exploit/</code>",
       objective: "Type tar -czvf",
       xp: 50,
-      check: (c, a) => c === "tar" && a.includes("-czvf") && a.some((x) => x.includes("backup.tar.gz")),
+      check: (c, a) =>
+        c === "tar" &&
+        a.includes("-czvf") &&
+        a.some((x) => x.includes("backup.tar.gz")),
     },
 
     // --- DATA INSPECTION: HEAD, TAIL, WC ---
@@ -463,7 +519,11 @@ const module1_navigation = {
       text: "Type <code>head -n 3 /var/log/syslog</code>",
       objective: "Type head -n 3",
       xp: 20,
-      check: (c, a) => c === "head" && a.includes("-n") && a.includes("3") && a.includes("/var/log/syslog"),
+      check: (c, a) =>
+        c === "head" &&
+        a.includes("-n") &&
+        a.includes("3") &&
+        a.includes("/var/log/syslog"),
     },
     {
       title: "Tail Read",
@@ -479,7 +539,8 @@ const module1_navigation = {
       text: "Type <code>tail -f /var/log/syslog</code>",
       objective: "Type tail -f",
       xp: 40,
-      check: (c, a) => c === "tail" && a.includes("-f") && a.includes("/var/log/syslog"),
+      check: (c, a) =>
+        c === "tail" && a.includes("-f") && a.includes("/var/log/syslog"),
     },
     {
       title: "Word Count Lines",
@@ -487,7 +548,8 @@ const module1_navigation = {
       text: "Type <code>wc -l /etc/passwd</code>",
       objective: "Type wc -l",
       xp: 25,
-      check: (c, a) => c === "wc" && a.includes("-l") && a.includes("/etc/passwd"),
+      check: (c, a) =>
+        c === "wc" && a.includes("-l") && a.includes("/etc/passwd"),
     },
     {
       title: "Word Count Words",
@@ -495,7 +557,8 @@ const module1_navigation = {
       text: "Type <code>wc -w /etc/passwd</code>",
       objective: "Type wc -w",
       xp: 25,
-      check: (c, a) => c === "wc" && a.includes("-w") && a.includes("/etc/passwd"),
+      check: (c, a) =>
+        c === "wc" && a.includes("-w") && a.includes("/etc/passwd"),
     },
     {
       title: "Word Count Bytes",
@@ -503,7 +566,8 @@ const module1_navigation = {
       text: "Type <code>wc -c /etc/passwd</code>",
       objective: "Type wc -c",
       xp: 25,
-      check: (c, a) => c === "wc" && a.includes("-c") && a.includes("/etc/passwd"),
+      check: (c, a) =>
+        c === "wc" && a.includes("-c") && a.includes("/etc/passwd"),
     },
 
     // --- SYSTEM UTILS ---
@@ -526,10 +590,13 @@ const module1_navigation = {
     {
       title: "Final Exam",
       why: "You now understand how the Linux matrix is structured, how to navigate its rooms, and how to manipulate its files. The basics are conquered.",
-      text: "Type <code>echo \"Navigation Mastered\"</code>",
+      text: 'Type <code>echo "Navigation Mastered"</code>',
       objective: "Echo the final phrase",
       xp: 100,
-      check: (c, a, o, raw) => raw.includes("echo") && raw.includes("Navigation") && raw.includes("Mastered"),
+      check: (c, a, o, raw) =>
+        raw.includes("echo") &&
+        raw.includes("Navigation") &&
+        raw.includes("Mastered"),
     },
   ],
 };

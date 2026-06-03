@@ -205,7 +205,7 @@ function renderLesson() {
   document.getElementById("lesson-module-tag").innerText = m.name.split(" ")[1];
   document.getElementById("lesson-index-tag").innerText =
     `Lesson ${activeLessonIndex + 1}/${m.lessons.length}`;
-    
+
   // UPGRADED UI: Massive Mission Briefing Box & Clearer Command Target
   document.getElementById("active-lesson-body").innerHTML = `
         <h2 class="text-lg font-black text-white flex items-center gap-1.5 mb-2">
@@ -218,7 +218,7 @@ function renderLesson() {
         <div class="text-sm text-slate-200 leading-relaxed font-mono bg-slate-900/80 p-3 rounded border border-slate-800">
             ${l.text}
         </div>`;
-        
+
   document.getElementById("lesson-objective-target").innerHTML = l.objective;
   document.getElementById("lesson-xp-badge").innerText = `+${l.xp} XP`;
   renderModulesOverview();
