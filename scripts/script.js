@@ -16,6 +16,7 @@ let playerStats = {
   completedQuests: [],
   discoveredCommands: [],
 };
+let isAssistantActive = false;
 
 const initialVfsTemplate = {
   "/": {
@@ -457,6 +458,27 @@ function executeCommand(rawCommand) {
   }
 }
 
+function toggleAssistant() {
+  isAssistantActive = !isAssistantActive;
+  const btn = document.getElementById("btn-assistant");
+  const assistantBubble = document.getElementById("cyber-assistant");
+
+  if (isAssistantActive) {
+    btn.innerHTML = "💡 Deep Dive: ON";
+    btn.classList.replace("text-yellow-400", "text-emerald-400");
+    btn.classList.replace("bg-yellow-400/10", "bg-emerald-400/10");
+    btn.classList.replace("border-yellow-400/20", "border-emerald-400/20");
+  } else {
+    btn.innerHTML = "💡 Deep Dive: OFF";
+    btn.classList.replace("text-emerald-400", "text-yellow-400");
+    btn.classList.replace("bg-emerald-400/10", "bg-yellow-400/10");
+    btn.classList.replace("border-emerald-400/20", "border-yellow-400/20");
+    // Hide bubble instantly if turned off
+    assistantBubble.classList.remove("assistant-show");
+    setTimeout(() => assistantBubble.classList.add("hidden"), 300);
+  }
+}
+
 function resetSandbox() {
   if (
     confirm(
@@ -509,6 +531,43 @@ function resetSandbox() {
   }
 }
 
+// --- DEEP DIVE ASSISTANT LISTENER ---
+cmdInput.addEventListener("input", () => {
+  if (!isAssistantActive) return;
+
+  const assistantBubble = document.getElementById("cyber-assistant");
+  const title = document.getElementById("assistant-title");
+  const text = document.getElementById("assistant-text");
+
+  // Grab exactly what the user is typing
+  let rawText = cmdInput.value.trim();
+  let commandTyped = rawText.split(" ")[0].toLowerCase(); // Only check the first word
+
+  if (commandTyped === "") {
+    // Hide if input is empty
+    assistantBubble.classList.remove("assistant-show");
+    setTimeout(() => {
+      if (!cmdInput.value.trim()) assistantBubble.classList.add("hidden");
+    }, 300);
+  } else if (deepDiveData[commandTyped]) {
+    // We have a match! Show the deep dive.
+    title.innerText = `Command: ${commandTyped}`;
+    text.innerHTML = deepDiveData[commandTyped];
+
+    assistantBubble.classList.remove("hidden");
+    // Tiny timeout to allow display:block to apply before animating opacity
+    setTimeout(() => assistantBubble.classList.add("assistant-show"), 10);
+  } else {
+    // Command not in our dictionary yet
+    title.innerText = `Command: ${commandTyped}`;
+    text.innerHTML = `<em>Bit is analyzing... Keep typing or execute the command!</em>`;
+
+    assistantBubble.classList.remove("hidden");
+    setTimeout(() => assistantBubble.classList.add("assistant-show"), 10);
+  }
+});
+
+// Also hide the assistant when the user hits Enter!
 cmdInput.addEventListener("keydown", (e) => {
   playSound("type");
   if (e.key === "Enter") {
@@ -519,11 +578,11 @@ cmdInput.addEventListener("keydown", (e) => {
     }
     executeCommand(cmd);
     cmdInput.value = "";
-  } else if (e.key === "ArrowUp") {
-    if (historyIndex > 0) {
-      historyIndex--;
-      cmdInput.value = commandHistory[historyIndex];
-    }
+
+    // ADD THIS TO HIDE THE ASSISTANT AFTER PRESSING ENTER
+    const assistantBubble = document.getElementById("cyber-assistant");
+    assistantBubble.classList.remove("assistant-show");
+    setTimeout(() => assistantBubble.classList.add("hidden"), 300);
   } else if (e.key === "ArrowDown") {
     if (historyIndex < commandHistory.length - 1) {
       historyIndex++;

@@ -206,3 +206,10 @@ body {
   animation: cyber-reveal 0.35s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
   transform-origin: left;
 }
+
+/* Assistant Pop-up Animations */
+.assistant-show {
+  display: block !important;
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}

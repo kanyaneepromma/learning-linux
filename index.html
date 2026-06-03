@@ -222,12 +222,22 @@
             sysadmin@celrigella-sandbox:~
           </span>
         </div>
-        <button
-          onclick="resetSandbox()"
-          class="text-[10px] bg-slate-900 border border-slate-800 hover:bg-red-950/40 hover:text-red-400 text-slate-400 px-2 py-1 rounded transition-all font-mono"
-        >
-          ⚡ Hard Reset
-        </button>
+        <div class="flex gap-2">
+          <button
+            id="btn-assistant"
+            onclick="toggleAssistant()"
+            class="px-3 py-1.5 text-xs font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded hover:bg-yellow-400/20 transition-all flex items-center gap-1"
+          >
+            💡 Deep Dive: OFF
+          </button>
+
+          <button
+            onclick="resetSandbox()"
+            class="px-3 py-1.5 text-xs font-bold text-red-400 bg-red-400/10 border border-red-400/20 rounded hover:bg-red-400/20 transition-all"
+          >
+            🧹 Hard Reset
+          </button>
+        </div>
       </div>
 
       <div
@@ -237,7 +247,7 @@
         <div
           class="text-slate-500 font-mono text-xs border-b border-slate-900/60 pb-3 mb-3"
         >
-          <span>Celrigella Linux Sandbox by Kwan & Gemini</span><br />
+          <span>🌟 Celrigella 🌟 Linux Sandbox by Kwan 🦖 & Gemini ✨ [2026 Edition]</span><br />
           <span>Type 'help' to inspect command indices.</span>
         </div>
         <div class="mb-4">
@@ -245,7 +255,7 @@
             >Welcome to the Mega Sandbox.</span
           ><br />
           <span class="text-slate-400"
-            >Over 100+ rapid-fire lessons have been loaded. Get to work!</span
+            >Over 500+ rapid-fire lessons have been loaded. Get to work!</span
           >
         </div>
       </div>
@@ -254,7 +264,28 @@
         id="autocomplete-indicator"
         class="px-4 py-1 bg-slate-950/80 border-t border-slate-900 terminal-font text-xs text-slate-500 hidden font-semibold"
       ></div>
-
+      <div
+        id="cyber-assistant"
+        class="hidden absolute bottom-16 left-4 w-[90%] md:w-2/3 bg-slate-900 border border-yellow-500/50 rounded-xl p-4 shadow-[0_0_20px_rgba(234,179,8,0.15)] z-50 transition-all duration-300 translate-y-4 opacity-0"
+      >
+        <div class="flex items-start gap-3">
+          <div class="text-3xl animate-bounce">💡</div>
+          <div>
+            <h4
+              class="font-bold text-yellow-400 font-mono text-sm uppercase tracking-wider"
+              id="assistant-title"
+            >
+              Bit's Deep Dive
+            </h4>
+            <p
+              class="text-sm text-slate-300 mt-1.5 leading-relaxed"
+              id="assistant-text"
+            >
+              Waiting for input...
+            </p>
+          </div>
+        </div>
+      </div>
       <div
         class="px-4 pb-4 terminal-font text-sm md:text-base flex items-center w-full"
         id="input-line"
@@ -303,6 +334,7 @@
     <script src="scripts/module.js"></script>
     <script src="scripts/quest.js"></script>
     <script src="scripts/fx.js"></script>
+    <script src="scripts/assistant.js"></script>
     <script src="scripts/script.js"></script>
   </body>
 </html>
