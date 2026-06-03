@@ -205,10 +205,20 @@ function renderLesson() {
   document.getElementById("lesson-module-tag").innerText = m.name.split(" ")[1];
   document.getElementById("lesson-index-tag").innerText =
     `Lesson ${activeLessonIndex + 1}/${m.lessons.length}`;
+    
+  // UPGRADED UI: Massive Mission Briefing Box & Clearer Command Target
   document.getElementById("active-lesson-body").innerHTML = `
-        <h2 class="text-lg font-black text-white flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full bg-indigo-500 pulse-emerald"></span>${l.title}</h2>
-        <div class="text-slate-400 text-[11px] leading-relaxed border-l-2 border-indigo-500/30 pl-3 italic bg-indigo-500/5 py-1.5 rounded-r"><strong class="text-slate-300">Context:</strong> ${l.why}</div>
-        <p class="text-sm text-slate-300 leading-relaxed">${l.text}</p>`;
+        <h2 class="text-lg font-black text-white flex items-center gap-1.5 mb-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 pulse-emerald"></span>${l.title}
+        </h2>
+        <div class="text-slate-300 text-xs leading-relaxed border-l-2 border-indigo-500/50 pl-3 bg-indigo-500/10 py-3 pr-3 rounded-r mb-4">
+            <strong class="text-indigo-400 uppercase tracking-wider text-[10px] block mb-1.5">Mission Briefing:</strong> 
+            ${l.why}
+        </div>
+        <div class="text-sm text-slate-200 leading-relaxed font-mono bg-slate-900/80 p-3 rounded border border-slate-800">
+            ${l.text}
+        </div>`;
+        
   document.getElementById("lesson-objective-target").innerHTML = l.objective;
   document.getElementById("lesson-xp-badge").innerText = `+${l.xp} XP`;
   renderModulesOverview();
