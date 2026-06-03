@@ -353,10 +353,10 @@ const cmdInput = document.getElementById("cmd-input");
 
 function printToTerminal(htmlContent, isCommand = false) {
   const div = document.createElement("div");
-  
+
   // ADDED 'cyber-line' HERE!
-  div.className = "mb-1 leading-relaxed cyber-line"; 
-  
+  div.className = "mb-1 leading-relaxed cyber-line";
+
   if (isCommand) {
     div.innerHTML = `<span class="term-prompt">sysadmin@gemini</span>:<span class="term-path">${formatPromptPath()}</span>$ ${htmlContent}`;
   } else {

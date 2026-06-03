@@ -14,4 +14,13 @@ const learningModules = [
   module10_sysadmin,
   module11_exploitation,
   module12_scripting,
+  module13_docker,
+  module14_git,
+  module15_kernel,
+  module16_web,
+  module17_ansible,
+  module18_cloud,
+  module19_crypto,
+  module20_iot,
+  module21_capstone,
 ];
