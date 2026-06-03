@@ -331,7 +331,7 @@ function addXp(amount) {
     `${playerStats.xp} / ${maxGlobalXp} XP`;
   document.getElementById("xp-progress").style.width =
     `${Math.min(100, (playerStats.xp / maxGlobalXp) * 100)}%`;
-  saveGame();  
+  saveGame();
 }
 
 function updateOverallProgress() {
@@ -355,10 +355,12 @@ function loadStats() {
       playerStats = JSON.parse(saved);
       if (!playerStats.completedQuests) playerStats.completedQuests = [];
       if (!playerStats.discoveredCommands) playerStats.discoveredCommands = [];
-      
+
       // LOAD THE BOOKMARKED LESSON!
-      if (playerStats.activeModule !== undefined) activeModuleIndex = playerStats.activeModule;
-      if (playerStats.activeLesson !== undefined) activeLessonIndex = playerStats.activeLesson;
+      if (playerStats.activeModule !== undefined)
+        activeModuleIndex = playerStats.activeModule;
+      if (playerStats.activeLesson !== undefined)
+        activeLessonIndex = playerStats.activeLesson;
     } catch (e) {}
   } else {
     playerStats.discoveredCommands = [];

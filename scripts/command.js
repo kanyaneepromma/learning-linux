@@ -2094,4 +2094,173 @@ const commands = {
       return "Python 3.10.12";
     },
   },
+  whois: {
+    desc: "Client for the whois directory service.",
+    run: (args) =>
+      "Domain Name: EXAMPLE.COM\nRegistry Domain ID: 2336799_DOMAIN_COM-VRSN\nRegistrar WHOIS Server: whois.iana.org\nCreation Date: 1995-08-14T04:00:00Z\nRegistrant Organization: Example Company\nRegistrant State/Province: CA\nRegistrant Country: US",
+  },
+  nslookup: {
+    desc: "Query Internet name servers interactively.",
+    run: (args) => {
+      if (args.includes("-type=TXT"))
+        return 'Server:		127.0.0.53\nAddress:	127.0.0.53#53\n\nNon-authoritative answer:\nexample.com	text = "v=spf1 include:_spf.google.com ~all"\nexample.com	text = "google-site-verification=abc123def456"';
+      return "Server:		127.0.0.53\nAddress:	127.0.0.53#53\n\nNon-authoritative answer:\nName:	example.com\nAddress: 93.184.216.34";
+    },
+  },
+  theHarvester: {
+    desc: "Gather emails, subdomains, hosts, employee names, open ports and banners.",
+    run: (args) =>
+      "*******************************************************************\n*  theHarvester 4.3.0                                             *\n*  Coded by Christian Martorella                                  *\n*******************************************************************\n\n[*] Target: example.com\n[*] Searching Google...\n\n[+] Emails found:\nadmin@example.com\nsupport@example.com\n\n[+] Hosts found:\nmail.example.com:192.168.1.10\ndev.example.com:192.168.1.11",
+  },
+  amass: {
+    desc: "In-depth Attack Surface Mapping and Asset Discovery.",
+    run: (args) =>
+      "OWASP Amass v3.21.2\n--------------------------------------------------------------------------------\n[Google] www.example.com\n[VirusTotal] api.example.com\n[Censys] staging.example.com\n[CertSpotter] vpn.example.com\n--------------------------------------------------------------------------------\nFound 4 names for example.com",
+  },
+  sublist3r: {
+    desc: "Fast subdomains enumeration tool for penetration testers.",
+    run: (args) =>
+      "                 ____        _     _ _     _   _____      \n                / ___| _   _| |__ | (_)___| |_|___ /_ __  \n                \\___ \\| | | | '_ \\| | / __| __| |_ \\ '__| \n                 ___) | |_| | |_) | | \\__ \\ |_ ___) | |   \n                |____/ \\__,_|_.__/|_|_|___/\\__|____/|_|   \n\n[-] Enumerating subdomains now for example.com\n[-] Searching in Baidu, Yahoo, Google, Bing, Ask...\n[+] Total Unique Subdomains Found: 3\nadmin.example.com\nshop.example.com\ndev.example.com\n\n[!] Output saved to subdomains.txt.",
+  },
+  dig: {
+    desc: "DNS lookup utility.",
+    run: (args) => {
+      if (args.includes("axfr"))
+        return "; <<>> DiG 9.18.1-1ubuntu1.2-Ubuntu <<>> axfr @ns1.example.com example.com\n; (1 server found)\n;; global options: +cmd\nexample.com.		86400	IN	SOA	ns1.example.com. admin.example.com. (\nexample.com.		86400	IN	NS	ns1.example.com.\nexample.com.		86400	IN	NS	ns2.example.com.\nadmin.example.com.	86400	IN	A	10.0.0.5\nsecure.example.com.	86400	IN	A	10.0.0.6\nexample.com.		86400	IN	SOA	ns1.example.com. admin.example.com. (\n;; Query time: 15 msec\n;; XFR size: 6 records (messages 1, bytes 240)";
+      if (args.includes("_dmarc"))
+        return '; <<>> DiG 9.18.1-1ubuntu1.2-Ubuntu <<>> TXT _dmarc.example.com\n;; ANSWER SECTION:\n_dmarc.example.com.	300	IN	TXT	"v=DMARC1; p=none; rua=mailto:admin@example.com"';
+      return ";; ANSWER SECTION:\nexample.com.		300	IN	A	93.184.216.34";
+    },
+  },
+  "recon-ng": {
+    desc: "Web Reconnaissance framework.",
+    run: () =>
+      "  _|_|_|    _|_|_|_|    _|_|_|    _|_|    _|      _|      _|      _|    _|_|_|  \n  _|    _|  _|        _|        _|    _|  _|_|    _|      _|_|    _|  _|        \n  _|_|_|    _|_|_|    _|        _|    _|  _|  _|  _|      _|  _|  _|  _|  _|_|  \n  _|    _|  _|        _|        _|    _|  _|    _|_|      _|    _|_|  _|    _|  \n  _|    _|  _|_|_|_|    _|_|_|    _|_|    _|      _|      _|      _|    _|_|_|  \n\n  [40] Recon Modules | [10] Reporting Modules | [5] Import Modules | [2] Export Modules\n  [2] Discovery Modules\n\n[recon-ng][default] >",
+  },
+  dnsrecon: {
+    desc: "DNS Enumeration script.",
+    run: (args) =>
+      "[*] std: Performing General Enumeration against: example.com...\n[-] DNSSEC is not configured for example.com\n[*]      SOA ns1.example.com 192.168.1.100\n[*]      NS ns1.example.com 192.168.1.100\n[*]      MX mail.example.com 192.168.1.105\n[*]      TXT v=spf1 a mx ~all\n[*] Enumeration complete.",
+  },
+  macchanger: {
+    desc: "Utility for viewing/manipulating the MAC address of network interfaces.",
+    run: (args) => {
+      if (args.includes("-s"))
+        return "Current MAC:   00:1a:2b:3c:4d:5e (Intel Corporate)";
+      if (args.includes("-r"))
+        return "Current MAC:   00:1a:2b:3c:4d:5e (Intel Corporate)\nPermanent MAC: 00:1a:2b:3c:4d:5e (Intel Corporate)\nNew MAC:       c4:12:f5:33:a1:b2 (Unknown)";
+      if (args.includes("-p"))
+        return "Current MAC:   c4:12:f5:33:a1:b2 (Unknown)\nPermanent MAC: 00:1a:2b:3c:4d:5e (Intel Corporate)\nNew MAC:       00:1a:2b:3c:4d:5e (Intel Corporate)";
+      return "Usage: macchanger [options] device";
+    },
+  },
+  proxychains4: {
+    desc: "Proxychains - redirect connections through proxy servers.",
+    run: (args) => {
+      if (args.includes("curl"))
+        return "[proxychains] config file found: /etc/proxychains4.conf\n[proxychains] preloading /usr/lib/libproxychains4.so\n[proxychains] DLL init: proxychains-ng 4.14\n[proxychains] Strict chain  ...  127.0.0.1:9050  ...  185.220.101.55\n185.220.101.55";
+      if (args.includes("nmap"))
+        return "[proxychains] config file found: /etc/proxychains4.conf\n[proxychains] preloading /usr/lib/libproxychains4.so\nStarting Nmap 7.93 ( https://nmap.org )\n[proxychains] Dynamic chain  ...  127.0.0.1:9050  ...  OK\nNmap scan report for target.local\nHost is up (0.50s latency).\nPORT   STATE SERVICE\n80/tcp open  http";
+      return "Usage: proxychains4 -q -f config_file program_name [arguments]";
+    },
+  },
+  arpspoof: {
+    desc: "Intercept packets on a switched LAN.",
+    run: () =>
+      "0:1a:2b:3c:4d:5e 8:0:27:1:2:3 0806 42: arp reply 10.0.0.1 is-at 0:1a:2b:3c:4d:5e\n0:1a:2b:3c:4d:5e 8:0:27:1:2:3 0806 42: arp reply 10.0.0.1 is-at 0:1a:2b:3c:4d:5e",
+  },
+  urlsnarf: {
+    desc: "Sniff HTTP requests in Common Log Format.",
+    run: () =>
+      'urlsnarf: listening on eth0 [tcp port 80 or port 8080 or port 3128]\n10.0.0.50 - - [21/Oct/2026:12:00:00 +0000] "GET http://insecure-site.com/login.php HTTP/1.1" - - "-" "Mozilla/5.0"\n10.0.0.50 - - [21/Oct/2026:12:00:05 +0000] "POST http://insecure-site.com/auth HTTP/1.1" - - "-" "Mozilla/5.0"',
+  },
+  ip: {
+    desc: "Show / manipulate routing, network devices, interfaces and tunnels.",
+    run: (args) => {
+      if (args.includes("neigh") && args.includes("flush"))
+        return "Flushed 3 ARP entries.";
+      return "Usage: ip [ OPTIONS ] OBJECT { COMMAND | help }";
+    },
+  },
+  whatweb: {
+    desc: "Next generation web scanner.",
+    run: () =>
+      "http://target.local [200 OK] Apache[2.4.41], Bootstrap, Country[RESERVED][ZZ], HTML5, HTTPServer[Ubuntu Linux][Apache/2.4.41 (Ubuntu)], IP[10.0.0.5], JQuery, Script, Title[Welcome], WordPress[5.8.1], X-Powered-By[PHP/7.4.3]",
+  },
+  wafw00f: {
+    desc: "Web Application Firewall Fingerprinting Tool.",
+    run: () =>
+      "                   ______\n                  /      \\\n                 (  W00f! )\n                  \\  ____/\n                  ,,    __            404 Hack Not Found\n              |`-.__   / /\n              |\"  _ --'-.\n             /.-'a ('_~__\n            //-'/'--'  _\\n           //  '--~~'\"\\n\n[*] Checking http://target.localn[+] The site http://target.local is behind Cloudflare (Cloudflare Inc.) WAF.",
+  },
+  wpscan: {
+    desc: "Black box WordPress vulnerability scanner.",
+    run: (args) => {
+      if (args.includes("u"))
+        return "[i] User(s) Identified:\n[+]\tadmin\n[+]\tjdoe\n[+]\tsmith";
+      if (args.includes("vp"))
+        return "[i] Plugin(s) Identified:\n[+] contact-form-7\n | Location: http://target.local/wp-content/plugins/contact-form-7/n | Latest Version: 5.5.1 (up to date)\n\n[!] [+] file-manager\n | Location: http://target.local/wp-content/plugins/file-manager/n | Version: 6.8 (Outdated!)\n | VULNERABILITIES: Arbitrary File Upload (CVE-2020-25213)";
+      return "Usage: wpscan [options]";
+    },
+  },
+  ffuf: {
+    desc: "Fast web fuzzer written in Go.",
+    run: (args) => {
+      if (args.includes("-fs"))
+        return "        /'___\\  /'___\\           /'___\\       \n       /\\ \\__/ /\\ \\__/  __  __  /\\ \\__/       \n       \\ \\ ,__\\\\ \\ ,__\\/\\ \\/\\ \\ \\ \\ ,__\\      \n        \\ \\ \\_/ \\ \\ \\_/\\ \\ \\_\\ \\ \\ \\ \\_/      \n         \\ \\_\\   \\ \\_\\  \\ \\____/  \\ \\_\\       \n          \\/_/    \\/_/   \\/___/    \\/_/       \n\n________________________________________________\n\n:: Method           : GET\n:: URL              : http://target.local/FUZZn:: Wordlist         : FUZZ: common.txt\n:: Filter Size      : 4242\n________________________________________________\n\nadmin                   [Status: 301, Size: 312, Words: 20, Lines: 10]\nlogin.php               [Status: 200, Size: 1542, Words: 300, Lines: 45]\nuploads                 [Status: 403, Size: 277, Words: 20, Lines: 10]\n:: Progress: [4614/4614] :: Job [1/1] :: 1500 req/sec :: Duration: [0:00:03] :: Errors: 0 ::";
+      return "        /'___\\  /'___\\           /'___\\       \n       /\\ \\__/ /\\ \\__/  __  __  /\\ \\__/       \n       \\ \\ ,__\\\\ \\ ,__\\/\\ \\/\\ \\ \\ \\ ,__\\      \n        \\ \\ \\_/ \\ \\ \\_/\\ \\ \\_\\ \\ \\ \\ \\_/      \n         \\ \\_\\   \\ \\_\\  \\ \\____/  \\ \\_\\       \n          \\/_/    \\/_/   \\/___/    \\/_/       \n\n________________________________________________\n\n:: Method           : GET\n:: URL              : http://target.local/FUZZn:: Wordlist         : FUZZ: common.txt\n________________________________________________\n\nadmin                   [Status: 301, Size: 312, Words: 20, Lines: 10]\nlogin.php               [Status: 200, Size: 1542, Words: 300, Lines: 45]\nindex.php               [Status: 200, Size: 4242, Words: 500, Lines: 120]\nabout.php               [Status: 200, Size: 4242, Words: 500, Lines: 120]\nuploads                 [Status: 403, Size: 277, Words: 20, Lines: 10]\n:: Progress: [4614/4614] :: Job [1/1] :: 1500 req/sec :: Duration: [0:00:03] :: Errors: 0 ::";
+    },
+  },
+  dirb: {
+    desc: "A web content scanner.",
+    run: () =>
+      "-----------------\nDIRB v2.22    \nBy The Dark Raver\n-----------------\n\nSTART_TIME: Wed Oct 21 13:00:00 2026\nURL_BASE: http://target.local/nWORDLIST_FILES: /usr/share/dirb/wordlists/common.txt\n\nGENERATED WORDS: 4612                                                          \n\n---- Scanning URL: http://target.local/ ----\n==> DIRECTORY: http://target.local/admin/n+ http://target.local/index.php (CODE:200|SIZE:4242)\n==> DIRECTORY: http://target.local/uploads/nn-----------------nEND_TIME: Wed Oct 21 13:00:15 2026\nDOWNLOADED: 4612 - FOUND: 1",
+  },
+  enum4linux: {
+    desc: "A tool for enumerating information from Windows and Samba systems.",
+    run: () =>
+      "=========================================( Target Information )=========================================\nTarget ........... 10.0.0.5\nRID Range ........ 500-550,1000-1050\nUsername ......... ''\nPassword ......... ''\n\n=========================================( Session Check )=============================================\n[+] Server 10.0.0.5 allows sessions using username '', password ''\n\n=========================================( OS information )============================================\n[+] Got OS info for 10.0.0.5 from smbclient: \nOS=[Windows Server 2016 Standard 14393] Server=[Windows Server 2016 Standard 6.3]\n\n=========================================( Users )====================================================\nindex: 0x1 RID: 0x1f4 acb: 0x00000210 Account: Administrator\nindex: 0x2 RID: 0x1f5 acb: 0x00000215 Account: Guest\nindex: 0x3 RID: 0x3e8 acb: 0x00000210 Account: jsmith",
+  },
+  smbclient: {
+    desc: "ftp-like client to access SMB/CIFS resources on servers.",
+    run: (args) => {
+      if (args.includes("-L"))
+        return "\tSharename       Type      Comment\n\t---------       ----      -------\n\tADMIN$          Disk      Remote Admin\n\tC$              Disk      Default share\n\tIPC$            IPC       Remote IPC\n\tBackups         Disk      Internal Backups\n\nSMB1 disabled -- no workgroup available";
+      return 'Try "help" to get a list of possible commands.\nsmb: \\>';
+    },
+  },
+  rpcclient: {
+    desc: "Tool for executing client side MS-RPC functions.",
+    run: () => "rpcclient $> ",
+  },
+  snmpwalk: {
+    desc: "Communicate with a network entity using SNMP requests.",
+    run: () =>
+      "SNMPv2-MIB::sysDescr.0 = STRING: Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 12.2(55)SE3\nSNMPv2-MIB::sysContact.0 = STRING: admin@example.com\nSNMPv2-MIB::sysName.0 = STRING: CoreSwitch_HQ",
+  },
+  "smtp-user-enum": {
+    desc: "SMTP user enumeration tool.",
+    run: () =>
+      "Starting smtp-user-enum v1.2 ( http://pentestmonkey.net/tools/smtp-user-enum )\n\n ----------------------------------------------------------\n|                   Scan Information                       |\n ----------------------------------------------------------\n\nMode ..................... VRFY\nWorker Processes ......... 5\nUsernames file ........... (supplied on cmd line)\nTarget count ............. 1\nUsername count ........... 1\nTarget TCP port .......... 25\nQuery timeout ............ 5 secs\nTarget domain ............ \n\n######## Scan started at Wed Oct 21 14:00:00 2026 #########\n10.0.0.25: root exists\n######## Scan completed at Wed Oct 21 14:00:01 2026 #########\n1 results.",
+  },
+  showmount: {
+    desc: "Show mount information for an NFS server.",
+    run: () =>
+      "Export list for 10.0.0.15:\n/backups * \n/var/www/html 10.0.0.0/24",
+  },
+  cewl: {
+    desc: "Custom Word List generator.",
+    run: (args) =>
+      "CeWL 5.4.8 (Inclusion) by Robin Wood (digininja)\nCeWL finished: 120 words found and saved to " +
+      args[args.length - 2],
+  },
+  hashid: {
+    desc: "Identify the different types of hashes used to encrypt data.",
+    run: () =>
+      "Analyzing '8743b52063cd84097a65d1633f5c74f5'\n[+] MD2 \n[+] MD5 \n[+] MD4 \n[+] Double MD5 \n[+] LM \n[+] RIPEMD-128 \n[+] Haval-128 \n[+] Tiger-128 ",
+  },
+  cupp: {
+    desc: "Common User Passwords Profiler.",
+    run: () =>
+      "[+] Insert the information about the victim to make a dictionary\n[+] If you don't know all the info, just hit enter when asked! ;)\n\n> First Name: John\n> Surname: Doe\n> Nickname: \n> Birthdate (DDMMYYYY): 01011990\n\n[+] Generating dictionary...\n[+] Dictionary generated with 1500 possible passwords.",
+  },
 };

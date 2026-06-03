@@ -23,4 +23,5 @@ const learningModules = [
   module19_crypto,
   module20_iot,
   module21_capstone,
+  module22_kali,
 ];

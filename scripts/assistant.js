@@ -190,4 +190,48 @@ const deepDiveData = {
     "<strong>Python 3:</strong> Executes python scripts. Can also be used to instantly spawn a web server: `python3 -m http.server 80`.",
   pip: "<strong>Pip:</strong> The standard package installer for Python.",
   npm: "<strong>NPM:</strong> Node Package Manager. Use `npm audit` to check if your JavaScript project has vulnerable dependencies.",
+  // --- KALI LINUX & ADVANCED ENUMERATION ---
+  whois:
+    "<strong>Whois:</strong> Queries public databases to find out who registered a domain name, their contact info, and when it expires.",
+  nslookup:
+    "<strong>NSLookup:</strong> Queries the Domain Name System (DNS). Can be used to find an IP address from a hostname, or extract hidden TXT records like SPF and DMARC.",
+  theharvester:
+    "<strong>TheHarvester:</strong> An OSINT tool. It scrapes Google, Bing, LinkedIn, and other sources to find emails, names, and subdomains related to a target.",
+  amass:
+    "<strong>Amass:</strong> The undisputed king of attack surface mapping. It uses APIs, certificates, and web scraping to find every subdomain an organization owns.",
+  sublist3r:
+    "<strong>Sublist3r:</strong> A lightweight Python tool for finding subdomains. Very fast, but less comprehensive than Amass.",
+  macchanger:
+    "<strong>MacChanger:</strong> Alters your physical network card's Media Access Control (MAC) address. Essential for evading physical network access controls.",
+  tor: "<strong>Tor:</strong> The Onion Router. Encrypts and bounces your traffic through multiple global volunteer nodes to hide your true IP address.",
+  proxychains4:
+    "<strong>Proxychains:</strong> Forces *any* standard Linux command (like Nmap or Curl) to route its traffic through Tor or another proxy network.",
+  arpspoof:
+    "<strong>ARP Spoof:</strong> A Man-in-the-Middle attack. Tells a victim machine that *you* are the router, forcing all their network traffic to flow through your Kali box.",
+  urlsnarf:
+    "<strong>URLSnarf:</strong> A classic sniffing tool. When performing a MitM attack, this instantly extracts all the HTTP requests the victim is making in plain text.",
+  whatweb:
+    "<strong>WhatWeb:</strong> Scans a website to identify the underlying technology (e.g., WordPress, Nginx, PHP, Bootstrap) and its exact version numbers.",
+  wafw00f:
+    "<strong>WafW00f:</strong> Scans a website to figure out if it is protected by a Web Application Firewall (like Cloudflare, Akamai, or F5 BIG-IP).",
+  wpscan:
+    "<strong>WPScan:</strong> The ultimate WordPress hacking tool. It can enumerate all users on a blog and identify out-of-date, vulnerable plugins.",
+  ffuf: "<strong>FFUF:</strong> Fuzz Faster U Fool. A blazing fast, modern web fuzzer. Used to brute-force hidden directories or test parameters for vulnerabilities.",
+  dirb: "<strong>Dirb:</strong> A classic directory brute-forcing tool. It throws thousands of common folder names at a web server to see if any return a '200 OK'.",
+  enum4linux:
+    "<strong>Enum4Linux:</strong> A wrapper script built around Samba tools. Extracts users, password policies, and file shares from Windows networks.",
+  smbclient:
+    "<strong>SMBClient:</strong> Command-line tool to access Windows network file shares (Server Message Block). Think of it like FTP, but for internal networks.",
+  rpcclient:
+    "<strong>RPCClient:</strong> Connects directly to Microsoft Remote Procedure Call endpoints. Often allows 'Null Sessions' (logging in without a password) to extract data.",
+  snmpwalk:
+    "<strong>SNMPWalk:</strong> Queries network devices (like routers and switches) using the Simple Network Management Protocol. Can leak massive amounts of routing data.",
+  "smtp-user-enum":
+    "<strong>SMTP User Enum:</strong> Asks an email server if an email address exists by using the VRFY, EXPN, or RCPT TO commands.",
+  showmount:
+    "<strong>Showmount:</strong> Native Linux tool. Asks an NFS (Network File System) server what folders it is currently sharing with the network.",
+  cewl: "<strong>CeWL:</strong> Custom Word List generator. A ruby app that crawls a given URL to a specified depth and returns a list of words, perfect for password cracking.",
+  hashid:
+    "<strong>HashID:</strong> Analyzes a password hash to guess what encryption algorithm (MD5, SHA-256, bcrypt) was used to create it.",
+  cupp: "<strong>CUPP:</strong> Common User Passwords Profiler. You input a victim's dog's name, birthdate, and partner's name, and it generates thousands of highly likely passwords.",
 };
