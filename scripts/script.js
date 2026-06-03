@@ -155,6 +155,10 @@ let activeLessonIndex = 0;
 let activeTab = "modules";
 
 function switchTab(tabId) {
+  if (tabId === "modules") playSound("book");
+  if (tabId === "quests") playSound("quest");
+  if (tabId === "cheatsheet") playSound("tool");
+
   activeTab = tabId;
   ["modules", "quests", "cheatsheet"].forEach((t) => {
     document.getElementById(`view-${t}`).classList.add("hidden");
@@ -459,6 +463,8 @@ function executeCommand(rawCommand) {
 }
 
 function toggleAssistant() {
+  playSound("lightbulb");
+
   isAssistantActive = !isAssistantActive;
   const btn = document.getElementById("btn-assistant");
   const assistantBubble = document.getElementById("cyber-assistant");
@@ -487,6 +493,9 @@ function resetSandbox() {
   ) {
     // 1. Reset the Virtual File System
     initVfs();
+
+    playSound("sweep");
+
     document.getElementById("prompt-path").innerText = formatPromptPath();
 
     // 2. NUKE the Local Storage (The real hard reset!)
