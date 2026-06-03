@@ -387,21 +387,29 @@ function executeCommand(rawCommand) {
         if (activeTab === "cheatsheet") renderCheatsheet();
       }
 
+      // Verify Lessons
       let m = learningModules[activeModuleIndex];
       let l = m.lessons[activeLessonIndex];
       let lId = `${activeModuleIndex}_${activeLessonIndex}`;
 
-      if (
-        !playerStats.completedLessons.includes(lId) &&
-        l.check(cmdName, args, output, cmdStr)
-      ) {
-        playerStats.completedLessons.push(lId);
-        addXp(l.xp);
-        printToTerminal(
-          `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs">🏆 Objective Accomplished! +${l.xp} XP</div>`,
-        );
-        if (activeLessonIndex < m.lessons.length - 1) activeLessonIndex++;
-        renderLesson();
+      // Check if the command satisfies the lesson objective
+      if (l.check(cmdName, args, output, cmdStr)) {
+        
+        // If it's a NEW completion, give XP and save progress!
+        if (!playerStats.completedLessons.includes(lId)) {
+          playerStats.completedLessons.push(lId);
+          addXp(l.xp);
+          printToTerminal(
+            `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs">🏆 Objective Accomplished! +${l.xp} XP</div>`
+          );
+        } 
+        
+        // ALWAYS advance to the next lesson if the command was correct, 
+        // even if they already had the XP for this one.
+        if (activeLessonIndex < m.lessons.length - 1) {
+          activeLessonIndex++;
+          renderLesson();
+        }
       }
 
       quests.forEach((q) => {
