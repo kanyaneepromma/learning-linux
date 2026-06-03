@@ -456,11 +456,43 @@ function executeCommand(rawCommand) {
 }
 
 function resetSandbox() {
-  if (confirm("Hard reset? XP is saved, files are reset.")) {
+  if (confirm("WARNING: This will delete ALL files, reset your rank, and wipe ALL XP. Are you sure?")) {
+    // 1. Reset the Virtual File System
     initVfs();
     document.getElementById("prompt-path").innerText = formatPromptPath();
+    
+    // 2. NUKE the Local Storage (The real hard reset!)
+    localStorage.removeItem("linux_mega_stats");
+    
+    // 3. Reset the game variables in memory
+    playerStats = {
+      xp: 0,
+      completedLessons: [],
+      completedQuests: [],
+      discoveredCommands: [],
+    };
+    activeModuleIndex = 0;
+    activeLessonIndex = 0;
+    document.getElementById("module-selector").value = 0;
+    
+    // 4. Reset the UI counters
+    document.getElementById("rank-name").innerText = `Rank: Terminal Newbie`;
+    document.getElementById("xp-counter").innerText = `0 / ${maxGlobalXp} XP`;
+    document.getElementById("xp-progress").style.width = `0%`;
+    document.getElementById("overall-progress-tag").innerText = `Progress: 0%`;
+    
+    // 5. Re-render the fresh state
+    renderModulesDropdown();
+    renderLesson();
+    if (activeTab === "quests") renderQuests();
+    if (activeTab === "cheatsheet") renderCheatsheet();
+    
+    playSound("error"); // Play the buzz sound for a dramatic wipe
+    document.getElementById("terminal-container").classList.add("shake-error");
+    setTimeout(() => document.getElementById("terminal-container").classList.remove("shake-error"), 300);
+
     printToTerminal(
-      "<span class='text-red-400 font-bold'>Reset Complete.</span>",
+      "<span class='text-red-500 font-black bg-red-950/50 px-2 py-1 uppercase'>SYSTEM WIPE COMPLETE. ALL XP DESTROYED.</span>",
     );
   }
 }
