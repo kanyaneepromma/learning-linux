@@ -139,10 +139,18 @@ function playSound(type) {
 
 function showFloatingXP(amount) {
   const fx = document.createElement("div");
-  fx.className =
-    "xp-float text-2xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,1)]";
+  
+  // Added 'fixed' so it floats OVER the UI instead of breaking the layout
+  fx.className = "fixed top-1/2 right-[20%] -translate-y-1/2 pointer-events-none z-[100] text-4xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,1)] transition-all duration-1000 ease-out";
   fx.innerText = `+${amount} XP!`;
+  
   document.body.appendChild(fx);
+
+  // Trigger the float-up and fade-out animation
+  setTimeout(() => {
+    fx.style.transform = "translateY(-150px)";
+    fx.style.opacity = "0";
+  }, 50);
 
   // Remove the element from the DOM after the animation finishes
   setTimeout(() => fx.remove(), 1000);

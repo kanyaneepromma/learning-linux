@@ -590,9 +590,18 @@ cmdInput.addEventListener("keydown", (e) => {
 
     // ADD THIS TO HIDE THE ASSISTANT AFTER PRESSING ENTER
     const assistantBubble = document.getElementById("cyber-assistant");
-    assistantBubble.classList.remove("assistant-show");
-    setTimeout(() => assistantBubble.classList.add("hidden"), 300);
+    if (assistantBubble) {
+      assistantBubble.classList.remove("assistant-show");
+      setTimeout(() => assistantBubble.classList.add("hidden"), 300);
+    }
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault(); // Prevents cursor from jumping
+    if (historyIndex > 0) {
+      historyIndex--;
+      cmdInput.value = commandHistory[historyIndex];
+    }
   } else if (e.key === "ArrowDown") {
+    e.preventDefault(); // Prevents cursor from jumping
     if (historyIndex < commandHistory.length - 1) {
       historyIndex++;
       cmdInput.value = commandHistory[historyIndex];
