@@ -355,7 +355,7 @@ function printToTerminal(htmlContent, isCommand = false) {
   const div = document.createElement("div");
   div.className = "mb-1 leading-relaxed";
   if (isCommand) {
-    div.innerHTML = `<span class="term-prompt">sysadmin@gemini</span>:<span class="term-path">${formatPromptPath()}</span>$ ${htmlContent}`;
+    div.innerHTML = `<span class="term-rainbow">sysadmin@gemini</span>:<span class="term-path">${formatPromptPath()}</span>$ <span class="term-rainbow">${htmlContent}</span>`;
   } else {
     div.innerHTML = htmlContent;
   }

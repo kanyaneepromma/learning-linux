@@ -49,6 +49,17 @@ body {
   width: 100%;
 }
 
+/* Rainbow Input Text */
+#cmd-input.term-rainbow {
+  background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #10b981, #0000ff, #4b0082, #8b00ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  animation: rainbow-scroll 3s linear infinite;
+  background-size: 200%;
+}
+
 /* Terminal Highlights */
 .term-dir {
   color: #60a5fa;
