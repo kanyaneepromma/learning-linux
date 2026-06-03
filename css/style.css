@@ -87,3 +87,29 @@ body {
     color: #34d399; /* Matrix Green default */
     font-family: 'Fira Code', monospace;
 }
+
+/* --- REAL LINUX TERMINAL COLORS --- */
+.term-dir { color: #3b82f6; font-weight: bold; }       /* Blue for Directories */
+.term-exe { color: #10b981; font-weight: bold; }       /* Green for Executables */
+.term-sym { color: #06b6d4; font-weight: bold; }       /* Cyan for Symlinks */
+.term-err { color: #ef4444; font-weight: bold; }       /* Red for Errors */
+.term-warn { color: #f59e0b; font-weight: bold; }      /* Yellow for Warnings */
+.term-root { color: #ef4444; font-weight: bold; }      /* Red for Root User */
+.term-prompt { color: #34d399; font-weight: bold; }    /* Green for sysadmin@gemini */
+.term-path { color: #60a5fa; font-weight: bold; }      /* Blue for the ~ path */
+
+/* --- ANIMATED GAMER RAINBOW TEXT --- */
+.term-rainbow {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #10b981, #0000ff, #4b0082, #8b00ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+    animation: rainbow-scroll 3s linear infinite;
+    background-size: 200%;
+}
+
+@keyframes rainbow-scroll {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
