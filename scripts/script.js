@@ -186,6 +186,7 @@ function changeModule() {
     document.getElementById("module-selector").value,
   );
   activeLessonIndex = 0;
+  saveGame();
   renderLesson();
 }
 
@@ -237,6 +238,7 @@ function selectModuleFromList(idx) {
   activeModuleIndex = idx;
   activeLessonIndex = 0;
   document.getElementById("module-selector").value = idx;
+  saveGame();
   renderLesson();
 }
 
@@ -329,7 +331,7 @@ function addXp(amount) {
     `${playerStats.xp} / ${maxGlobalXp} XP`;
   document.getElementById("xp-progress").style.width =
     `${Math.min(100, (playerStats.xp / maxGlobalXp) * 100)}%`;
-  localStorage.setItem("linux_mega_stats", JSON.stringify(playerStats));
+  saveGame();  
 }
 
 function updateOverallProgress() {
@@ -339,6 +341,13 @@ function updateOverallProgress() {
     `Progress: ${Math.round((playerStats.completedLessons.length / t) * 100)}%`;
 }
 
+// --- NEW SAVE GAME HELPER ---
+function saveGame() {
+  playerStats.activeModule = activeModuleIndex;
+  playerStats.activeLesson = activeLessonIndex;
+  localStorage.setItem("linux_mega_stats", JSON.stringify(playerStats));
+}
+
 function loadStats() {
   let saved = localStorage.getItem("linux_mega_stats");
   if (saved) {
@@ -346,6 +355,10 @@ function loadStats() {
       playerStats = JSON.parse(saved);
       if (!playerStats.completedQuests) playerStats.completedQuests = [];
       if (!playerStats.discoveredCommands) playerStats.discoveredCommands = [];
+      
+      // LOAD THE BOOKMARKED LESSON!
+      if (playerStats.activeModule !== undefined) activeModuleIndex = playerStats.activeModule;
+      if (playerStats.activeLesson !== undefined) activeLessonIndex = playerStats.activeLesson;
     } catch (e) {}
   } else {
     playerStats.discoveredCommands = [];
@@ -391,7 +404,7 @@ function executeCommand(rawCommand) {
       if (!playerStats.discoveredCommands) playerStats.discoveredCommands = [];
       if (!playerStats.discoveredCommands.includes(cmdName)) {
         playerStats.discoveredCommands.push(cmdName);
-        localStorage.setItem("linux_mega_stats", JSON.stringify(playerStats));
+        saveGame();
         if (activeTab === "cheatsheet") renderCheatsheet();
       }
 
@@ -415,6 +428,7 @@ function executeCommand(rawCommand) {
         // even if they already had the XP for this one.
         if (activeLessonIndex < m.lessons.length - 1) {
           activeLessonIndex++;
+          saveGame();
           renderLesson();
         }
       }
