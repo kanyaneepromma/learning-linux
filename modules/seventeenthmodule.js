@@ -4,10 +4,10 @@
 const module17_ansible = {
   name: "17. Infrastructure as Code (65 Lessons)",
   lessons: [
-    // --- PHASE 1: SSH ORCHESTRATION (1-10) ---
+    // --- PHASE 1: SSH ORCHESTRATION & INVENTORY (1-15) ---
     {
       title: "Generate SSH Keys",
-      why: "Ansible requires passwordless SSH access to control nodes. Generate an RSA keypair.",
+      why: "Ansible is 'Agentless'. It doesn't require software installed on target servers; it orchestrates infrastructure purely over the SSH protocol. We must first generate an RSA cryptographic keypair for passwordless authentication.",
       text: 'Type <code>ssh-keygen -t rsa -b 4096 -N ""</code>',
       objective: "Type ssh-keygen -t rsa",
       xp: 20,
@@ -16,7 +16,7 @@ const module17_ansible = {
     },
     {
       title: "Check Key Output",
-      why: "Verify your public and private keys were created.",
+      why: "Verify the kernel successfully wrote the `id_rsa` (private) and `id_rsa.pub` (public) keys to your local `.ssh` directory.",
       text: "Type <code>ls -l ~/.ssh/</code>",
       objective: "List ~/.ssh directory",
       xp: 10,
@@ -24,178 +24,75 @@ const module17_ansible = {
     },
     {
       title: "Read Public Key",
-      why: "This is the lock you will place on the remote servers.",
+      why: "The public key is the 'lock' you will distribute to your fleet. Anyone holding the private key can open this lock mathematically.",
       text: "Type <code>cat ~/.ssh/id_rsa.pub</code>",
       objective: "Read id_rsa.pub",
       xp: 15,
       check: (c, a) => c === "cat" && a[0].includes("id_rsa.pub"),
     },
     {
-      title: "Copy Key to Web1",
-      why: "Push your key to the first web server.",
-      text: "Type <code>ssh-copy-id root@10.0.0.10</code>",
-      objective: "Copy key to 10.0.0.10",
-      xp: 25,
-      check: (c, a) => c === "ssh-copy-id" && a[0].includes("10.0.0.10"),
+      title: "Simulate Key Copy",
+      why: "In reality, you use `ssh-copy-id` to push your public key into the `authorized_keys` file of your target servers. We simulate this fleet authorization.",
+      text: 'Type <code>echo "Keys Distributed"</code>',
+      objective: "Simulate key distribution",
+      xp: 10,
+      check: (c, a, o, raw) => raw.includes("echo") && raw.includes("Keys"),
     },
     {
-      title: "Copy Key to Web2",
-      why: "Push your key to the second web server.",
-      text: "Type <code>ssh-copy-id root@10.0.0.11</code>",
-      objective: "Copy key to 10.0.0.11",
-      xp: 25,
-      check: (c, a) => c === "ssh-copy-id" && a[0].includes("10.0.0.11"),
-    },
-    {
-      title: "Copy Key to DB1",
-      why: "Push your key to the database server.",
-      text: "Type <code>ssh-copy-id root@10.0.0.20</code>",
-      objective: "Copy key to 10.0.0.20",
-      xp: 25,
-      check: (c, a) => c === "ssh-copy-id" && a[0].includes("10.0.0.20"),
-    },
-    {
-      title: "Test Passwordless Login",
-      why: "Ensure you can connect without a password prompt.",
-      text: 'Type <code>ssh root@10.0.0.10 "whoami"</code>',
-      objective: "Test SSH command execution",
-      xp: 30,
-      check: (c, a) =>
-        c === "ssh" && a.includes("root@10.0.0.10") && a.includes("whoami"),
-    },
-    {
-      title: "Install Ansible",
-      why: "Install the orchestration tool.",
-      text: "Type <code>apt install ansible -y</code>",
-      objective: "Install ansible",
-      xp: 20,
-      check: (c, a) =>
-        c === "apt" && a.includes("install") && a.includes("ansible"),
-    },
-    {
-      title: "Verify Ansible",
-      why: "Check the installed version.",
-      text: "Type <code>ansible --version</code>",
-      objective: "Type ansible --version",
-      xp: 15,
-      check: (c, a) => c === "ansible" && a.includes("--version"),
-    },
-    {
-      title: "Create Ansible Dir",
-      why: "Create a workspace for your fleet configurations.",
+      title: "Create Workspace",
+      why: "Infrastructure as Code (IaC) requires strict organization. Create a dedicated directory to house your YAML blueprints and fleet inventories.",
       text: "Type <code>mkdir ~/ansible_fleet && cd ~/ansible_fleet</code>",
-      objective: "mkdir and cd",
-      xp: 25,
+      objective: "Create and enter ansible_fleet",
+      xp: 15,
       check: (c, a, o, raw) =>
         raw.includes("mkdir") &&
-        raw.includes("cd") &&
-        raw.includes("ansible_fleet"),
+        raw.includes("ansible_fleet") &&
+        raw.includes("cd"),
     },
-
-    // --- PHASE 2: INVENTORY MANAGEMENT (11-20) ---
     {
       title: "Create Inventory File",
-      why: "The inventory file tells Ansible what servers exist.",
+      why: "The Inventory file defines your network topology. It categorizes hundreds of IP addresses into logical groups (like [web] or [db]) so Ansible knows exactly where to route its SSH multiplexed connections.",
       text: "Type <code>touch hosts.ini</code>",
-      objective: "Type touch hosts.ini",
-      xp: 10,
+      objective: "Create hosts.ini",
+      xp: 15,
       check: (c, a) => c === "touch" && a[0] === "hosts.ini",
     },
     {
       title: "Define Web Group",
-      why: "Group servers by their purpose.",
-      text: 'Type <code>echo "[webservers]" > hosts.ini</code>',
-      objective: "Echo [webservers] to hosts.ini",
-      xp: 20,
+      why: "Using INI format, we create a logical `[webservers]` group and assign two IP addresses to it. Ansible will parse this and target these nodes in parallel.",
+      text: 'Type <code>echo -e "[webservers]\\n10.0.0.10\\n10.0.0.11" > hosts.ini</code>',
+      objective: "Populate hosts.ini",
+      xp: 30,
       check: (c, a, o, raw) =>
         raw.includes("echo") &&
         raw.includes("[webservers]") &&
-        raw.includes("hosts.ini"),
-    },
-    {
-      title: "Add Web Nodes",
-      why: "Add the IP addresses to the webservers group.",
-      text: 'Type <code>echo -e "10.0.0.10\\n10.0.0.11" >> hosts.ini</code>',
-      objective: "Append IPs to hosts",
-      xp: 25,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("10.0.0.10") &&
-        raw.includes("hosts.ini"),
+        raw.includes(">"),
     },
     {
       title: "Define DB Group",
-      why: "Create the database group.",
-      text: 'Type <code>echo "[dbservers]" >> hosts.ini</code>',
-      objective: "Append [dbservers]",
-      xp: 20,
+      why: "Append a `[databases]` group to the inventory architecture.",
+      text: 'Type <code>echo -e "\\n[databases]\\n10.0.0.20" >> hosts.ini</code>',
+      objective: "Append databases to hosts.ini",
+      xp: 30,
       check: (c, a, o, raw) =>
         raw.includes("echo") &&
-        raw.includes("[dbservers]") &&
-        raw.includes("hosts.ini"),
+        raw.includes("[databases]") &&
+        raw.includes(">>"),
     },
     {
-      title: "Add DB Nodes",
-      why: "Add the database IP.",
-      text: 'Type <code>echo "10.0.0.20" >> hosts.ini</code>',
-      objective: "Append 10.0.0.20",
-      xp: 20,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") && raw.includes("10.0.0.20"),
-    },
-    {
-      title: "Read Inventory",
-      why: "Verify your server fleet configuration.",
+      title: "View Topology",
+      why: "Verify the structural layout of your cluster map.",
       text: "Type <code>cat hosts.ini</code>",
       objective: "Read hosts.ini",
       xp: 10,
       check: (c, a) => c === "cat" && a[0] === "hosts.ini",
     },
     {
-      title: "List Hosts",
-      why: "Ask Ansible to parse and list all recognized hosts.",
-      text: "Type <code>ansible all -i hosts.ini --list-hosts</code>",
-      objective: "Type ansible all --list-hosts",
-      xp: 30,
-      check: (c, a) =>
-        c === "ansible" && a.includes("all") && a.includes("--list-hosts"),
-    },
-    {
-      title: "List Web Group",
-      why: "List only the webservers.",
-      text: "Type <code>ansible webservers -i hosts.ini --list-hosts</code>",
-      objective: "List webservers hosts",
-      xp: 30,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("webservers") &&
-        a.includes("--list-hosts"),
-    },
-    {
-      title: "Set Config File",
-      why: "Set the default inventory so you don't need the -i flag every time.",
-      text: 'Type <code>echo "[defaults]\\ninventory = hosts.ini" > ansible.cfg</code>',
-      objective: "Create ansible.cfg",
+      title: "Ansible Ping Fleet",
+      why: "The `ping` module is not ICMP. It initiates full SSH cryptographic handshakes with every server in the inventory (`all`), uploads a tiny Python script to their RAM, executes it to verify Python is installed, and returns 'pong'.",
+      text: "Type <code>ansible all -i hosts.ini -m ping</code>",
+      objective: "Ping the entire fleet",
       xp: 40,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") && raw.includes("ansible.cfg"),
-    },
-    {
-      title: "Verify Config",
-      why: "Check that Ansible defaults are set.",
-      text: "Type <code>cat ansible.cfg</code>",
-      objective: "Read ansible.cfg",
-      xp: 10,
-      check: (c, a) => c === "cat" && a[0] === "ansible.cfg",
-    },
-
-    // --- PHASE 3: AD-HOC COMMANDS (21-35) ---
-    {
-      title: "The God Ping",
-      why: "Ping every single server in your fleet simultaneously using the ping module (-m).",
-      text: "Type <code>ansible all -m ping</code>",
-      objective: "Use ansible all -m ping",
-      xp: 30,
       check: (c, a) =>
         c === "ansible" &&
         a.includes("all") &&
@@ -203,405 +100,452 @@ const module17_ansible = {
         a.includes("ping"),
     },
     {
-      title: "Ping Webservers",
-      why: "Ping only a specific group.",
-      text: "Type <code>ansible webservers -m ping</code>",
-      objective: "Ping webservers",
-      xp: 20,
+      title: "Ping Specific Group",
+      why: "Limit the execution scope. Instruct Ansible to only negotiate connections with servers logically bound to the `webservers` array.",
+      text: "Type <code>ansible webservers -i hosts.ini -m ping</code>",
+      objective: "Ping only webservers",
+      xp: 30,
       check: (c, a) =>
         c === "ansible" && a.includes("webservers") && a.includes("ping"),
     },
     {
-      title: "Ad-Hoc Command",
-      why: "Run an arbitrary raw command (-a) across the fleet.",
-      text: 'Type <code>ansible all -a "uptime"</code>',
-      objective: "Run uptime on all nodes",
-      xp: 35,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("all") &&
-        a.includes("-a") &&
-        a.includes("uptime"),
-    },
-    {
-      title: "Check Fleet Memory",
-      why: "Check RAM on all web servers at once.",
-      text: 'Type <code>ansible webservers -a "free -m"</code>',
-      objective: "Run free -m on webservers",
-      xp: 35,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("webservers") &&
-        a.includes("-a") &&
-        a.some((x) => x.includes("free")),
-    },
-    {
-      title: "Check Disk Space",
-      why: "Check storage on the database node.",
-      text: 'Type <code>ansible dbservers -a "df -h"</code>',
-      objective: "Run df -h on dbservers",
-      xp: 35,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("dbservers") &&
-        a.some((x) => x.includes("df")),
-    },
-    {
-      title: "Ansible Shell Module",
-      why: "Use the shell module to run commands that require pipes or redirects.",
-      text: 'Type <code>ansible all -m shell -a "cat /etc/passwd | wc -l"</code>',
-      objective: "Use shell module with pipe",
-      xp: 45,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("-m") &&
-        a.includes("shell") &&
-        a.some((x) => x.includes("wc -l")),
-    },
-    {
-      title: "Gather Facts",
-      why: "Extract massive JSON hardware/OS details from a node.",
-      text: "Type <code>ansible 10.0.0.10 -m setup</code>",
-      objective: "Use the setup module",
+      title: "Ansible Setup Module",
+      why: "The `setup` module initiates 'Fact Gathering'. It interrogates the target's kernel, extracting its exact OS version, RAM capacity, and CPU architecture into a massive JSON object for dynamic logic evaluation.",
+      text: "Type <code>ansible webservers -i hosts.ini -m setup</code>",
+      objective: "Run setup module",
       xp: 40,
       check: (c, a) =>
-        c === "ansible" &&
-        a.includes("10.0.0.10") &&
-        a.includes("-m") &&
-        a.includes("setup"),
+        c === "ansible" && a.includes("-m") && a.includes("setup"),
     },
     {
       title: "Filter Facts",
-      why: "Extract just the IP address configurations.",
-      text: 'Type <code>ansible 10.0.0.10 -m setup -a "filter=ansible_default_ipv4"</code>',
-      objective: "Filter ansible setup facts",
-      xp: 50,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("setup") &&
-        a.some((x) => x.includes("filter=")),
+      why: "The raw JSON array from `setup` is massive. The `-a` (Arguments) flag passes a strict filter to the module, isolating only the network IPv4 routing interfaces.",
+      text: 'Type <code>ansible webservers -i hosts.ini -m setup -a "filter=ansible_default_ipv4"</code>',
+      objective: "Filter setup facts",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        raw.includes("ansible") &&
+        raw.includes("setup") &&
+        raw.includes("filter="),
     },
     {
-      title: "Install Package (Ad-Hoc)",
-      why: "Use the apt module to install curl on all web nodes (-b means become root).",
-      text: 'Type <code>ansible webservers -m apt -a "name=curl state=present" -b</code>',
-      objective: "Install curl via apt module",
-      xp: 50,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("-m") &&
-        a.includes("apt") &&
-        a.includes("-b"),
+      title: "Configure Ansible Defaults",
+      why: "Passing `-i hosts.ini` every time is tedious. Create an `ansible.cfg` file to permanently map your local directory to the inventory file.",
+      text: 'Type <code>echo -e "[defaults]\\ninventory = hosts.ini" > ansible.cfg</code>',
+      objective: "Create ansible.cfg",
+      xp: 35,
+      check: (c, a, o, raw) =>
+        raw.includes("echo") &&
+        raw.includes("inventory") &&
+        raw.includes("ansible.cfg"),
     },
     {
-      title: "Remove Package",
-      why: "Ensure a package is deleted across the fleet.",
-      text: 'Type <code>ansible all -m apt -a "name=telnet state=absent" -b</code>',
-      objective: "Remove telnet via apt",
-      xp: 50,
+      title: "Ping Without Flags",
+      why: "Verify that the local configuration file successfully overrides the default Ansible engine settings.",
+      text: "Type <code>ansible all -m ping</code>",
+      objective: "Ping without -i flag",
+      xp: 20,
       check: (c, a) =>
         c === "ansible" &&
-        a.includes("apt") &&
-        a.some((x) => x.includes("absent")),
-    },
-    {
-      title: "Service Status",
-      why: "Check if a service is running on multiple nodes.",
-      text: 'Type <code>ansible webservers -m service -a "name=nginx state=started" -b</code>',
-      objective: "Use the service module",
-      xp: 50,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("-m") &&
-        a.includes("service") &&
-        a.some((x) => x.includes("nginx")),
-    },
-    {
-      title: "Copy File",
-      why: "Push a local file to 100 servers instantly.",
-      text: 'Type <code>ansible all -m copy -a "src=hosts.ini dest=/tmp/hosts.bak"</code>',
-      objective: "Use the copy module",
-      xp: 50,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("-m") &&
-        a.includes("copy") &&
-        a.some((x) => x.includes("dest=/tmp")),
-    },
-    {
-      title: "File Permissions",
-      why: "Change permissions on the remote file.",
-      text: 'Type <code>ansible all -m file -a "path=/tmp/hosts.bak mode=0644"</code>',
-      objective: "Use the file module",
-      xp: 50,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("-m") &&
-        a.includes("file") &&
-        a.some((x) => x.includes("mode=0644")),
-    },
-    {
-      title: "Create Remote User",
-      why: "Create a sysadmin user on every database server.",
-      text: 'Type <code>ansible dbservers -m user -a "name=dbadmin state=present" -b</code>',
-      objective: "Use the user module",
-      xp: 50,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("-m") &&
-        a.includes("user") &&
-        a.some((x) => x.includes("dbadmin")),
-    },
-    {
-      title: "Reboot Fleet",
-      why: "The ultimate power trip. Restart all servers safely.",
-      text: "Type <code>ansible all -m reboot -b</code>",
-      objective: "Use the reboot module",
-      xp: 40,
-      check: (c, a) =>
-        c === "ansible" &&
-        a.includes("-m") &&
-        a.includes("reboot") &&
-        a.includes("-b"),
+        a.includes("all") &&
+        a.includes("ping") &&
+        !a.includes("-i"),
     },
 
-    // --- PHASE 4: PLAYBOOKS & YAML (36-50) ---
+    // --- PHASE 2: AD-HOC COMMANDS (16-30) ---
+    {
+      title: "Ad-Hoc Shell",
+      why: "The `shell` module bypasses complex Python wrappers and pushes raw bash strings directly into the remote server's terminal.",
+      text: 'Type <code>ansible all -m shell -a "uptime"</code>',
+      objective: "Run uptime on fleet",
+      xp: 35,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("shell") && raw.includes("uptime"),
+    },
+    {
+      title: "Check Disk Space",
+      why: "Orchestrate a parallel execution of `df -h` to instantly locate storage bottlenecks across 10,000 servers simultaneously.",
+      text: 'Type <code>ansible databases -m shell -a "df -h"</code>',
+      objective: "Run df -h on databases",
+      xp: 35,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("databases") && raw.includes("df -h"),
+    },
+    {
+      title: "Elevate Privileges",
+      why: "Standard SSH connects as a normal user. The `-b` (Become) flag leverages `sudo` to mathematically escalate the execution process to root before running the command.",
+      text: 'Type <code>ansible all -b -m shell -a "whoami"</code>',
+      objective: "Use -b for privilege escalation",
+      xp: 40,
+      check: (c, a, o, raw) =>
+        c === "ansible" && a.includes("-b") && raw.includes("whoami"),
+    },
+    {
+      title: "Apt Module",
+      why: "Instead of running raw `apt install` bash commands, Ansible uses the `apt` module. This provides Idempotency—it checks if the software is already installed before attempting to download it, saving CPU cycles.",
+      text: 'Type <code>ansible webservers -b -m apt -a "name=nginx state=present"</code>',
+      objective: "Install nginx via apt module",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        c === "ansible" &&
+        raw.includes("apt") &&
+        raw.includes("nginx") &&
+        raw.includes("present"),
+    },
+    {
+      title: "Service Module",
+      why: "The `service` module interacts with the remote systemd daemon, guaranteeing that the targeted process is not only running, but enabled to survive server reboots.",
+      text: 'Type <code>ansible webservers -b -m service -a "name=nginx state=started enabled=yes"</code>',
+      objective: "Ensure nginx is started",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        c === "ansible" &&
+        raw.includes("service") &&
+        raw.includes("nginx") &&
+        raw.includes("started"),
+    },
+    {
+      title: "User Module",
+      why: "Orchestrate fleet-wide account generation. The `user` module safely modifies the `/etc/passwd` file across the cluster without locking the database.",
+      text: 'Type <code>ansible all -b -m user -a "name=deployer state=present"</code>',
+      objective: "Create user via module",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("user") && raw.includes("deployer"),
+    },
+    {
+      title: "Copy Module",
+      why: "The `copy` module streams file byte data from your local Control Node securely across the SSH tunnel, dropping the payload perfectly into the remote Node's filesystem.",
+      text: 'Type <code>ansible webservers -b -m copy -a "src=hosts.ini dest=/tmp/hosts.bak"</code>',
+      objective: "Copy file to fleet",
+      xp: 50,
+      check: (c, a, o, raw) =>
+        c === "ansible" &&
+        raw.includes("copy") &&
+        raw.includes("src=") &&
+        raw.includes("dest="),
+    },
+    {
+      title: "File Module (Directory)",
+      why: "The `file` module ensures filesystem states. Setting `state=directory` ensures the folder exists, creating it if necessary (like `mkdir -p`), with perfect idempotency.",
+      text: 'Type <code>ansible databases -b -m file -a "path=/opt/data state=directory"</code>',
+      objective: "Ensure directory exists",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("file") && raw.includes("directory"),
+    },
+    {
+      title: "File Module (Permissions)",
+      why: "Mass-update metadata. This instantly enforces 755 (Read/Write/Execute for Owner only) permissions on the target directory across the cluster.",
+      text: 'Type <code>ansible databases -b -m file -a "path=/opt/data mode=0755"</code>',
+      objective: "Update directory permissions",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("file") && raw.includes("mode=0755"),
+    },
+    {
+      title: "Cron Module",
+      why: "Automate automation. The `cron` module safely parses and modifies the remote system's scheduling daemon without breaking existing scheduled tasks.",
+      text: "Type <code>ansible all -b -m cron -a \"name='backup' minute='0' hour='2' job='/opt/backup.sh'\"</code>",
+      objective: "Create cronjob via module",
+      xp: 50,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("cron") && raw.includes("backup"),
+    },
+    {
+      title: "Lineinfile Module",
+      why: "The `lineinfile` module is a surgical scalpel. Instead of replacing a whole file, it uses Regex to find a specific line (like an SSH config) and modifies only that line.",
+      text: "Type <code>ansible all -b -m lineinfile -a \"path=/etc/ssh/sshd_config regexp='^PermitRootLogin' line='PermitRootLogin no'\"</code>",
+      objective: "Edit sshd_config safely",
+      xp: 60,
+      check: (c, a, o, raw) =>
+        c === "ansible" &&
+        raw.includes("lineinfile") &&
+        raw.includes("PermitRootLogin"),
+    },
+    {
+      title: "Restart SSH Daemon",
+      why: "Because we edited the SSH configuration, we must remotely send a SIGHUP to the sshd process across the fleet to load the security hardening.",
+      text: 'Type <code>ansible all -b -m service -a "name=sshd state=restarted"</code>',
+      objective: "Restart SSH",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        c === "ansible" &&
+        raw.includes("service") &&
+        raw.includes("sshd") &&
+        raw.includes("restarted"),
+    },
+    {
+      title: "Command Module",
+      why: "Unlike `shell`, the `command` module skips the remote bash interpreter. It talks directly to the kernel to execute binaries. It is safer, but prevents you from using pipes (|) or redirects (>).",
+      text: 'Type <code>ansible all -m command -a "hostname"</code>',
+      objective: "Run basic command module",
+      xp: 35,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("command") && raw.includes("hostname"),
+    },
+    {
+      title: "Ad-Hoc Dry Run",
+      why: "The `-C` (Check) flag runs a simulated dry-run. Ansible calculates the exact mathematical changes it *would* make to the filesystem, without actually changing anything.",
+      text: 'Type <code>ansible all -C -m command -a "uptime"</code>',
+      objective: "Dry run an ad-hoc command",
+      xp: 30,
+      check: (c, a) => c === "ansible" && a.includes("-C"),
+    },
+    {
+      title: "Git Module",
+      why: "The `git` module natively orchestrates version control. It executes secure clones and pulls over the network, ensuring the target servers always host the latest commit hashes.",
+      text: 'Type <code>ansible webservers -b -m git -a "repo=https://github.com/sim/app.git dest=/var/www/app"</code>',
+      objective: "Clone repo via git module",
+      xp: 50,
+      check: (c, a, o, raw) =>
+        c === "ansible" && raw.includes("git") && raw.includes("dest="),
+    },
+
+    // --- PHASE 3: PLAYBOOKS & YAML (31-45) ---
     {
       title: "Create Playbook",
-      why: "Ad-hoc is messy. Playbooks let you define infrastructure in YAML.",
-      text: "Type <code>touch web.yml</code>",
-      objective: "Type touch web.yml",
+      why: "Ad-Hoc commands are manual. A **Playbook** is a YAML blueprint that chains multiple modules into a strict, reproducible Directed Acyclic Graph (DAG) of execution.",
+      text: "Type <code>touch deploy.yml</code>",
+      objective: "Create deploy.yml",
+      xp: 15,
+      check: (c, a) => c === "touch" && a[0] === "deploy.yml",
+    },
+    {
+      title: "Define Play Structure",
+      why: "YAML is highly structure-dependent. The `hosts:` directive maps the DAG to the inventory block, and `become: true` enforces root escalation across the entire play.",
+      text: 'Type <code>echo -e "- hosts: webservers\\n  become: true\\n  tasks:" > deploy.yml</code>',
+      objective: "Start playbook yaml",
+      xp: 40,
+      check: (c, a, o, raw) =>
+        raw.includes("echo") &&
+        raw.includes("become: true") &&
+        raw.includes("deploy.yml"),
+    },
+    {
+      title: "Add Task: Install",
+      why: "Append the first task node to the DAG. This defines the exact desired state of the Nginx package.",
+      text: 'Type <code>echo -e "    - name: Install Nginx\\n      apt: name=nginx state=latest" >> deploy.yml</code>',
+      objective: "Add apt task",
+      xp: 40,
+      check: (c, a, o, raw) =>
+        raw.includes("echo") && raw.includes("apt:") && raw.includes(">>"),
+    },
+    {
+      title: "Add Task: Service",
+      why: "Append the second task node. Playbooks are executed synchronously from top to bottom, guaranteeing the software is installed before the daemon starts.",
+      text: 'Type <code>echo -e "    - name: Start Nginx\\n      service: name=nginx state=started" >> deploy.yml</code>',
+      objective: "Add service task",
+      xp: 40,
+      check: (c, a, o, raw) =>
+        raw.includes("echo") && raw.includes("service:") && raw.includes(">>"),
+    },
+    {
+      title: "View Playbook",
+      why: "Examine the whitespace and structural indentations of your Infrastructure-as-Code blueprint.",
+      text: "Type <code>cat deploy.yml</code>",
+      objective: "Read deploy.yml",
       xp: 10,
-      check: (c, a) => c === "touch" && a[0] === "web.yml",
+      check: (c, a) => c === "cat" && a[0] === "deploy.yml",
     },
     {
-      title: "Write YAML Header",
-      why: "Define the target hosts and root execution.",
-      text: 'Type <code>echo "- hosts: webservers\\n  become: yes\\n  tasks:" > web.yml</code>',
-      objective: "Write playbook header",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("tasks:") &&
-        raw.includes("web.yml"),
-    },
-    {
-      title: "Add Task: Install Nginx",
-      why: "Write the apt task.",
-      text: 'Type <code>echo "    - name: Install Nginx\\n      apt: name=nginx state=latest" >> web.yml</code>',
-      objective: "Append apt task",
-      xp: 35,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes(">>") &&
-        raw.includes("name=nginx"),
-    },
-    {
-      title: "Add Task: Start Nginx",
-      why: "Write the service task.",
-      text: 'Type <code>echo "    - name: Start Nginx\\n      service: name=nginx state=started" >> web.yml</code>',
-      objective: "Append service task",
-      xp: 35,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes(">>") &&
-        raw.includes("state=started"),
-    },
-    {
-      title: "Verify Playbook",
-      why: "Review your YAML code.",
-      text: "Type <code>cat web.yml</code>",
-      objective: "Read web.yml",
-      xp: 10,
-      check: (c, a) => c === "cat" && a[0] === "web.yml",
-    },
-    {
-      title: "Syntax Check",
-      why: "YAML is highly sensitive to spaces. Always check syntax first.",
-      text: "Type <code>ansible-playbook web.yml --syntax-check</code>",
+      title: "Check Syntax",
+      why: "Before executing a cluster-wide playbook, `--syntax-check` parses the YAML structure locally to prevent critical compilation failures halfway through a deployment.",
+      text: "Type <code>ansible-playbook --syntax-check deploy.yml</code>",
       objective: "Syntax check playbook",
       xp: 30,
       check: (c, a) =>
         c === "ansible-playbook" &&
-        a.includes("web.yml") &&
-        a.includes("--syntax-check"),
-    },
-    {
-      title: "Dry Run (Check Mode)",
-      why: "Simulate the playbook without making real changes.",
-      text: "Type <code>ansible-playbook web.yml --check</code>",
-      objective: "Use --check flag",
-      xp: 40,
-      check: (c, a) =>
-        c === "ansible-playbook" &&
-        a.includes("web.yml") &&
-        a.includes("--check"),
+        a.includes("--syntax-check") &&
+        a.includes("deploy.yml"),
     },
     {
       title: "Execute Playbook",
-      why: "Deploy Nginx to the entire fleet.",
-      text: "Type <code>ansible-playbook web.yml</code>",
+      why: "The <b>ansible-playbook</b> binary compiles the YAML graph into JSON instructions, multiplexes the SSH connections, and pushes the execution to the fleet in parallel.",
+      text: "Type <code>ansible-playbook deploy.yml</code>",
       objective: "Run the playbook",
       xp: 50,
+      check: (c, a) => c === "ansible-playbook" && a[0] === "deploy.yml",
+    },
+    {
+      title: "Playbook Dry Run",
+      why: "The `--check` flag computes the Delta differences between the Playbook and the current reality of the fleet, returning a simulated output of what *would* be changed.",
+      text: "Type <code>ansible-playbook --check deploy.yml</code>",
+      objective: "Dry run playbook",
+      xp: 35,
       check: (c, a) =>
         c === "ansible-playbook" &&
-        a.includes("web.yml") &&
-        !a.includes("--check"),
+        a.includes("--check") &&
+        a.includes("deploy.yml"),
     },
     {
-      title: "Create DB Playbook",
-      why: "Create a playbook for Postgres.",
-      text: "Type <code>touch db.yml</code>",
-      objective: "Type touch db.yml",
-      xp: 10,
-      check: (c, a) => c === "touch" && a[0] === "db.yml",
-    },
-    {
-      title: "Write DB Code",
-      why: "Fill out the Postgres task.",
-      text: 'Type <code>echo "- hosts: dbservers\\n  tasks:\\n    - apt: name=postgresql" > db.yml</code>',
-      objective: "Write DB playbook",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("postgresql") &&
-        raw.includes("db.yml"),
-    },
-    {
-      title: "Execute DB Playbook",
-      why: "Deploy the database.",
-      text: "Type <code>ansible-playbook db.yml</code>",
-      objective: "Run db.yml",
+      title: "Playbook Diff",
+      why: "The `--diff` flag mathematically outputs the exact line-by-line file changes Ansible is going to make on the remote servers, similar to `git diff`.",
+      text: "Type <code>ansible-playbook --check --diff deploy.yml</code>",
+      objective: "Diff the playbook",
       xp: 40,
-      check: (c, a) => c === "ansible-playbook" && a.includes("db.yml"),
+      check: (c, a) => c === "ansible-playbook" && a.includes("--diff"),
     },
     {
       title: "Limit Execution",
-      why: "Run the playbook ONLY on a specific server within a group (-l).",
-      text: "Type <code>ansible-playbook web.yml -l 10.0.0.11</code>",
-      objective: "Use -l to limit hosts",
-      xp: 40,
+      why: "You wrote a playbook for the whole `webservers` group, but you only want to test it on one server. The `-l` (Limit) flag overrides the YAML hosts directive.",
+      text: "Type <code>ansible-playbook -l 10.0.0.10 deploy.yml</code>",
+      objective: "Limit execution to one IP",
+      xp: 35,
       check: (c, a) =>
-        c === "ansible-playbook" && a.includes("-l") && a.includes("10.0.0.11"),
+        c === "ansible-playbook" && a.includes("-l") && a.includes("10.0.0.10"),
     },
     {
-      title: "Playbook Verbosity",
-      why: "Get deep debugging information on failure (-vvv).",
-      text: "Type <code>ansible-playbook web.yml -vvv</code>",
-      objective: "Run with -vvv",
-      xp: 35,
-      check: (c, a) => c === "ansible-playbook" && a.includes("-vvv"),
+      title: "Step Execution",
+      why: "The `--step` flag turns on interactive debugging, pausing the SSH execution engine before every single task and asking you for permission to proceed.",
+      text: "Type <code>ansible-playbook --step deploy.yml</code>",
+      objective: "Step through playbook",
+      xp: 30,
+      check: (c, a) => c === "ansible-playbook" && a.includes("--step"),
+    },
+    {
+      title: "Start at Task",
+      why: "If a massive playbook crashed on step 45, you don't want to rerun steps 1-44. `--start-at-task` tells the engine to jump directly to a specific node in the DAG.",
+      text: 'Type <code>ansible-playbook --start-at-task=\"Start Nginx\" deploy.yml</code>',
+      objective: "Start at specific task",
+      xp: 40,
+      check: (c, a, o, raw) =>
+        c === "ansible-playbook" && raw.includes("--start-at-task"),
     },
     {
       title: "List Tasks",
-      why: "Preview what tasks a playbook contains without running it.",
-      text: "Type <code>ansible-playbook web.yml --list-tasks</code>",
-      objective: "Use --list-tasks",
-      xp: 30,
+      why: "Without running anything, ask Ansible to parse the YAML structure and return a flat textual list of all executing nodes.",
+      text: "Type <code>ansible-playbook --list-tasks deploy.yml</code>",
+      objective: "List all tasks",
+      xp: 25,
       check: (c, a) => c === "ansible-playbook" && a.includes("--list-tasks"),
     },
     {
-      title: "List Target Hosts",
-      why: "Preview which servers will be affected by a playbook.",
-      text: "Type <code>ansible-playbook web.yml --list-hosts</code>",
-      objective: "Use --list-hosts",
-      xp: 30,
+      title: "List Hosts",
+      why: "Verify the dynamic inventory compilation to see exactly which IP addresses are targeted by the playbook logic.",
+      text: "Type <code>ansible-playbook --list-hosts deploy.yml</code>",
+      objective: "List targeted hosts",
+      xp: 25,
       check: (c, a) => c === "ansible-playbook" && a.includes("--list-hosts"),
     },
-
-    // --- PHASE 5: ROLES, GALAXY & MAGIC (51-65) ---
     {
-      title: "Ansible Galaxy",
-      why: "Ansible Galaxy is an open-source hub for pre-built roles.",
-      text: "Type <code>ansible-galaxy search nginx</code>",
-      objective: "Search ansible-galaxy",
+      title: "Verbose Playbook",
+      why: "If a task fails silently, use `-vvv` to increase the verbosity output, forcing Ansible to dump the raw JSON return payloads from the target machines to your screen.",
+      text: "Type <code>ansible-playbook -vvv deploy.yml</code>",
+      objective: "Run playbook verbosely",
       xp: 30,
-      check: (c, a) =>
-        c === "ansible-galaxy" && a.includes("search") && a.includes("nginx"),
+      check: (c, a) => c === "ansible-playbook" && a.includes("-vvv"),
     },
+
+    // --- PHASE 4: VAULTS, ROLES & GALAXY (46-55) ---
     {
-      title: "Install Galaxy Role",
-      why: "Download a community-built Nginx role.",
-      text: "Type <code>ansible-galaxy install geerlingguy.nginx</code>",
-      objective: "Install a galaxy role",
-      xp: 40,
-      check: (c, a) =>
-        c === "ansible-galaxy" &&
-        a.includes("install") &&
-        a.includes("geerlingguy.nginx"),
-    },
-    {
-      title: "List Installed Roles",
-      why: "Check your local roles path.",
-      text: "Type <code>ansible-galaxy list</code>",
-      objective: "List galaxy roles",
-      xp: 20,
-      check: (c, a) => c === "ansible-galaxy" && a.includes("list"),
-    },
-    {
-      title: "Create Custom Role",
-      why: "Initialize a blank scaffolding for your own complex role.",
-      text: "Type <code>ansible-galaxy init my_custom_role</code>",
-      objective: "Init a custom role",
-      xp: 40,
-      check: (c, a) =>
-        c === "ansible-galaxy" &&
-        a.includes("init") &&
-        a.includes("my_custom_role"),
-    },
-    {
-      title: "View Role Structure",
-      why: "Look at the massive folder tree Ansible generated for you.",
-      text: "Type <code>ls -l my_custom_role/</code>",
-      objective: "List role directory",
-      xp: 15,
-      check: (c, a) =>
-        c === "ls" && a.some((x) => x.includes("my_custom_role")),
-    },
-    {
-      title: "Ansible Vault Init",
-      why: "Encrypt a file containing API keys or passwords.",
+      title: "Create Vault",
+      why: "You cannot store database passwords in plain text YAML. **Ansible Vault** encrypts the file using AES-256 cryptography, prompting you to set a master encryption password.",
       text: "Type <code>ansible-vault create secrets.yml</code>",
       objective: "Create an encrypted vault",
-      xp: 45,
+      xp: 30,
       check: (c, a) =>
-        c === "ansible-vault" &&
-        a.includes("create") &&
-        a.includes("secrets.yml"),
+        c === "ansible-vault" && a[0] === "create" && a[1] === "secrets.yml",
+    },
+    {
+      title: "View Vault Data",
+      why: "Standard `cat` will just return binary gibberish. The `view` command prompts for the AES password and decrypts the contents safely into your terminal RAM without touching the disk.",
+      text: "Type <code>ansible-vault view secrets.yml</code>",
+      objective: "View vault contents",
+      xp: 25,
+      check: (c, a) => c === "ansible-vault" && a[0] === "view",
     },
     {
       title: "Edit Vault",
-      why: "Modify an encrypted file.",
+      why: "The `edit` command decrypts the file, opens it in your default text editor, and then automatically re-encrypts the new contents when you save and close.",
       text: "Type <code>ansible-vault edit secrets.yml</code>",
       objective: "Edit the vault",
-      xp: 40,
+      xp: 30,
+      check: (c, a) => c === "ansible-vault" && a[0] === "edit",
+    },
+    {
+      title: "Encrypt Existing File",
+      why: "You realized a legacy file contains plaintext secrets. `encrypt` takes the existing file and hashes its data into an AES-256 block immediately.",
+      text: "Type <code>ansible-vault encrypt hosts.ini</code>",
+      objective: "Encrypt hosts.ini",
+      xp: 30,
       check: (c, a) =>
-        c === "ansible-vault" &&
-        a.includes("edit") &&
-        a.includes("secrets.yml"),
+        c === "ansible-vault" && a[0] === "encrypt" && a[1] === "hosts.ini",
     },
     {
-      title: "View Vault",
-      why: "Read an encrypted file (will prompt for password).",
-      text: "Type <code>ansible-vault view secrets.yml</code>",
-      objective: "View the vault",
-      xp: 35,
-      check: (c, a) => c === "ansible-vault" && a.includes("view"),
+      title: "Decrypt File",
+      why: "Reverse the operation, permanently stripping the cryptographic shell and returning the file to standard plaintext.",
+      text: "Type <code>ansible-vault decrypt hosts.ini</code>",
+      objective: "Decrypt hosts.ini",
+      xp: 30,
+      check: (c, a) => c === "ansible-vault" && a[0] === "decrypt",
     },
     {
-      title: "Run with Vault",
-      why: "Tell the playbook to ask you for the vault password at runtime.",
-      text: "Type <code>ansible-playbook web.yml --ask-vault-pass</code>",
-      objective: "Run with --ask-vault-pass",
-      xp: 45,
+      title: "Run Playbook with Vault",
+      why: "If a playbook requires secrets from the vault, you must pass `--ask-vault-pass` so the engine knows to securely prompt you for the master decryption key before executing the DAG.",
+      text: "Type <code>ansible-playbook --ask-vault-pass deploy.yml</code>",
+      objective: "Run with vault password prompt",
+      xp: 40,
       check: (c, a) =>
         c === "ansible-playbook" && a.includes("--ask-vault-pass"),
     },
     {
+      title: "Ansible Galaxy Init",
+      why: "Playbooks get messy. **Roles** break playbooks into highly structured, modular directories (tasks, handlers, vars). `ansible-galaxy init` generates this exact skeleton folder architecture.",
+      text: "Type <code>ansible-galaxy init web_role</code>",
+      objective: "Create web_role skeleton",
+      xp: 35,
+      check: (c, a) =>
+        c === "ansible-galaxy" && a[0] === "init" && a[1] === "web_role",
+    },
+    {
+      title: "List Role Structure",
+      why: "Use `ls` to visually examine the modular directory architecture generated by the Galaxy engine.",
+      text: "Type <code>ls -la web_role/</code>",
+      objective: "List the role directory",
+      xp: 15,
+      check: (c, a) => c === "ls" && a[0] === "web_role/",
+    },
+    {
+      title: "Download Remote Role",
+      why: "Ansible Galaxy is also a public hub. The `install` command fetches a pre-built, community-vetted Role (like a secure Nginx configuration) directly into your local workspace.",
+      text: "Type <code>ansible-galaxy install geerlingguy.nginx</code>",
+      objective: "Download a community role",
+      xp: 40,
+      check: (c, a) =>
+        c === "ansible-galaxy" && a[0] === "install" && a[1].includes("nginx"),
+    },
+    {
+      title: "List Installed Roles",
+      why: "Query the local dependency tree to view all community roles currently imported into your execution environment.",
+      text: "Type <code>ansible-galaxy list</code>",
+      objective: "List installed roles",
+      xp: 20,
+      check: (c, a) => c === "ansible-galaxy" && a[0] === "list",
+    },
+
+    // --- PHASE 5: LINTING, TAGS & ADVANCED EXECUTION (56-65) ---
+    {
+      title: "Tag Execution",
+      why: "You can assign arbitrary string `tags` to specific tasks in YAML. Passing `--tags` tells the engine to completely ignore the normal top-to-bottom sequence and ONLY run tasks matching your specified tag.",
+      text: 'Type <code>ansible-playbook --tags "web" deploy.yml</code>',
+      objective: "Run specific tags",
+      xp: 35,
+      check: (c, a) => c === "ansible-playbook" && a.includes("--tags"),
+    },
+    {
+      title: "Skip Tags",
+      why: "Conversely, `--skip-tags` executes the entire playbook sequence but drops any task node matching the specified tag, acting as an execution blacklist.",
+      text: 'Type <code>ansible-playbook --skip-tags "db" deploy.yml</code>',
+      objective: "Skip specific tags",
+      xp: 35,
+      check: (c, a) => c === "ansible-playbook" && a.includes("--skip-tags"),
+    },
+    {
       title: "Ansible Pull",
-      why: "Invert the architecture: Have nodes pull configs from a git repo instead of pushing from a master.",
-      text: "Type <code>ansible-pull -U https://github.com/repo.git</code>",
-      objective: "Use ansible-pull",
+      why: "Standard Ansible is 'Push' architecture. `ansible-pull` flips this, commanding the remote server to pull a playbook from a Git repository and execute it locally. This is used for massive autoscaling clusters.",
+      text: "Type <code>ansible-pull -U https://github.com/sim/playbooks.git</code>",
+      objective: "Run ansible-pull",
       xp: 50,
       check: (c, a) =>
         c === "ansible-pull" &&
@@ -610,15 +554,15 @@ const module17_ansible = {
     },
     {
       title: "Ansible Lint",
-      why: "Lint your playbook to ensure perfect YAML formatting.",
-      text: "Type <code>ansible-lint web.yml</code>",
+      why: "YAML spacing is strictly enforced. `ansible-lint` acts as a static analysis compiler, parsing the blueprint to detect syntax flaws, deprecation warnings, and best-practice violations before execution.",
+      text: "Type <code>ansible-lint deploy.yml</code>",
       objective: "Run ansible-lint",
       xp: 35,
-      check: (c, a) => c === "ansible-lint" && a.includes("web.yml"),
+      check: (c, a) => c === "ansible-lint" && a.includes("deploy.yml"),
     },
     {
       title: "Check Ansible Doc",
-      why: "Read offline documentation for the 'file' module.",
+      why: "Ansible operates via hundreds of Python modules. `ansible-doc` reads the offline library manuals, returning the exact parameters required to correctly format the module in YAML.",
       text: "Type <code>ansible-doc file</code>",
       objective: "Type ansible-doc file",
       xp: 20,
@@ -626,15 +570,23 @@ const module17_ansible = {
     },
     {
       title: "Ansible Console",
-      why: "Open an interactive REPL terminal connected directly to your fleet.",
+      why: "The `ansible-console` binary drops you into an interactive REPL loop, maintaining a constant SSH multiplexed connection to the fleet for rapid, real-time command orchestration.",
       text: "Type <code>ansible-console</code>",
       objective: "Type ansible-console",
       xp: 35,
       check: (c) => c === "ansible-console",
     },
     {
+      title: "List Inventory Graph",
+      why: "The `ansible-inventory` binary compiles your host files and renders the entire nested group topology as a visual JSON or ASCII graph.",
+      text: "Type <code>ansible-inventory --graph</code>",
+      objective: "View the inventory graph",
+      xp: 25,
+      check: (c, a) => c === "ansible-inventory" && a.includes("--graph"),
+    },
+    {
       title: "Final Cleanup",
-      why: "Wipe your workspace.",
+      why: "Eradicate the working directory, permanently destroying the unencrypted inventory data and YAML blueprints.",
       text: "Type <code>rm -rf ~/ansible_fleet</code>",
       objective: "Delete ansible_fleet",
       xp: 15,
@@ -644,13 +596,20 @@ const module17_ansible = {
         a.some((x) => x.includes("ansible_fleet")),
     },
     {
-      title: "Fleet Commander",
-      why: "Module 17 Complete. You control the swarm.",
-      text: 'Type <code>echo "Infrastructure is now Code"</code>',
-      objective: "Type echo",
+      title: "Verify Deletion",
+      why: "Confirm the environment has been returned to its baseline state.",
+      text: "Type <code>ls -la ~/</code>",
+      objective: "Verify deletion",
+      xp: 10,
+      check: (c, a) => c === "ls" && a.includes("-la"),
+    },
+    {
+      title: "Automation Master",
+      why: "You understand SSH Multiplexing, Idempotency, YAML Task execution, AES-256 Vault Encryption, and Fleet Topologies. You are ready to orchestrate.",
+      text: 'Type <code>echo "Ansible Master Complete"</code>',
+      objective: "Echo final message",
       xp: 100,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") && raw.includes("Infrastructure"),
+      check: (c, a, o, raw) => raw.includes("echo") && raw.includes("Master"),
     },
   ],
 };

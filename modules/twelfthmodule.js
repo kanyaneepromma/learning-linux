@@ -7,7 +7,7 @@ const module12_scripting = {
     // --- PHASE 1: VARIABLES & ENVIRONMENT (1-20) ---
     {
       title: "Set Variable",
-      why: "Store data in memory.",
+      why: "Variables allocate a temporary memory block in your active shell's RAM space. By defining `TARGET`, you create a named pointer to the string data '10.0.0.50'.",
       text: 'Type <code>TARGET="10.0.0.50"</code>',
       objective: "Set TARGET variable",
       xp: 15,
@@ -16,7 +16,7 @@ const module12_scripting = {
     },
     {
       title: "Call Variable",
-      why: "Read the variable using the $ symbol.",
+      why: "The `$` symbol is the variable expansion operator. It tells the Bash interpreter to dereference the pointer and substitute the actual memory value into the command before execution.",
       text: "Type <code>echo $TARGET</code>",
       objective: "echo $TARGET",
       xp: 15,
@@ -24,7 +24,7 @@ const module12_scripting = {
     },
     {
       title: "Export Variable",
-      why: "Make the variable available to child processes.",
+      why: "By default, variables are local to your current shell. `export` promotes the variable to the global Environment space, allowing child processes and scripts spawned from this terminal to inherit it.",
       text: "Type <code>export TARGET</code>",
       objective: "export TARGET",
       xp: 20,
@@ -32,7 +32,7 @@ const module12_scripting = {
     },
     {
       title: "Environment Vars",
-      why: "View all active system variables.",
+      why: "The `env` command reads the `environ` pointer array provided by the kernel, dumping all global variables currently loaded into your active session's memory.",
       text: "Type <code>env</code>",
       objective: "Type env",
       xp: 15,
@@ -40,7 +40,7 @@ const module12_scripting = {
     },
     {
       title: "Grep Env",
-      why: "Find your specific target variable in the environment.",
+      why: "Pipe the environment array into grep to instantly locate the specific memory pointer you just exported.",
       text: "Type <code>env | grep TARGET</code>",
       objective: "Grep TARGET from env",
       xp: 20,
@@ -48,7 +48,7 @@ const module12_scripting = {
     },
     {
       title: "Command Substitution",
-      why: "Save the output of a command directly into a variable.",
+      why: "Wrapping a command in `$()` spawns a subshell. The kernel executes the command, captures its Standard Output (stdout), and injects it directly into the variable's memory space.",
       text: "Type <code>USER_INFO=$(whoami)</code>",
       objective: "Set USER_INFO to whoami output",
       xp: 30,
@@ -56,7 +56,7 @@ const module12_scripting = {
     },
     {
       title: "Echo Substitution",
-      why: "Verify the command substitution worked.",
+      why: "Dereference the `$USER_INFO` pointer to verify the subshell correctly populated the memory block.",
       text: "Type <code>echo $USER_INFO</code>",
       objective: "echo $USER_INFO",
       xp: 15,
@@ -64,7 +64,7 @@ const module12_scripting = {
     },
     {
       title: "Read Input",
-      why: "Ask for user input in a script.",
+      why: "The `read` command suspends script execution and waits for Standard Input (stdin) from the keyboard, storing the user's keystrokes directly into the specified variable.",
       text: 'Type <code>read -p "Enter IP: " IP_VAR</code>',
       objective: "Use read -p",
       xp: 25,
@@ -72,7 +72,7 @@ const module12_scripting = {
     },
     {
       title: "Alias Creation",
-      why: "Create a custom shortcut for a long command.",
+      why: "Aliases are macros loaded into the shell's memory. When you type the alias, Bash intercepts the command and expands it to its full string before execution.",
       text: "Type <code>alias ll='ls -la'</code>",
       objective: "Create alias ll",
       xp: 25,
@@ -80,7 +80,7 @@ const module12_scripting = {
     },
     {
       title: "Test Alias",
-      why: "Run your new shortcut.",
+      why: "Execute your newly created macro to verify the Bash interpreter expands it correctly.",
       text: "Type <code>ll</code>",
       objective: "Type ll",
       xp: 15,
@@ -88,7 +88,7 @@ const module12_scripting = {
     },
     {
       title: "List Aliases",
-      why: "See all active shortcuts.",
+      why: "View the active macro table loaded into your current session's RAM.",
       text: "Type <code>alias</code>",
       objective: "Type alias",
       xp: 15,
@@ -96,7 +96,7 @@ const module12_scripting = {
     },
     {
       title: "Persist Alias",
-      why: "Save the alias to your bash profile so it survives reboots.",
+      why: "Aliases die when you close the terminal. By appending the macro to `~/.bashrc`, you instruct the shell to automatically reload it into RAM every time you log in.",
       text: "Type <code>echo \"alias ll='ls -la'\" >> ~/.bashrc</code>",
       objective: "Append alias to .bashrc",
       xp: 30,
@@ -107,7 +107,7 @@ const module12_scripting = {
     },
     {
       title: "Source Profile",
-      why: "Reload the bash profile without logging out.",
+      why: "The `source` command forces the current shell to immediately re-read and execute the contents of a configuration file, applying changes without requiring a reboot.",
       text: "Type <code>source ~/.bashrc</code>",
       objective: "source ~/.bashrc",
       xp: 25,
@@ -115,7 +115,7 @@ const module12_scripting = {
     },
     {
       title: "Math Evaluation",
-      why: "Perform basic arithmetic in bash using $((...)).",
+      why: "Bash isn't just for running programs; it has a built-in Arithmetic Logic Unit (ALU) interface. The `$((...))` syntax evaluates mathematical expressions natively.",
       text: "Type <code>echo $((5 + 5))</code>",
       objective: "echo $((5 + 5))",
       xp: 20,
@@ -123,7 +123,7 @@ const module12_scripting = {
     },
     {
       title: "Expr Command",
-      why: "Alternative way to evaluate math expressions.",
+      why: "`expr` is a legacy Unix binary that evaluates regular expressions and math. When using multiplication (*), you must escape it with a backslash `\\` so Bash doesn't confuse it with a wildcard.",
       text: "Type <code>expr 10 \\* 2</code>",
       objective: "Use expr multiplication",
       xp: 20,
@@ -131,7 +131,7 @@ const module12_scripting = {
     },
     {
       title: "String Length",
-      why: "Count characters in a variable.",
+      why: "The `${#VAR}` syntax is a native parameter expansion that calculates the exact character byte-length of the data stored in the memory pointer.",
       text: "Type <code>echo ${#TARGET}</code>",
       objective: "echo ${#TARGET}",
       xp: 30,
@@ -139,7 +139,7 @@ const module12_scripting = {
     },
     {
       title: "Substring Extraction",
-      why: "Extract a portion of a string.",
+      why: "Parameter expansion can slice strings. `${TARGET:0:2}` tells the interpreter: start at index 0, and extract exactly 2 bytes of data.",
       text: "Type <code>echo ${TARGET:0:2}</code>",
       objective: "echo ${TARGET:0:2}",
       xp: 30,
@@ -147,7 +147,7 @@ const module12_scripting = {
     },
     {
       title: "String Replacement",
-      why: "Replace text inside a variable.",
+      why: "`${VAR/find/replace}` performs an inline memory substitution, replacing the first instance of the target string before outputting it.",
       text: "Type <code>echo ${TARGET/10/192}</code>",
       objective: "echo ${TARGET/10/192}",
       xp: 30,
@@ -155,7 +155,7 @@ const module12_scripting = {
     },
     {
       title: "Unset Variable",
-      why: "Clear a variable from memory.",
+      why: "The `unset` command explicitly commands the kernel to deallocate the memory block associated with the variable, destroying the pointer.",
       text: "Type <code>unset TARGET</code>",
       objective: "unset TARGET",
       xp: 15,
@@ -163,7 +163,7 @@ const module12_scripting = {
     },
     {
       title: "Verify Unset",
-      why: "Ensure the variable is empty.",
+      why: "Dereferencing a destroyed pointer returns a null (empty) string.",
       text: "Type <code>echo $TARGET</code>",
       objective: "echo $TARGET",
       xp: 10,
@@ -173,7 +173,7 @@ const module12_scripting = {
     // --- PHASE 2: CONDITIONAL LOGIC (21-40) ---
     {
       title: "If Statement",
-      why: "Basic true/false logic block.",
+      why: "The `[` is actually a synonym for the `test` binary. It evaluates a conditional expression and returns an exit code. `-eq` performs a mathematical integer comparison (Equal).",
       text: 'Type <code>if [ 1 -eq 1 ]; then echo "True"; fi</code>',
       objective: "Write an if statement",
       xp: 30,
@@ -182,7 +182,7 @@ const module12_scripting = {
     },
     {
       title: "If Not Equal",
-      why: "Check for inequality (-ne).",
+      why: "The `-ne` operator evaluates mathematical inequality (Not Equal). If the condition returns true (Exit Code 0), the `then` block executes.",
       text: 'Type <code>if [ 1 -ne 2 ]; then echo "Not Equal"; fi</code>',
       objective: "Use -ne in an if block",
       xp: 30,
@@ -190,7 +190,7 @@ const module12_scripting = {
     },
     {
       title: "If Greater Than",
-      why: "Check if a number is larger (-gt).",
+      why: "The `-gt` operator evaluates if the left integer is strictly greater than the right integer.",
       text: 'Type <code>if [ 5 -gt 2 ]; then echo "Greater"; fi</code>',
       objective: "Use -gt",
       xp: 30,
@@ -198,7 +198,7 @@ const module12_scripting = {
     },
     {
       title: "If Less Than",
-      why: "Check if a number is smaller (-lt).",
+      why: "The `-lt` operator evaluates if the left integer is strictly less than the right integer.",
       text: 'Type <code>if [ 2 -lt 5 ]; then echo "Less"; fi</code>',
       objective: "Use -lt",
       xp: 30,
@@ -206,7 +206,7 @@ const module12_scripting = {
     },
     {
       title: "String Equal",
-      why: "Compare two strings using ==.",
+      why: "While numbers use `-eq`, strings use the `==` operator. This performs a byte-by-byte ASCII comparison of the two text arrays.",
       text: 'Type <code>if [ "a" == "a" ]; then echo "Match"; fi</code>',
       objective: "String comparison ==",
       xp: 30,
@@ -214,7 +214,7 @@ const module12_scripting = {
     },
     {
       title: "String Not Equal",
-      why: "Compare two strings using !=.",
+      why: "The `!=` operator evaluates string inequality, returning true if the ASCII byte arrays do not match.",
       text: 'Type <code>if [ "a" != "b" ]; then echo "Diff"; fi</code>',
       objective: "String comparison !=",
       xp: 30,
@@ -222,7 +222,7 @@ const module12_scripting = {
     },
     {
       title: "Check Empty String",
-      why: "Check if a variable is empty (-z).",
+      why: "The `-z` (Zero) flag checks the memory pointer. It returns true ONLY if the string's length is exactly 0 bytes.",
       text: 'Type <code>if [ -z "$TARGET" ]; then echo "Empty"; fi</code>',
       objective: "Use -z for empty check",
       xp: 35,
@@ -230,7 +230,7 @@ const module12_scripting = {
     },
     {
       title: "Check Populated String",
-      why: "Check if a string has content (-n).",
+      why: "The `-n` (Non-Zero) flag returns true if the string's length is greater than 0 bytes, ensuring the variable contains data.",
       text: 'Type <code>if [ -n "Data" ]; then echo "Full"; fi</code>',
       objective: "Use -n for populated check",
       xp: 35,
@@ -238,7 +238,7 @@ const module12_scripting = {
     },
     {
       title: "File Exists",
-      why: "Check if a specific file exists (-f).",
+      why: "The `-f` flag queries the hard drive's inode table to verify that the specified path physically exists AND is a standard file (not a directory).",
       text: 'Type <code>if [ -f "/etc/passwd" ]; then echo "Exists"; fi</code>',
       objective: "Use -f to check file",
       xp: 35,
@@ -247,7 +247,7 @@ const module12_scripting = {
     },
     {
       title: "Directory Exists",
-      why: "Check if a directory exists (-d).",
+      why: "The `-d` flag queries the filesystem to verify that the target path physically exists and is structurally formatted as a directory node.",
       text: 'Type <code>if [ -d "/tmp" ]; then echo "Dir Exists"; fi</code>',
       objective: "Use -d to check directory",
       xp: 35,
@@ -256,7 +256,7 @@ const module12_scripting = {
     },
     {
       title: "File is Readable",
-      why: "Check if you have read permissions (-r).",
+      why: "The `-r` flag checks the file's metadata against your current Effective User ID (EUID) to ensure you have Read permissions.",
       text: 'Type <code>if [ -r "/etc/passwd" ]; then echo "Readable"; fi</code>',
       objective: "Use -r for readability",
       xp: 35,
@@ -264,7 +264,7 @@ const module12_scripting = {
     },
     {
       title: "File is Writable",
-      why: "Check if you have write permissions (-w).",
+      why: "The `-w` flag checks the filesystem metadata to guarantee your current user has authorization to modify the target's data blocks.",
       text: 'Type <code>if [ -w "/tmp" ]; then echo "Writable"; fi</code>',
       objective: "Use -w for writability",
       xp: 35,
@@ -272,7 +272,7 @@ const module12_scripting = {
     },
     {
       title: "File is Executable",
-      why: "Check if a script can run (-x).",
+      why: "The `-x` flag verifies that the file's executable permission bit is set, meaning the CPU is authorized to process its contents as instructions.",
       text: 'Type <code>if [ -x "/bin/bash" ]; then echo "Exec"; fi</code>',
       objective: "Use -x for executability",
       xp: 35,
@@ -280,7 +280,7 @@ const module12_scripting = {
     },
     {
       title: "Logical AND",
-      why: "Combine two conditions. Both must be true (&&).",
+      why: "The `&&` operator chains conditions. The second expression is ONLY evaluated if the first expression returns a successful (0) exit code.",
       text: 'Type <code>if [ 1 -eq 1 ] && [ 2 -eq 2 ]; then echo "Both"; fi</code>',
       objective: "Use logical &&",
       xp: 40,
@@ -288,7 +288,7 @@ const module12_scripting = {
     },
     {
       title: "Logical OR",
-      why: "Combine two conditions. Only one needs to be true (||).",
+      why: "The `||` operator chains conditions. The second expression is ONLY evaluated if the first expression fails (returns a non-zero exit code).",
       text: 'Type <code>if [ 1 -eq 2 ] || [ 1 -eq 1 ]; then echo "One"; fi</code>',
       objective: "Use logical ||",
       xp: 40,
@@ -296,7 +296,7 @@ const module12_scripting = {
     },
     {
       title: "If/Else Block",
-      why: "Provide an alternative action if the condition is false.",
+      why: "The `else` keyword provides a fallback execution path, instructing the CPU to run alternate instructions if the `if` condition fails.",
       text: 'Type <code>if [ 1 -eq 2 ]; then echo "Yes"; else echo "No"; fi</code>',
       objective: "Write an if/else block",
       xp: 40,
@@ -305,7 +305,7 @@ const module12_scripting = {
     },
     {
       title: "Double Bracket Regex",
-      why: "Bash supports regex matching inside [[...]].",
+      why: "The `[[...]]` syntax is a bash-specific upgrade over the standard `[`. It natively supports the `=~` operator, allowing you to evaluate strings against complex Regular Expressions.",
       text: 'Type <code>if [[ "Hack123" =~ [0-9] ]]; then echo "Has Nums"; fi</code>',
       objective: "Use =~ for regex matching",
       xp: 50,
@@ -314,7 +314,7 @@ const module12_scripting = {
     },
     {
       title: "Command Success",
-      why: "Run a command only if the previous one succeeded (&&).",
+      why: "The `&&` operator isn't just for `if` statements. It links execution chains, ensuring the `cd` command only fires if the `mkdir` command successfully allocated the directory.",
       text: "Type <code>mkdir test_dir && cd test_dir</code>",
       objective: "Chain commands with &&",
       xp: 30,
@@ -323,7 +323,7 @@ const module12_scripting = {
     },
     {
       title: "Command Failure",
-      why: "Run a command only if the previous one failed (||).",
+      why: "The `||` operator executes the fallback command only if the primary command crashes, creating a rudimentary error-handling mechanism.",
       text: 'Type <code>cd fake_dir || echo "Failed!"</code>',
       objective: "Chain commands with ||",
       xp: 30,
@@ -332,7 +332,7 @@ const module12_scripting = {
     },
     {
       title: "Exit Status Check",
-      why: "Check the secret $? variable to see the last command's exit code.",
+      why: "Every executed command sends a numeric exit status to the kernel. `$?` contains the last status. 0 means absolute success; any other number indicates an error.",
       text: "Type <code>echo $?</code>",
       objective: "echo $?",
       xp: 20,
@@ -342,7 +342,7 @@ const module12_scripting = {
     // --- PHASE 3: LOOPS & AUTOMATION (41-60) ---
     {
       title: "For Loop Numeric",
-      why: "Loop through a sequence of numbers.",
+      why: "A `for` loop iterates over a sequence. The `{1..5}` brace expansion generates an array of numbers in RAM, and the loop executes its block once for every element.",
       text: "Type <code>for i in {1..5}; do echo $i; done</code>",
       objective: "Write a for loop with {1..5}",
       xp: 35,
@@ -351,7 +351,7 @@ const module12_scripting = {
     },
     {
       title: "For Loop Strings",
-      why: "Loop through a list of words.",
+      why: "The loop doesn't care about numbers. It simply steps through the provided list of space-separated text strings, assigning each to the `$host` pointer in turn.",
       text: "Type <code>for host in web db dns; do echo $host; done</code>",
       objective: "Write a for loop with strings",
       xp: 35,
@@ -360,7 +360,7 @@ const module12_scripting = {
     },
     {
       title: "For Loop Command",
-      why: "Loop over the output of a command.",
+      why: "By placing `$(ls)` in the loop definition, you dynamically generate the iteration array from the standard output of the directory listing.",
       text: "Type <code>for file in $(ls); do echo $file; done</code>",
       objective: "Write a for loop wrapping ls",
       xp: 40,
@@ -368,7 +368,7 @@ const module12_scripting = {
     },
     {
       title: "For Loop C-Style",
-      why: "Write a loop like a C programmer.",
+      why: "Bash supports standard C-language loop architecture: initialize a variable (`i=0`), define the breaking condition (`i<3`), and define the step iteration (`i++`).",
       text: "Type <code>for ((i=0; i<3; i++)); do echo $i; done</code>",
       objective: "Write a C-style for loop",
       xp: 40,
@@ -376,7 +376,7 @@ const module12_scripting = {
     },
     {
       title: "While Loop True",
-      why: "Create an infinite loop (Ctrl+C to break in real life).",
+      why: "A `while` loop runs continuously as long as its condition evaluates to true. `while true` creates an infinite loop, which must be manually broken using `break`.",
       text: 'Type <code>while true; do echo "Hacking..."; break; done</code>',
       objective: "Write a while true loop",
       xp: 40,
@@ -385,7 +385,7 @@ const module12_scripting = {
     },
     {
       title: "While Loop Condition",
-      why: "Loop until a math condition is met.",
+      why: "This combines arithmetic tracking with loop evaluation. It continues spawning cycles until the variable `$x` exceeds the integer limit defined by `-le`.",
       text: "Type <code>x=1; while [ $x -le 3 ]; do echo $x; ((x++)); done</code>",
       objective: "Write a conditional while loop",
       xp: 50,
@@ -394,7 +394,7 @@ const module12_scripting = {
     },
     {
       title: "Read File Line by Line",
-      why: "The safest way to process text files in bash.",
+      why: "This is the most secure way to parse files. The `<` operator redirects the file descriptor into the loop, and `read` pulls exactly one line of text per cycle into RAM.",
       text: "Type <code>while read line; do echo $line; done < /etc/passwd</code>",
       objective: "Use a while read loop",
       xp: 50,
@@ -403,7 +403,7 @@ const module12_scripting = {
     },
     {
       title: "Automated Ping Sweep",
-      why: "Red Team: Ping an entire subnet automatically.",
+      why: "Combine loop mechanics with network diagnostics. This dynamically alters the IP address string, allowing you to brute-force network discovery automatically.",
       text: "Type <code>for i in {1..5}; do ping -c 1 10.0.0.$i; done</code>",
       objective: "Create a ping sweep loop",
       xp: 50,
@@ -412,7 +412,7 @@ const module12_scripting = {
     },
     {
       title: "Automated File Creation",
-      why: "Create 10 numbered files instantly.",
+      why: "Leverage iteration to programmatically mass-generate file inodes on the hard drive using the sequence variable inside the filename string.",
       text: "Type <code>for i in {1..10}; do touch file_$i.txt; done</code>",
       objective: "Create 10 files in a loop",
       xp: 40,
@@ -421,7 +421,7 @@ const module12_scripting = {
     },
     {
       title: "Verify Automation",
-      why: "Check that the files were created.",
+      why: "Execute a standard directory listing to verify the kernel successfully committed the loop's 10 file creation requests to disk.",
       text: "Type <code>ls</code>",
       objective: "Type ls",
       xp: 10,
@@ -429,7 +429,7 @@ const module12_scripting = {
     },
     {
       title: "Automated Cleanup",
-      why: "Delete all those numbered files instantly.",
+      why: "Run a secondary destructive loop to iterate through the sequence and unlink all 10 generated files from the filesystem.",
       text: "Type <code>for i in {1..10}; do rm file_$i.txt; done</code>",
       objective: "Delete files in a loop",
       xp: 40,
@@ -438,7 +438,7 @@ const module12_scripting = {
     },
     {
       title: "Seq Command",
-      why: "Generate a sequence of numbers (alternative to {1..5}).",
+      why: "The `seq` binary is an alternative to brace expansion. It mathematically generates a numeric sequence stream, which is useful for dynamic variables.",
       text: "Type <code>seq 1 5</code>",
       objective: "Type seq 1 5",
       xp: 15,
@@ -446,7 +446,7 @@ const module12_scripting = {
     },
     {
       title: "Seq Step",
-      why: "Generate numbers counting by 2s.",
+      why: "`seq` accepts a step parameter. `seq 1 2 10` instructs the generator to start at 1, increment by 2 on each cycle, and terminate before exceeding 10.",
       text: "Type <code>seq 1 2 10</code>",
       objective: "Type seq 1 2 10",
       xp: 20,
@@ -454,7 +454,7 @@ const module12_scripting = {
     },
     {
       title: "Create Bash Script",
-      why: "Put logic into a file instead of typing it all out.",
+      why: "The `#!/bin/bash` string is called a 'Shebang'. It is a magic byte sequence that tells the Linux kernel exactly which interpreter engine to use when executing the file.",
       text: "Type <code>echo '#!/bin/bash' > script.sh</code>",
       objective: "Create script.sh with shebang",
       xp: 25,
@@ -465,7 +465,7 @@ const module12_scripting = {
     },
     {
       title: "Append Command",
-      why: "Add a command to your script.",
+      why: "Write automation instructions into your script file using standard stream redirection.",
       text: "Type <code>echo 'echo \"Running...\"' >> script.sh</code>",
       objective: "Append to script.sh",
       xp: 25,
@@ -474,7 +474,7 @@ const module12_scripting = {
     },
     {
       title: "Chmod Script",
-      why: "Make it executable.",
+      why: "A script is just a text file until you flip the Execution bit in its metadata. `chmod +x` authorizes the kernel to pass the file to the interpreter.",
       text: "Type <code>chmod +x script.sh</code>",
       objective: "chmod +x script.sh",
       xp: 20,
@@ -483,7 +483,7 @@ const module12_scripting = {
     },
     {
       title: "Execute Script",
-      why: "Run your custom automation tool.",
+      why: "Prefixing the script with `./` tells the kernel to execute the binary located in the *current* directory, bypassing the global `$PATH` search.",
       text: "Type <code>./script.sh</code>",
       objective: "Run ./script.sh",
       xp: 30,
@@ -491,7 +491,7 @@ const module12_scripting = {
     },
     {
       title: "Pass Arguments",
-      why: "Scripts can accept external input ($1, $2).",
+      why: "Scripts accept external data via Positional Parameters. `$1` represents the first argument passed to the script, `$2` the second, and so on.",
       text: "Type <code>echo 'echo \"Target is $1\"' > arg.sh && chmod +x arg.sh</code>",
       objective: "Create an arg.sh script",
       xp: 35,
@@ -499,7 +499,7 @@ const module12_scripting = {
     },
     {
       title: "Run with Args",
-      why: "Pass an IP address into your new script.",
+      why: "Execute the script and pass '10.0.0.99' as the first Positional Parameter, mapping it directly to the `$1` variable inside the script's memory.",
       text: "Type <code>./arg.sh 10.0.0.99</code>",
       objective: "Run ./arg.sh with an argument",
       xp: 30,
@@ -507,7 +507,7 @@ const module12_scripting = {
     },
     {
       title: "Clean Up Scripts",
-      why: "Remove the practice tools.",
+      why: "Erase the temporary automation files to maintain a sterile testing environment.",
       text: "Type <code>rm script.sh arg.sh</code>",
       objective: "rm the scripts",
       xp: 15,
@@ -518,7 +518,7 @@ const module12_scripting = {
     // --- PHASE 4: TEXT PARSING & PIPELINES (AWK, SED, CUT) (61-85) ---
     {
       title: "Cut Command Basic",
-      why: "Extract sections of text based on a delimiter (-d).",
+      why: "The `cut` binary slices vertical columns out of text streams. The `-d` flag sets the boundary delimiter (a colon), and `-f 1` extracts the first field block.",
       text: "Type <code>echo \"admin:password\" | cut -d ':' -f 1</code>",
       objective: "Use cut -d ':' -f 1",
       xp: 30,
@@ -527,7 +527,7 @@ const module12_scripting = {
     },
     {
       title: "Cut System Users",
-      why: "Extract just the usernames from /etc/passwd.",
+      why: "Execute the slice directly against the system database, ripping the username column completely away from the password hashes and UIDs.",
       text: "Type <code>cut -d ':' -f 1 /etc/passwd</code>",
       objective: "Cut field 1 from passwd",
       xp: 30,
@@ -536,7 +536,7 @@ const module12_scripting = {
     },
     {
       title: "Awk Basic",
-      why: "Awk is a powerful programming language for text parsing. Print the first column.",
+      why: "`awk` is an entire Turing-complete programming language. By default, it splits lines by whitespace, assigning the first block to the `$1` pointer.",
       text: "Type <code>echo \"apple banana cherry\" | awk '{print $1}'</code>",
       objective: "Use awk '{print $1}'",
       xp: 35,
@@ -544,7 +544,7 @@ const module12_scripting = {
     },
     {
       title: "Awk Last Column",
-      why: "Print the last column without knowing how many there are ($NF).",
+      why: "The `awk` `$NF` variable is a dynamic pointer to the 'Number of Fields'. It automatically targets the absolute last column in a row.",
       text: "Type <code>echo \"a b c d e\" | awk '{print $NF}'</code>",
       objective: "Use awk '{print $NF}'",
       xp: 35,
@@ -552,7 +552,7 @@ const module12_scripting = {
     },
     {
       title: "Awk Delimiter",
-      why: "Tell awk to split columns by colons instead of spaces (-F).",
+      why: "The `-F` flag changes the internal field separator for the `awk` engine. Here, we parse the password file by treating colons as the structural boundaries.",
       text: "Type <code>awk -F ':' '{print $1}' /etc/passwd</code>",
       objective: "Use awk -F ':' on passwd",
       xp: 40,
@@ -564,7 +564,7 @@ const module12_scripting = {
     },
     {
       title: "Awk Conditional",
-      why: "Only print the row if the user ID is 0 (Root).",
+      why: "Awk can perform logical evaluation before acting. `$3 == 0` intercepts the row, checks if the UID equals 0, and only prints if true.",
       text: "Type <code>awk -F ':' '$3 == 0 {print $1}' /etc/passwd</code>",
       objective: "Use conditional awk '$3 == 0'",
       xp: 50,
@@ -572,7 +572,7 @@ const module12_scripting = {
     },
     {
       title: "Sed Substitution",
-      why: "Stream Editor: Find and replace text automatically (s/find/replace/).",
+      why: "`sed` (Stream Editor) modifies text dynamically. The `s/find/replace/` syntax executes a regex substitution on the first matching instance per line.",
       text: "Type <code>echo \"I hate Linux\" | sed 's/hate/love/'</code>",
       objective: "Use sed 's/hate/love/'",
       xp: 35,
@@ -581,7 +581,7 @@ const module12_scripting = {
     },
     {
       title: "Sed Global Replace",
-      why: "Replace ALL instances on a line by adding 'g' to the end.",
+      why: "Appending the `g` (Global) modifier to the substitution command forces `sed` to replace every single matching instance across the entire data stream.",
       text: "Type <code>echo \"dog dog dog\" | sed 's/dog/cat/g'</code>",
       objective: "Use sed 's/dog/cat/g'",
       xp: 35,
@@ -589,7 +589,7 @@ const module12_scripting = {
     },
     {
       title: "Sed Delete Line",
-      why: "Delete specific lines. (e.g., delete line 1).",
+      why: "`sed` can structurally alter documents. The `1d` command targets line 1 and physically deletes it from the output stream.",
       text: "Type <code>sed '1d' /etc/passwd</code>",
       objective: "Use sed '1d'",
       xp: 35,
@@ -597,7 +597,7 @@ const module12_scripting = {
     },
     {
       title: "Sort Basic",
-      why: "Alphabetize output.",
+      why: "The `sort` command buffers the entire input stream into RAM, analyzes the ASCII byte values of the first character of each line, and outputs them in ascending order.",
       text: 'Type <code>echo -e "c\\na\\nb" | sort</code>',
       objective: "Pipe into sort",
       xp: 25,
@@ -605,7 +605,7 @@ const module12_scripting = {
     },
     {
       title: "Sort Reverse",
-      why: "Reverse the alphabetical order.",
+      why: "The `-r` flag flips the sorting algorithm, outputting the highest ASCII byte values first to create a descending list.",
       text: 'Type <code>echo -e "c\\na\\nb" | sort -r</code>',
       objective: "Pipe into sort -r",
       xp: 25,
@@ -613,7 +613,7 @@ const module12_scripting = {
     },
     {
       title: "Sort Numeric",
-      why: "Sort by actual number value, not first digit.",
+      why: "The `-n` flag changes the sorting logic. Instead of reading ASCII strings, it mathematically evaluates the strings as actual integers.",
       text: 'Type <code>echo -e "10\\n2\\n1" | sort -n</code>',
       objective: "Pipe into sort -n",
       xp: 25,
@@ -621,7 +621,7 @@ const module12_scripting = {
     },
     {
       title: "Uniq Command",
-      why: "Remove duplicate lines (must be sorted first!).",
+      why: "The `uniq` command deletes adjacent duplicate lines in a stream. Because it only compares adjacent lines, the data MUST be piped through `sort` first.",
       text: 'Type <code>echo -e "a\\na\\nb" | uniq</code>',
       objective: "Pipe into uniq",
       xp: 25,
@@ -629,7 +629,7 @@ const module12_scripting = {
     },
     {
       title: "Uniq Count",
-      why: "Count how many times each line appeared.",
+      why: "The `-c` flag prepends a numeric counter to each line, tallying exactly how many identical duplicates were merged together by the engine.",
       text: 'Type <code>echo -e "a\\na\\nb" | uniq -c</code>',
       objective: "Pipe into uniq -c",
       xp: 30,
@@ -637,7 +637,7 @@ const module12_scripting = {
     },
     {
       title: "The Master Pipeline",
-      why: "Extract all shells, sort them, and count unique ones.",
+      why: "The ultimate Linux data pipeline. You extract the shell column (cut), group identical shells together (sort), and count the frequencies of each (uniq).",
       text: "Type <code>cut -d ':' -f 7 /etc/passwd | sort | uniq -c</code>",
       objective: "Combine cut, sort, and uniq",
       xp: 50,
@@ -646,7 +646,7 @@ const module12_scripting = {
     },
     {
       title: "Tr Command",
-      why: "Translate or delete characters. Change a to z.",
+      why: "`tr` (Translate) replaces single characters byte-by-byte. It maps the first array ('a') directly to the second array ('z').",
       text: "Type <code>echo \"apple\" | tr 'a' 'z'</code>",
       objective: "Pipe into tr 'a' 'z'",
       xp: 25,
@@ -654,7 +654,7 @@ const module12_scripting = {
     },
     {
       title: "Tr Uppercase",
-      why: "Convert a whole string to uppercase.",
+      why: "`tr` supports ASCII range maps. By mapping the set 'a-z' to 'A-Z', it forces the entire byte stream into an uppercase format.",
       text: "Type <code>echo \"linux\" | tr 'a-z' 'A-Z'</code>",
       objective: "Use tr 'a-z' 'A-Z'",
       xp: 30,
@@ -663,7 +663,7 @@ const module12_scripting = {
     },
     {
       title: "Tr Delete",
-      why: "Remove all spaces from a string (-d).",
+      why: "The `-d` flag transforms `tr` into a deletion engine, stripping every instance of the specified character entirely out of the stream.",
       text: "Type <code>echo \"h e l l o\" | tr -d ' '</code>",
       objective: "Use tr -d ' '",
       xp: 30,
@@ -671,7 +671,7 @@ const module12_scripting = {
     },
     {
       title: "Wc Chars",
-      why: "Count exactly how many characters are in a string.",
+      why: "The `echo -n` flag prevents a trailing newline character. `wc -c` then calculates the exact raw byte footprint of the string.",
       text: 'Type <code>echo -n "abc" | wc -c</code>',
       objective: "Use echo -n and wc -c",
       xp: 20,
@@ -679,7 +679,7 @@ const module12_scripting = {
     },
     {
       title: "Grep Ignore Case",
-      why: "Search without worrying about capitalization (-i).",
+      why: "The `-i` flag disables ASCII case sensitivity, forcing the grep regex engine to match both uppercase and lowercase variations of the string.",
       text: 'Type <code>grep -i "ROOT" /etc/passwd</code>',
       objective: "Use grep -i",
       xp: 20,
@@ -687,7 +687,7 @@ const module12_scripting = {
     },
     {
       title: "Grep Invert",
-      why: "Show lines that DO NOT match the pattern (-v).",
+      why: "The `-v` flag creates an inverse filter. It drops any line that matches the pattern and ONLY outputs lines that fail the regex evaluation.",
       text: 'Type <code>grep -v "bash" /etc/passwd</code>',
       objective: "Use grep -v",
       xp: 25,
@@ -695,7 +695,7 @@ const module12_scripting = {
     },
     {
       title: "Grep Count",
-      why: "Just print the number of matches (-c).",
+      why: "The `-c` flag suppresses the textual output completely, returning a single integer representing how many rows triggered a positive match.",
       text: 'Type <code>grep -c "sh" /etc/passwd</code>',
       objective: "Use grep -c",
       xp: 25,
@@ -703,7 +703,7 @@ const module12_scripting = {
     },
     {
       title: "Grep Recursive",
-      why: "Search inside all files in a directory (-r).",
+      why: "The `-r` flag traverses directory structures. It opens every single file it finds and executes the regex search across the entire filesystem tree.",
       text: 'Type <code>grep -r "password" /var/log/</code>',
       objective: "Use grep -r",
       xp: 30,
@@ -711,7 +711,7 @@ const module12_scripting = {
     },
     {
       title: "Head/Tail Pipe",
-      why: "Extract the exact middle line (e.g., line 5).",
+      why: "By extracting the top 5 lines with `head`, and then passing that chunk to `tail -n 1`, you mathematically isolate and extract exactly line 5.",
       text: "Type <code>head -n 5 /etc/passwd | tail -n 1</code>",
       objective: "Combine head and tail",
       xp: 40,
@@ -720,7 +720,7 @@ const module12_scripting = {
     },
     {
       title: "Tee Command",
-      why: "Output to screen AND save to a file at the same time.",
+      why: "The `tee` command creates a T-junction in the data stream. It writes the data directly to a file on the disk while simultaneously passing a copy forward to the screen.",
       text: 'Type <code>echo "Data" | tee output.txt</code>',
       objective: "Pipe into tee",
       xp: 35,
@@ -731,7 +731,7 @@ const module12_scripting = {
     // --- PHASE 5: PYTHON, JSON, AND ADVANCED MAGIC (86-100) ---
     {
       title: "Base64 Encode",
-      why: "Obfuscate text using Base64 encoding.",
+      why: "Base64 translates binary data into a 64-character ASCII string. Hackers use it to safely transmit executable payloads through text-only HTTP connections.",
       text: 'Type <code>echo "Secret" | base64</code>',
       objective: "Pipe into base64",
       xp: 25,
@@ -739,7 +739,7 @@ const module12_scripting = {
     },
     {
       title: "Base64 Decode",
-      why: "Decode an obfuscated string (-d).",
+      why: "The `-d` flag reverses the Radix-64 algorithm, converting the obfuscated text string back into its original raw bytes.",
       text: 'Type <code>echo "U2VjcmV0" | base64 -d</code>',
       objective: "Use base64 -d",
       xp: 30,
@@ -747,7 +747,7 @@ const module12_scripting = {
     },
     {
       title: "Hex Dump",
-      why: "View the raw hexadecimal binary values of a file.",
+      why: "The `xxd` command translates raw file data into a hexadecimal readout, allowing reverse engineers to inspect the exact compiled byte structure of a binary.",
       text: "Type <code>xxd /etc/passwd</code>",
       objective: "Use xxd",
       xp: 30,
@@ -755,7 +755,7 @@ const module12_scripting = {
     },
     {
       title: "MD5 Hashing",
-      why: "Generate an MD5 hash directly in the terminal.",
+      why: "The `md5sum` command passes the text stream through the MD5 cryptographic algorithm, generating a 128-bit checksum signature to verify data integrity.",
       text: 'Type <code>echo "admin" | md5sum</code>',
       objective: "Pipe into md5sum",
       xp: 25,
@@ -763,7 +763,7 @@ const module12_scripting = {
     },
     {
       title: "SHA1 Hashing",
-      why: "Generate a SHA1 hash.",
+      why: "The `sha1sum` command uses the SHA-1 algorithm to generate a mathematically complex 160-bit cryptographic signature.",
       text: 'Type <code>echo "admin" | sha1sum</code>',
       objective: "Pipe into sha1sum",
       xp: 25,
@@ -771,7 +771,7 @@ const module12_scripting = {
     },
     {
       title: "JSON Parse Basic",
-      why: "Use 'jq' to pretty-print JSON files.",
+      why: "`jq` is a lightweight command-line JSON processor. Passing the `.` filter takes an unformatted JSON string and reconstructs it into a human-readable, colorized DOM tree.",
       text: "Type <code>echo '{\"name\":\"root\"}' | jq '.'</code>",
       objective: "Use jq '.'",
       xp: 35,
@@ -779,7 +779,7 @@ const module12_scripting = {
     },
     {
       title: "JSON Extract Key",
-      why: "Use 'jq' to extract a specific value from JSON.",
+      why: "`jq` can traverse object arrays. By specifying `.name`, the engine parses the JSON tree and extracts only the value bound to that specific key.",
       text: "Type <code>echo '{\"name\":\"root\"}' | jq '.name'</code>",
       objective: "Use jq '.name'",
       xp: 40,
@@ -787,7 +787,7 @@ const module12_scripting = {
     },
     {
       title: "Python One-Liner",
-      why: "Execute Python code directly from Bash (-c).",
+      why: "The `-c` flag instructs the Python interpreter to execute the following string as native Python code without needing to read from a `.py` file.",
       text: "Type <code>python3 -c \"print('Hacked')\"</code>",
       objective: "Use python3 -c",
       xp: 35,
@@ -796,7 +796,7 @@ const module12_scripting = {
     },
     {
       title: "Python Buffer Overflow",
-      why: "Generate 1,000 'A' characters to crash a vulnerable app.",
+      why: "Multiplying strings in Python is a highly efficient way to instantly generate massive, perfectly-sized memory payloads used to trigger buffer overflows in vulnerable binaries.",
       text: "Type <code>python3 -c \"print('A' * 1000)\"</code>",
       objective: "Print A * 1000 in python3",
       xp: 40,
@@ -804,7 +804,7 @@ const module12_scripting = {
     },
     {
       title: "Python Web Server",
-      why: "Host your directory on port 8000 instantly to transfer files.",
+      why: "The `-m` flag executes a library module as a script. This instantly turns your machine into an active HTTP web server, exposing your current directory to the network.",
       text: "Type <code>python3 -m http.server 8000</code>",
       objective: "Use python3 -m http.server",
       xp: 40,
@@ -813,7 +813,7 @@ const module12_scripting = {
     },
     {
       title: "Curl Python Server",
-      why: "Download a file from your own server in another window.",
+      why: "The HTTP request hits the Python server, proving that you successfully opened a network socket and hosted files using a single line of code.",
       text: "Type <code>curl http://localhost:8000</code>",
       objective: "Curl localhost:8000",
       xp: 20,
@@ -821,7 +821,7 @@ const module12_scripting = {
     },
     {
       title: "Perl One-Liner",
-      why: "Execute Perl code directly from Bash.",
+      why: "Like Python, Perl can execute inline scripts using the `-e` flag. Perl is natively installed on almost all legacy UNIX systems, making it a reliable fallback for hackers.",
       text: "Type <code>perl -e 'print \"Magic\\n\"'</code>",
       objective: "Use perl -e",
       xp: 30,
@@ -830,7 +830,7 @@ const module12_scripting = {
     },
     {
       title: "Diff Command",
-      why: "Compare two files to see exactly what changed.",
+      why: "The `diff` binary mathematically compares two files byte-by-byte, outputting the exact structural differences between them. It is heavily used in code version control.",
       text: "Type <code>diff /etc/passwd /etc/group</code>",
       objective: "Use diff",
       xp: 20,
@@ -838,7 +838,7 @@ const module12_scripting = {
     },
     {
       title: "History Execution",
-      why: "Run the exact command you ran 5 steps ago (!5).",
+      why: "The `!` operator accesses the Bash history buffer. `!1` commands the shell to instantly re-execute the exact string recorded at index 1 of the history array.",
       text: "Type <code>!1</code>",
       objective: "Type !1",
       xp: 25,
@@ -846,7 +846,7 @@ const module12_scripting = {
     },
     {
       title: "The God Tier",
-      why: "Module 12 Complete. You are a Tool Builder.",
+      why: "By piping an echo string into `tee`, you split the data flow, sending a copy to the root filesystem to prove your total mastery of scripting, text parsing, and stream redirection.",
       text: 'Type <code>echo "I command the shell." | tee /root/mastery.txt</code>',
       objective: "Echo and tee to mastery.txt",
       xp: 100,

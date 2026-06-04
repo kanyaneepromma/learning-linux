@@ -1,897 +1,433 @@
-// twentiethmodule.js
-// Module 20: IoT & Firmware Hacking (100 Lessons)
+// nineteenthmodule.js
+// Module 19: Applied Cryptography & Steganography (65 Lessons)
 
-const module20_iot = {
-  name: "20. IoT & Firmware (100 Lessons)",
+const module19_crypto = {
+  name: "19. Cryptography & Stego (65 Lessons)",
   lessons: [
-    // --- PHASE 1: FIRMWARE RECON & EXTRACTION (1-20) ---
+    // --- PHASE 1: HASHING & INTEGRITY (1-15) ---
     {
-      title: "Download Router Firmware",
-      why: "Get the target binary.",
-      text: "Type <code>wget http://vendor.local/firmware_v1.bin</code>",
-      objective: "Download firmware",
+      title: "Create Plaintext",
+      why: "Cryptography requires raw data. We create a standardized plaintext file to observe how different mathematical hashing algorithms process identical byte arrays.",
+      text: 'Type <code>echo "Top Secret" > secret.txt</code>',
+      objective: "Create secret.txt",
       xp: 10,
-      check: (c, a) => c === "wget" && a.some((x) => x.includes("firmware")),
+      check: (c, a, o, raw) =>
+        raw.includes("echo") && raw.includes("secret.txt"),
     },
     {
-      title: "Identify Binary",
-      why: "Check the basic file type.",
-      text: "Type <code>file firmware_v1.bin</code>",
-      objective: "Type file firmware_v1.bin",
+      title: "MD5 Hash",
+      why: "The MD5 algorithm generates a 128-bit message digest. It is mathematically broken and vulnerable to 'Collision Attacks' (two different files generating the exact same hash). It should only be used for basic file integrity checks, never for security.",
+      text: "Type <code>md5sum secret.txt</code>",
+      objective: "Type md5sum secret.txt",
       xp: 15,
-      check: (c, a) => c === "file" && a.includes("firmware_v1.bin"),
+      check: (c, a) => c === "md5sum" && a.includes("secret.txt"),
     },
     {
-      title: "Check Entropy",
-      why: "High entropy means it's compressed or encrypted.",
-      text: "Type <code>ent firmware_v1.bin</code>",
-      objective: "Type ent firmware_v1.bin",
+      title: "SHA-1 Hash",
+      why: "The Secure Hash Algorithm 1 generates a 160-bit digest. Like MD5, SHA-1 was shattered by Google in 2017 via the 'SHAttered' collision attack. Modern cryptographic standards deprecate its use.",
+      text: "Type <code>sha1sum secret.txt</code>",
+      objective: "Type sha1sum secret.txt",
+      xp: 15,
+      check: (c, a) => c === "sha1sum" && a.includes("secret.txt"),
+    },
+    {
+      title: "SHA-256 Hash",
+      why: "SHA-256 is the current industry gold standard. Developed by the NSA, it generates a highly secure 256-bit cryptographic signature. It is the core algorithm used in Bitcoin mining and TLS handshakes.",
+      text: "Type <code>sha256sum secret.txt</code>",
+      objective: "Type sha256sum secret.txt",
       xp: 20,
-      check: (c, a) => c === "ent" && a.includes("firmware_v1.bin"),
+      check: (c, a) => c === "sha256sum" && a.includes("secret.txt"),
     },
     {
-      title: "Hex Dump Header",
-      why: "Look for magic bytes manually.",
-      text: "Type <code>xxd firmware_v1.bin | head -n 10</code>",
-      objective: "Pipe xxd to head",
+      title: "SHA-512 Hash",
+      why: "An evolution of the SHA-2 family. It computes a massive 512-bit digest, utilizing 64-bit mathematical operations. This algorithm is heavily utilized in modern Linux `/etc/shadow` password storage.",
+      text: "Type <code>sha512sum secret.txt</code>",
+      objective: "Type sha512sum secret.txt",
+      xp: 20,
+      check: (c, a) => c === "sha512sum" && a.includes("secret.txt"),
+    },
+    {
+      title: "BLAKE2 Hash",
+      why: "BLAKE2 (b2sum) is a modern cryptographic hash function that is mathematically faster than MD5 and SHA-1, yet more secure than SHA-2. It is highly optimized for modern CPUs.",
+      text: "Type <code>b2sum secret.txt</code>",
+      objective: "Type b2sum secret.txt",
+      xp: 20,
+      check: (c, a) => c === "b2sum" && a.includes("secret.txt"),
+    },
+    {
+      title: "Save Checksum",
+      why: "When distributing software, developers provide a checksum file. We route the SHA-256 calculation directly into a `.sha256` file to establish a cryptographic baseline for our data.",
+      text: "Type <code>sha256sum secret.txt > secret.sha256</code>",
+      objective: "Save sha256sum to file",
       xp: 25,
       check: (c, a, o, raw) =>
-        raw.includes("xxd") && raw.includes("firmware") && raw.includes("head"),
-    },
-    {
-      title: "Extract Strings",
-      why: "Look for hardcoded URLs or passwords.",
-      text: "Type <code>strings firmware_v1.bin | head -n 15</code>",
-      objective: "Pipe strings to head",
-      xp: 25,
-      check: (c, a, o, raw) =>
-        raw.includes("strings") &&
-        raw.includes("firmware") &&
-        raw.includes("head"),
-    },
-    {
-      title: "Grep for Passwords",
-      why: "Search the binary specifically for 'password'.",
-      text: "Type <code>strings firmware_v1.bin | grep -i password</code>",
-      objective: "Grep password from strings",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("strings") &&
-        raw.includes("grep") &&
-        raw.includes("password"),
-    },
-    {
-      title: "Grep for Backdoors",
-      why: "Search for hidden development URLs.",
-      text: "Type <code>strings firmware_v1.bin | grep -i http</code>",
-      objective: "Grep http from strings",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("strings") && raw.includes("grep") && raw.includes("http"),
-    },
-    {
-      title: "Binwalk Scan",
-      why: "Scan the binary for embedded filesystems like SquashFS.",
-      text: "Type <code>binwalk firmware_v1.bin</code>",
-      objective: "Type binwalk firmware_v1.bin",
-      xp: 35,
-      check: (c, a) =>
-        c === "binwalk" && a.includes("firmware_v1.bin") && !a.includes("-e"),
-    },
-    {
-      title: "Binwalk Extract",
-      why: "Rip the filesystem out of the binary.",
-      text: "Type <code>binwalk -e firmware_v1.bin</code>",
-      objective: "Type binwalk -e firmware_v1.bin",
-      xp: 50,
-      check: (c, a) =>
-        c === "binwalk" && a.includes("-e") && a.includes("firmware_v1.bin"),
-    },
-    {
-      title: "List Extracted",
-      why: "Look at the folder Binwalk created.",
-      text: "Type <code>ls -l _firmware_v1.bin.extracted/</code>",
-      objective: "List extracted dir",
-      xp: 15,
-      check: (c, a) => c === "ls" && a.some((x) => x.includes("extracted")),
-    },
-    {
-      title: "Navigate to SquashFS",
-      why: "Enter the extracted Linux root filesystem.",
-      text: "Type <code>cd _firmware_v1.bin.extracted/squashfs-root</code>",
-      objective: "cd into squashfs-root",
-      xp: 20,
-      check: (c, a) => c === "cd" && a.some((x) => x.includes("squashfs-root")),
-    },
-    {
-      title: "List Firmware Root",
-      why: "It looks just like a normal Linux system!",
-      text: "Type <code>ls -la</code>",
-      objective: "Type ls -la",
-      xp: 10,
-      check: (c, a) => c === "ls" && a.includes("-la"),
-    },
-    {
-      title: "Read Shadow File",
-      why: "Steal the router's root hashes.",
-      text: "Type <code>cat etc/shadow</code>",
-      objective: "Cat etc/shadow",
-      xp: 30,
-      check: (c, a) => c === "cat" && a.some((x) => x.includes("etc/shadow")),
-    },
-    {
-      title: "Read Config",
-      why: "Check for hardcoded WiFi credentials.",
-      text: "Type <code>cat etc/config/wireless</code>",
-      objective: "Cat etc/config/wireless",
-      xp: 30,
-      check: (c, a) =>
-        c === "cat" && a.some((x) => x.includes("config/wireless")),
-    },
-    {
-      title: "Find Startup Scripts",
-      why: "See what the router does when it boots.",
-      text: "Type <code>cat etc/init.d/rcS</code>",
-      objective: "Cat rcS",
-      xp: 30,
-      check: (c, a) => c === "cat" && a.some((x) => x.includes("rcS")),
-    },
-    {
-      title: "Plant a Backdoor",
-      why: "Modify the firmware by adding a malicious user.",
-      text: 'Type <code>echo "hacker:x:0:0::/:/bin/sh" >> etc/passwd</code>',
-      objective: "Append to etc/passwd",
-      xp: 45,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("hacker") &&
-        raw.includes("passwd"),
-    },
-    {
-      title: "Repack Firmware",
-      why: "Rebuild the SquashFS filesystem into a new binary.",
-      text: "Type <code>mksquashfs . ../modified_fw.bin -comp xz</code>",
-      objective: "Use mksquashfs",
-      xp: 50,
-      check: (c, a) => c === "mksquashfs" && a.includes("modified_fw.bin"),
-    },
-    {
-      title: "Go Up",
-      why: "Leave the root folder.",
-      text: "Type <code>cd ..</code>",
-      objective: "Type cd ..",
-      xp: 10,
-      check: (c, a) => c === "cd" && a[0] === "..",
-    },
-    {
-      title: "Verify New Firmware",
-      why: "Check that your backdoored binary was built.",
-      text: "Type <code>ls -lh modified_fw.bin</code>",
-      objective: "List modified_fw.bin",
-      xp: 20,
-      check: (c, a) => c === "ls" && a.includes("modified_fw.bin"),
-    },
-    {
-      title: "Go Home",
-      why: "Return to your workspace.",
-      text: "Type <code>cd ~</code>",
-      objective: "Type cd ~",
-      xp: 10,
-      check: (c, a) => c === "cd" && a[0] === "~",
-    },
-
-    // --- PHASE 2: EMULATION & BINARY ANALYSIS (21-40) ---
-    {
-      title: "Check Architecture",
-      why: "Find out what CPU the router uses (often ARM or MIPS).",
-      text: "Type <code>readelf -h _firmware_v1.bin.extracted/squashfs-root/bin/busybox | grep Machine</code>",
-      objective: "Readelf busybox",
-      xp: 40,
-      check: (c, a, o, raw) =>
-        raw.includes("readelf") &&
-        raw.includes("Machine") &&
-        raw.includes("busybox"),
-    },
-    {
-      title: "Install QEMU",
-      why: "Install the CPU emulator to run ARM/MIPS binaries on an x86 PC.",
-      text: "Type <code>apt install qemu-user-static -y</code>",
-      objective: "Install qemu-user-static",
-      xp: 30,
-      check: (c, a) => c === "apt" && a.includes("qemu-user-static"),
-    },
-    {
-      title: "Copy QEMU Binary",
-      why: "Place the emulator inside the extracted firmware root.",
-      text: "Type <code>cp /usr/bin/qemu-mips-static _firmware_v1.bin.extracted/squashfs-root/usr/bin/</code>",
-      objective: "Copy qemu-mips-static",
-      xp: 35,
-      check: (c, a) =>
-        c === "cp" && a.some((x) => x.includes("qemu-mips-static")),
-    },
-    {
-      title: "Chroot into Firmware",
-      why: "Change root into the firmware to run it locally!",
-      text: "Type <code>chroot _firmware_v1.bin.extracted/squashfs-root /bin/sh</code>",
-      objective: "Use chroot",
-      xp: 50,
-      check: (c, a) =>
-        c === "chroot" && a.some((x) => x.includes("squashfs-root")),
-    },
-    {
-      title: "Test Emulation",
-      why: "Run the router's web server locally.",
-      text: "Type <code>/usr/sbin/httpd -h /www</code>",
-      objective: "Start httpd in chroot",
-      xp: 40,
-      check: (c, a, o, raw) => raw.includes("httpd") && raw.includes("/www"),
-    },
-    {
-      title: "Exit Chroot",
-      why: "Leave the emulated environment.",
-      text: "Type <code>exit</code>",
-      objective: "Type exit",
-      xp: 10,
-      check: (c) => c === "exit",
-    },
-    {
-      title: "Find Web Binaries",
-      why: "Locate CGI scripts handling web requests.",
-      text: 'Type <code>find _firmware_v1.bin.extracted/squashfs-root -name "*.cgi"</code>',
-      objective: "Find .cgi files",
-      xp: 30,
-      check: (c, a) => c === "find" && a.includes("*.cgi"),
-    },
-    {
-      title: "Analyze CGI (Strings)",
-      why: "Look for command injection vulnerabilities.",
-      text: "Type <code>strings _firmware_v1.bin.extracted/squashfs-root/www/cgi-bin/ping.cgi | grep system</code>",
-      objective: "Grep system in cgi",
-      xp: 40,
-      check: (c, a, o, raw) =>
-        raw.includes("strings") &&
-        raw.includes("system") &&
-        raw.includes("ping.cgi"),
-    },
-    {
-      title: "Disassemble CGI",
-      why: "Use objdump to look at the assembly instructions.",
-      text: "Type <code>objdump -d _firmware_v1.bin.extracted/squashfs-root/www/cgi-bin/ping.cgi | head</code>",
-      objective: "Disassemble cgi",
-      xp: 45,
-      check: (c, a, o, raw) =>
-        raw.includes("objdump") &&
-        raw.includes("-d") &&
-        raw.includes("ping.cgi"),
-    },
-    {
-      title: "Look for Keys",
-      why: "Find hidden RSA keys shipped with the firmware.",
-      text: 'Type <code>find _firmware_v1.bin.extracted/squashfs-root -name "*.pem"</code>',
-      objective: "Find .pem files",
-      xp: 30,
-      check: (c, a) => c === "find" && a.includes("*.pem"),
-    },
-    {
-      title: "Read Private Key",
-      why: "View the compromised key.",
-      text: "Type <code>cat _firmware_v1.bin.extracted/squashfs-root/etc/dropbear/dropbear_rsa_host_key</code>",
-      objective: "Cat dropbear key",
-      xp: 35,
-      check: (c, a) => c === "cat" && a.some((x) => x.includes("dropbear")),
-    },
-    {
-      title: "Search Certificates",
-      why: "Look for hardcoded SSL certs.",
-      text: 'Type <code>find _firmware_v1.bin.extracted/squashfs-root -name "*.crt"</code>',
-      objective: "Find .crt files",
-      xp: 30,
-      check: (c, a) => c === "find" && a.includes("*.crt"),
-    },
-    {
-      title: "Extract Bootloader",
-      why: "Use dd to carve out the u-boot bootloader from the raw binary.",
-      text: "Type <code>dd if=firmware_v1.bin of=uboot.bin bs=1 count=131072</code>",
-      objective: "Use dd to extract bootloader",
-      xp: 50,
-      check: (c, a) =>
-        c === "dd" &&
-        a.includes("if=firmware_v1.bin") &&
-        a.includes("of=uboot.bin"),
-    },
-    {
-      title: "Analyze Bootloader",
-      why: "Look for U-Boot environment variables.",
-      text: "Type <code>strings uboot.bin | grep bootcmd</code>",
-      objective: "Grep bootcmd from uboot",
-      xp: 35,
-      check: (c, a, o, raw) =>
-        raw.includes("strings") &&
-        raw.includes("bootcmd") &&
-        raw.includes("uboot.bin"),
-    },
-    {
-      title: "Decompile Kernel",
-      why: "Find the LZMA compressed kernel.",
-      text: "Type <code>binwalk -e uboot.bin</code>",
-      objective: "Binwalk uboot",
-      xp: 30,
-      check: (c, a) =>
-        c === "binwalk" && a.includes("-e") && a.includes("uboot.bin"),
-    },
-    {
-      title: "Install Firmware Mod Kit",
-      why: "FMK automates the extraction and rebuilding process.",
-      text: "Type <code>apt install firmware-mod-kit -y</code>",
-      objective: "Install FMK",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("firmware-mod-kit"),
-    },
-    {
-      title: "Run Extract-ng",
-      why: "Use FMK to extract firmware.",
-      text: "Type <code>extract-ng.sh firmware_v1.bin</code>",
-      objective: "Run extract-ng",
-      xp: 30,
-      check: (c, a) => c === "extract-ng.sh" && a.includes("firmware_v1.bin"),
-    },
-    {
-      title: "Run Build-ng",
-      why: "Use FMK to rebuild it automatically.",
-      text: "Type <code>build-ng.sh fmk/</code>",
-      objective: "Run build-ng",
-      xp: 30,
-      check: (c, a) => c === "build-ng.sh" && a.includes("fmk/"),
-    },
-    {
-      title: "Calculate Original Hash",
-      why: "Prep for comparison.",
-      text: "Type <code>sha256sum firmware_v1.bin</code>",
-      objective: "Hash original",
-      xp: 15,
-      check: (c, a) => c === "sha256sum" && a.includes("firmware_v1.bin"),
-    },
-    {
-      title: "Compare Modified Hash",
-      why: "Prove the firmware signature changed.",
-      text: "Type <code>sha256sum modified_fw.bin</code>",
-      objective: "Hash modified",
-      xp: 15,
-      check: (c, a) => c === "sha256sum" && a.includes("modified_fw.bin"),
-    },
-
-    // --- PHASE 3: HARDWARE PROTOCOLS (UART, SPI, I2C) (41-60) ---
-    {
-      title: "Check dmesg for UART",
-      why: "You plugged a USB-to-TTL adapter into the motherboard. Find it.",
-      text: "Type <code>dmesg | grep ttyUSB</code>",
-      objective: "Grep ttyUSB from dmesg",
-      xp: 25,
-      check: (c, a, o, raw) =>
-        raw.includes("dmesg") && raw.includes("grep") && raw.includes("ttyUSB"),
-    },
-    {
-      title: "Connect to UART",
-      why: "Use screen to open a serial connection to the hardware pins at 115200 baud.",
-      text: "Type <code>screen /dev/ttyUSB0 115200</code>",
-      objective: "Use screen to connect to UART",
-      xp: 50,
-      check: (c, a) =>
-        c === "screen" && a.includes("/dev/ttyUSB0") && a.includes("115200"),
-    },
-    {
-      title: "UART Root Shell",
-      why: "You bypassed the login by interrupting the boot process. Who are you?",
-      text: "Type <code>whoami</code>",
-      objective: "Type whoami in UART",
-      xp: 20,
-      check: (c) => c === "whoami",
-    },
-    {
-      title: "Exit Screen",
-      why: "Kill the serial connection.",
-      text: "Type <code>exit</code>",
-      objective: "Exit screen",
-      xp: 10,
-      check: (c) => c === "exit",
-    },
-    {
-      title: "Install Flashrom",
-      why: "You clamped an EEPROM clip onto the router's SPI flash memory chip. Install the tool to read it.",
-      text: "Type <code>apt install flashrom -y</code>",
-      objective: "Install flashrom",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("flashrom"),
-    },
-    {
-      title: "Detect SPI Chip",
-      why: "Probe the hardware to see what memory chip is attached.",
-      text: "Type <code>flashrom -p ch341a_spi</code>",
-      objective: "Detect chip with flashrom",
-      xp: 40,
-      check: (c, a) =>
-        c === "flashrom" &&
-        a.includes("-p") &&
-        a.includes("ch341a_spi") &&
-        !a.includes("-r"),
-    },
-    {
-      title: "Dump SPI Flash",
-      why: "Rip the entire firmware directly off the physical motherboard chip.",
-      text: "Type <code>flashrom -p ch341a_spi -r dumped_bios.bin</code>",
-      objective: "Dump SPI flash",
-      xp: 60,
-      check: (c, a) =>
-        c === "flashrom" && a.includes("-r") && a.includes("dumped_bios.bin"),
-    },
-    {
-      title: "Verify Dump Size",
-      why: "Ensure the dump matches the 8MB chip size.",
-      text: "Type <code>ls -lh dumped_bios.bin</code>",
-      objective: "Check size of dumped_bios.bin",
-      xp: 15,
-      check: (c, a) => c === "ls" && a.includes("dumped_bios.bin"),
-    },
-    {
-      title: "Erase SPI Chip",
-      why: "WARNING: You are about to brick the router physically.",
-      text: "Type <code>flashrom -p ch341a_spi -E</code>",
-      objective: "Erase SPI flash",
-      xp: 45,
-      check: (c, a) => c === "flashrom" && a.includes("-E"),
-    },
-    {
-      title: "Write Malicious SPI",
-      why: "Flash your backdoored firmware directly to the hardware.",
-      text: "Type <code>flashrom -p ch341a_spi -w modified_fw.bin</code>",
-      objective: "Write SPI flash",
-      xp: 60,
-      check: (c, a) =>
-        c === "flashrom" && a.includes("-w") && a.includes("modified_fw.bin"),
-    },
-    {
-      title: "Install I2C Tools",
-      why: "I2C is another protocol used to talk to sensors/EEPROMs.",
-      text: "Type <code>apt install i2c-tools -y</code>",
-      objective: "Install i2c-tools",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("i2c-tools"),
-    },
-    {
-      title: "Detect I2C Busses",
-      why: "See what I2C interfaces exist on the device.",
-      text: "Type <code>i2cdetect -l</code>",
-      objective: "Use i2cdetect -l",
-      xp: 30,
-      check: (c, a) => c === "i2cdetect" && a.includes("-l"),
-    },
-    {
-      title: "Scan I2C Bus 1",
-      why: "Probe the bus to see what hardware addresses respond.",
-      text: "Type <code>i2cdetect -y 1</code>",
-      objective: "Use i2cdetect -y 1",
-      xp: 40,
-      check: (c, a) => c === "i2cdetect" && a.includes("-y") && a.includes("1"),
-    },
-    {
-      title: "Dump I2C EEPROM",
-      why: "Extract data from the chip at address 0x50.",
-      text: "Type <code>i2cdump -y 1 0x50</code>",
-      objective: "Use i2cdump",
-      xp: 50,
-      check: (c, a) => c === "i2cdump" && a.includes("1") && a.includes("0x50"),
-    },
-    {
-      title: "Write I2C Register",
-      why: "Change a configuration bit on the hardware sensor.",
-      text: "Type <code>i2cset -y 1 0x50 0x00 0xFF</code>",
-      objective: "Use i2cset",
-      xp: 50,
-      check: (c, a) =>
-        c === "i2cset" && a.includes("0x50") && a.includes("0xFF"),
-    },
-    {
-      title: "Read JTAG Info",
-      why: "JTAG is the ultimate hardware debugging port. (Simulated check).",
-      text: "Type <code>openocd -f interface/jlink.cfg</code>",
-      objective: "Run openocd",
-      xp: 35,
-      check: (c, a) => c === "openocd" && a.some((x) => x.includes("jlink")),
-    },
-    {
-      title: "Check USB Devices",
-      why: "See what hacking hardware is plugged into your PC.",
-      text: "Type <code>lsusb</code>",
-      objective: "Type lsusb",
-      xp: 15,
-      check: (c) => c === "lsusb",
-    },
-    {
-      title: "Setup Baudrate",
-      why: "Configure the TTY device settings manually.",
-      text: "Type <code>stty -F /dev/ttyUSB0 115200 cs8 -cstopb -parenb</code>",
-      objective: "Configure stty for UART",
-      xp: 45,
-      check: (c, a) =>
-        c === "stty" && a.includes("/dev/ttyUSB0") && a.includes("115200"),
-    },
-    {
-      title: "Read Raw Serial",
-      why: "Cat the raw hardware port directly.",
-      text: "Type <code>cat /dev/ttyUSB0</code>",
-      objective: "Cat /dev/ttyUSB0",
-      xp: 30,
-      check: (c, a) => c === "cat" && a[0] === "/dev/ttyUSB0",
-    },
-    {
-      title: "Send Serial Command",
-      why: "Push data to the hardware port.",
-      text: 'Type <code>echo "reboot" > /dev/ttyUSB0</code>',
-      objective: "Echo to /dev/ttyUSB0",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
+        raw.includes("sha256sum") &&
         raw.includes(">") &&
-        raw.includes("/dev/ttyUSB0"),
+        raw.includes("secret.sha256"),
+    },
+    {
+      title: "Verify Checksum",
+      why: "The <b>-c</b> (Check) flag reads the saved checksum file, independently recalculates the hash of the target file on your disk, and verifies if the two mathematical signatures perfectly match.",
+      text: "Type <code>sha256sum -c secret.sha256</code>",
+      objective: "Verify sha256sum",
+      xp: 25,
+      check: (c, a) =>
+        c === "sha256sum" && a.includes("-c") && a.includes("secret.sha256"),
+    },
+    {
+      title: "Modify Plaintext",
+      why: "Let's test the 'Avalanche Effect'. We alter a single byte in our plaintext file. In a strong cryptographic algorithm, altering one bit of input should drastically change at least 50% of the output bits.",
+      text: 'Type <code>echo "Top Secres" > secret.txt</code>',
+      objective: "Modify secret.txt",
+      xp: 15,
+      check: (c, a, o, raw) =>
+        raw.includes("echo") && raw.includes("Top Secres"),
+    },
+    {
+      title: "Detect Tampering",
+      why: "Run the verification check again. Because the underlying file bytes were altered, the newly calculated hash will fail against the original signature, proving the file was tampered with.",
+      text: "Type <code>sha256sum -c secret.sha256</code>",
+      objective: "Verify failed sha256sum",
+      xp: 25,
+      check: (c, a) =>
+        c === "sha256sum" && a.includes("-c") && a.includes("secret.sha256"),
+    },
+    {
+      title: "Base64 Encoding",
+      why: "Encoding is NOT encryption; it provides zero security. Base64 mathematically translates raw binary data into a safe 64-character ASCII alphabet so it can be transmitted over text-only protocols like HTTP or SMTP.",
+      text: 'Type <code>echo "MalwarePayload" | base64</code>',
+      objective: "Base64 encode a string",
+      xp: 20,
+      check: (c, a, o, raw) => raw.includes("base64") && !raw.includes("-d"),
+    },
+    {
+      title: "Base64 Decoding",
+      why: "The <b>-d</b> flag reverses the Radix-64 encoding process. Attackers heavily use Base64 to obfuscate malicious PowerShell or bash commands, bypassing simple Intrusion Detection Systems.",
+      text: 'Type <code>echo "TWFsd2FyZVBheWxvYWQK" | base64 -d</code>',
+      objective: "Base64 decode a string",
+      xp: 20,
+      check: (c, a, o, raw) => raw.includes("base64") && raw.includes("-d"),
+    },
+    {
+      title: "Hex Dump",
+      why: "The <b>xxd</b> command translates the file's raw binary into a Hexadecimal block structure. This is critical for cryptanalysis when attempting to identify file headers or hidden magic bytes.",
+      text: "Type <code>xxd secret.txt</code>",
+      objective: "Type xxd secret.txt",
+      xp: 15,
+      check: (c, a) => c === "xxd" && a.includes("secret.txt"),
+    },
+    {
+      title: "Clean Hashing Artifacts",
+      why: "Remove the modified plaintext and the broken cryptographic signature file to prepare for asymmetric encryption.",
+      text: "Type <code>rm secret.txt secret.sha256</code>",
+      objective: "Remove text and sha files",
+      xp: 10,
+      check: (c, a) => c === "rm" && a.includes("secret.txt"),
     },
 
-    // --- PHASE 4: BLUETOOTH LOW ENERGY (BLE) & SDR (61-80) ---
+    // --- PHASE 2: SYMMETRIC & ASYMMETRIC ENCRYPTION (16-30) ---
     {
-      title: "Check BT Adapter",
-      why: "Verify your Bluetooth hacking dongle is recognized.",
-      text: "Type <code>hciconfig</code>",
-      objective: "Type hciconfig",
-      xp: 15,
-      check: (c) => c === "hciconfig",
-    },
-    {
-      title: "Bring BT UP",
-      why: "Turn on the Bluetooth interface.",
-      text: "Type <code>hciconfig hci0 up</code>",
-      objective: "Type hciconfig hci0 up",
-      xp: 20,
-      check: (c, a) =>
-        c === "hciconfig" && a.includes("hci0") && a.includes("up"),
-    },
-    {
-      title: "BLE Scan",
-      why: "Scan the room for Smart Watches, Locks, and Trackers.",
-      text: "Type <code>hcitool lescan</code>",
-      objective: "Type hcitool lescan",
-      xp: 35,
-      check: (c, a) => c === "hcitool" && a.includes("lescan"),
-    },
-    {
-      title: "Bluetoothctl",
-      why: "Enter the interactive BT management console.",
-      text: "Type <code>bluetoothctl</code>",
-      objective: "Type bluetoothctl",
-      xp: 20,
-      check: (c) => c === "bluetoothctl",
-    },
-    {
-      title: "Exit Bluetoothctl",
-      why: "Leave the console.",
-      text: "Type <code>exit</code>",
-      objective: "Type exit",
-      xp: 10,
-      check: (c) => c === "exit",
-    },
-    {
-      title: "Connect to BLE Device",
-      why: "Use gatttool to connect to a Smart Bulb's MAC Address.",
-      text: "Type <code>gatttool -b AA:BB:CC:DD:EE:FF -I</code>",
-      objective: "Use gatttool -I",
-      xp: 40,
-      check: (c, a) => c === "gatttool" && a.includes("-b") && a.includes("-I"),
-    },
-    {
-      title: "Read BLE Characteristics",
-      why: "Ask the smart device what features it has.",
-      text: "Type <code>char-desc</code>",
-      objective: "Type char-desc",
+      title: "Generate GPG Keypair",
+      why: "Asymmetric Encryption relies on two mathematically linked keys. <b>gpg --gen-key</b> generates a Public Key (to lock data) and a Private Key (to unlock data) using the RSA algorithm.",
+      text: "Type <code>gpg --gen-key</code>",
+      objective: "Generate GPG keys",
       xp: 30,
-      check: (c) => c === "char-desc",
+      check: (c, a) => c === "gpg" && a.includes("--gen-key"),
     },
     {
-      title: "Write BLE Payload",
-      why: "Send a hex command to turn off the smart bulb without authentication.",
-      text: "Type <code>char-write-req 0x0012 00000000</code>",
-      objective: "Write BLE char",
+      title: "List Public Keys",
+      why: "Query the local GnuPG keyring memory to verify the kernel successfully generated and stored the public component of your cryptographic identity.",
+      text: "Type <code>gpg --list-keys</code>",
+      objective: "List GPG keys",
+      xp: 15,
+      check: (c, a) => c === "gpg" && a.includes("--list-keys"),
+    },
+    {
+      title: "Export Public Key",
+      why: "To allow others to send you secure messages, you must export your Public Key into an ASCII-armored (<b>-a</b>) block. This key can be safely posted publicly on the internet.",
+      text: "Type <code>gpg -a --export > public.asc</code>",
+      objective: "Export GPG public key",
+      xp: 35,
+      check: (c, a, o, raw) =>
+        c === "gpg" && raw.includes("--export") && raw.includes("public.asc"),
+    },
+    {
+      title: "View Public Key",
+      why: "Examine the exported ASCII-armored RSA key block. This mathematical matrix allows anyone to encrypt data that only your private key can decrypt.",
+      text: "Type <code>cat public.asc</code>",
+      objective: "Read public.asc",
+      xp: 15,
+      check: (c, a) => c === "cat" && a[0] === "public.asc",
+    },
+    {
+      title: "Create Secret Data",
+      why: "Establish a highly sensitive plaintext file that we will encrypt to simulate secure network communication.",
+      text: 'Type <code>echo "Launch Codes" > mission.txt</code>',
+      objective: "Create mission.txt",
+      xp: 10,
+      check: (c, a, o, raw) =>
+        raw.includes("echo") && raw.includes("mission.txt"),
+    },
+    {
+      title: "Encrypt Asymmetrically",
+      why: "The <b>-e</b> flag encrypts the file. The <b>-r</b> flag specifies the recipient's public key. The resulting file (`mission.txt.gpg`) is mathematically locked and can only be opened by the private key holder.",
+      text: "Type <code>gpg -e -a -r SysAdmin mission.txt</code>",
+      objective: "Encrypt mission.txt",
+      xp: 40,
+      check: (c, a) =>
+        c === "gpg" &&
+        a.includes("-e") &&
+        a.includes("-r") &&
+        a.includes("mission.txt"),
+    },
+    {
+      title: "Delete Plaintext",
+      why: "Once the data is securely locked inside the GPG block, violently delete the plaintext original from the hard drive to prevent forensic recovery.",
+      text: "Type <code>rm mission.txt</code>",
+      objective: "Remove mission.txt",
+      xp: 10,
+      check: (c, a) => c === "rm" && a[0] === "mission.txt",
+    },
+    {
+      title: "Decrypt Asymmetrically",
+      why: "The <b>-d</b> flag reads the encrypted GPG block, queries your local keyring for the matching Private Key, and processes the decryption algorithm, dumping the plaintext output to your terminal.",
+      text: "Type <code>gpg -d mission.txt.gpg</code>",
+      objective: "Decrypt mission.txt.gpg",
+      xp: 40,
+      check: (c, a) =>
+        c === "gpg" && a.includes("-d") && a.includes("mission.txt.gpg"),
+    },
+    {
+      title: "Symmetric OpenSSL",
+      why: "Asymmetric (RSA) is slow. Symmetric encryption uses a single password to both lock and unlock data, and is heavily utilized for bulk file encryption. <b>openssl enc -aes-256-cbc</b> initiates a military-grade block cipher.",
+      text: "Type <code>openssl enc -aes-256-cbc -salt -in public.asc -out secure.enc</code>",
+      objective: "Use openssl aes-256-cbc",
+      xp: 50,
+      check: (c, a) =>
+        c === "openssl" && a.includes("enc") && a.includes("-aes-256-cbc"),
+    },
+    {
+      title: "Decrypt OpenSSL",
+      why: "The <b>-d</b> flag reverses the AES-256 Cipher Block Chaining (CBC) algorithm, requiring the exact same initialization password you used to encrypt it.",
+      text: "Type <code>openssl enc -d -aes-256-cbc -in secure.enc -out recovered.asc</code>",
+      objective: "Decrypt with openssl",
+      xp: 50,
+      check: (c, a) =>
+        c === "openssl" && a.includes("-d") && a.includes("-aes-256-cbc"),
+    },
+
+    // --- PHASE 3: PKI, CERTIFICATES & TLS (31-45) ---
+    {
+      title: "Generate RSA Key",
+      why: "Public Key Infrastructure (PKI) secures the internet via HTTPS. First, we use OpenSSL to generate an unencrypted 2048-bit RSA private key, which forms the mathematical foundation of our server.",
+      text: "Type <code>openssl genrsa -out server.key 2048</code>",
+      objective: "Generate RSA key",
+      xp: 35,
+      check: (c, a) =>
+        c === "openssl" && a.includes("genrsa") && a.includes("2048"),
+    },
+    {
+      title: "Generate CSR",
+      why: "A Certificate Signing Request (CSR) is an encoded message sent to a Certificate Authority (like VeriSign). It contains your Public Key and company metadata, requesting them to legally cryptographically sign your identity.",
+      text: "Type <code>openssl req -new -key server.key -out server.csr</code>",
+      objective: "Generate CSR",
+      xp: 45,
+      check: (c, a) =>
+        c === "openssl" && a.includes("req") && a.includes("-new"),
+    },
+    {
+      title: "Self-Sign Certificate",
+      why: "For internal networks, we act as our own Certificate Authority. We use the X.509 standard to self-sign the CSR using our own Private Key, establishing a valid TLS certificate valid for 365 days.",
+      text: "Type <code>openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt</code>",
+      objective: "Self-sign certificate",
+      xp: 50,
+      check: (c, a) =>
+        c === "openssl" && a.includes("x509") && a.includes("-req"),
+    },
+    {
+      title: "Inspect Certificate",
+      why: "The X.509 certificate is encoded in PEM format. The <b>-text -noout</b> arguments command OpenSSL to decode the certificate and print the cryptographic modulus, issuer metadata, and validity dates in human-readable text.",
+      text: "Type <code>openssl x509 -in server.crt -text -noout</code>",
+      objective: "Inspect x509 certificate",
+      xp: 40,
+      check: (c, a) =>
+        c === "openssl" && a.includes("x509") && a.includes("-text"),
+    },
+    {
+      title: "Extract Public Key",
+      why: "Using OpenSSL, you can mathematically derive and extract the pure Public Key vector directly from the X.509 certificate structural matrix.",
+      text: "Type <code>openssl x509 -in server.crt -pubkey -noout > server_pub.pem</code>",
+      objective: "Extract pubkey from cert",
+      xp: 40,
+      check: (c, a, o, raw) =>
+        raw.includes("openssl") &&
+        raw.includes("-pubkey") &&
+        raw.includes("server_pub.pem"),
+    },
+    {
+      title: "Test TLS Server",
+      why: "OpenSSL includes `s_server`, a diagnostic tool that opens a listening port and simulates a full web server, allowing you to test if your newly generated keys successfully negotiate a TLS cryptographic handshake.",
+      text: "Type <code>openssl s_server -cert server.crt -key server.key -accept 4433 &</code>",
+      objective: "Start openssl s_server",
       xp: 50,
       check: (c, a, o, raw) =>
-        c === "char-write-req" || raw.includes("char-write-req"),
+        raw.includes("s_server") &&
+        raw.includes("-accept") &&
+        raw.includes("4433"),
     },
     {
-      title: "Install SDR Tools",
-      why: "Software Defined Radio lets you hack raw radio waves (drones, car keys).",
-      text: "Type <code>apt install rtl-sdr -y</code>",
-      objective: "Install rtl-sdr",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("rtl-sdr"),
-    },
-    {
-      title: "Test RTL-SDR",
-      why: "Check if the antenna is connected.",
-      text: "Type <code>rtl_test</code>",
-      objective: "Type rtl_test",
-      xp: 25,
-      check: (c) => c === "rtl_test",
-    },
-    {
-      title: "Install RTL_433",
-      why: "A tool specifically for hacking 433MHz devices (Weather stations, alarms).",
-      text: "Type <code>apt install rtl-433 -y</code>",
-      objective: "Install rtl-433",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("rtl-433"),
-    },
-    {
-      title: "Scan 433MHz",
-      why: "Sniff the airwaves for IoT device transmissions.",
-      text: "Type <code>rtl_433</code>",
-      objective: "Type rtl_433",
-      xp: 40,
-      check: (c) => c === "rtl_433",
-    },
-    {
-      title: "Capture Radio to File",
-      why: "Record the raw radio signal of a key fob.",
-      text: "Type <code>rtl_sdr -f 433.92M -s 250000 capture.bin</code>",
-      objective: "Use rtl_sdr to capture",
-      xp: 50,
-      check: (c, a) =>
-        c === "rtl_sdr" && a.includes("-f") && a.includes("capture.bin"),
-    },
-    {
-      title: "Install Airmon",
-      why: "WiFi hacking tools for IoT device attacks.",
-      text: "Type <code>apt install aircrack-ng -y</code>",
-      objective: "Install aircrack-ng",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("aircrack-ng"),
-    },
-    {
-      title: "Monitor Mode",
-      why: "Put your WiFi card into listening mode to sniff IoT traffic.",
-      text: "Type <code>airmon-ng start wlan0</code>",
-      objective: "Start monitor mode",
-      xp: 35,
-      check: (c, a) =>
-        c === "airmon-ng" && a.includes("start") && a.includes("wlan0"),
-    },
-    {
-      title: "Airodump Sniff",
-      why: "Watch devices communicate with the router.",
-      text: "Type <code>airodump-ng wlan0mon</code>",
-      objective: "Run airodump-ng",
-      xp: 40,
-      check: (c, a) => c === "airodump-ng" && a.includes("wlan0mon"),
-    },
-    {
-      title: "Deauth Attack",
-      why: "Kick the IoT camera off the network using aireplay.",
-      text: "Type <code>aireplay-ng -0 5 -a 00:11:22:33:44:55 wlan0mon</code>",
-      objective: "Use aireplay-ng deauth",
-      xp: 50,
-      check: (c, a) =>
-        c === "aireplay-ng" && a.includes("-0") && a.includes("5"),
-    },
-    {
-      title: "TCPDump IoT",
-      why: "Sniff packets specifically looking for unencrypted IoT data.",
-      text: "Type <code>tcpdump -i wlan0mon -w iot_capture.pcap</code>",
-      objective: "Run tcpdump",
+      title: "Test TLS Client",
+      why: "The `s_client` acts as a diagnostic browser. It connects to the server, outputs the entire TLS handshake process, reveals the negotiated Cipher Suite (e.g., ECDHE-RSA-AES256-GCM-SHA384), and validates the certificate chain.",
+      text: "Type <code>openssl s_client -connect localhost:4433</code>",
+      objective: "Connect openssl s_client",
       xp: 45,
       check: (c, a) =>
-        c === "tcpdump" && a.includes("-w") && a.includes("iot_capture.pcap"),
+        c === "openssl" &&
+        a.includes("s_client") &&
+        a.includes("localhost:4433"),
     },
     {
-      title: "Read PCAP",
-      why: "Use TShark (command line Wireshark) to analyze the dump.",
-      text: "Type <code>tshark -r iot_capture.pcap</code>",
-      objective: "Run tshark",
-      xp: 40,
-      check: (c, a) =>
-        c === "tshark" && a.includes("-r") && a.includes("iot_capture.pcap"),
-    },
-    {
-      title: "Stop Monitor Mode",
-      why: "Return the WiFi card to normal.",
-      text: "Type <code>airmon-ng stop wlan0mon</code>",
-      objective: "Stop monitor mode",
-      xp: 20,
-      check: (c, a) => c === "airmon-ng" && a.includes("stop"),
+      title: "Kill TLS Server",
+      why: "Terminate the diagnostic OpenSSL background process.",
+      text: "Type <code>killall openssl</code>",
+      objective: "Kill openssl",
+      xp: 15,
+      check: (c, a) => c === "killall" && a.includes("openssl"),
     },
 
-    // --- PHASE 5: MQTT, COAP & SMART HOME HACKING (81-100) ---
+    // --- PHASE 4: STEGANOGRAPHY (46-55) ---
     {
-      title: "Install MQTT Clients",
-      why: "MQTT is the most popular IoT messaging protocol.",
-      text: "Type <code>apt install mosquitto-clients -y</code>",
-      objective: "Install mosquitto-clients",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("mosquitto-clients"),
+      title: "Simulate Image",
+      why: "Steganography is the art of hiding data in plain sight. Create a simulated JPEG file that we will use to conceal our encrypted payloads.",
+      text: "Type <code>touch cover.jpg</code>",
+      objective: "Create cover.jpg",
+      xp: 10,
+      check: (c, a) => c === "touch" && a[0] === "cover.jpg",
     },
     {
-      title: "Scan for MQTT",
-      why: "Look for port 1883 on the Smart Home network.",
-      text: "Type <code>nmap -p 1883 10.0.0.0/24</code>",
-      objective: "Nmap port 1883",
-      xp: 30,
-      check: (c, a) => c === "nmap" && a.includes("-p") && a.includes("1883"),
-    },
-    {
-      title: "Subscribe to All Topics",
-      why: "Connect to the broker and listen to EVERYTHING in the smart home.",
-      text: 'Type <code>mosquitto_sub -h 10.0.0.50 -t "#" -v</code>',
-      objective: "Use mosquitto_sub with # wildcard",
-      xp: 50,
-      check: (c, a) =>
-        c === "mosquitto_sub" &&
-        a.includes("-h") &&
-        a.includes("-t") &&
-        a.includes("#"),
-    },
-    {
-      title: "Publish MQTT Payload",
-      why: "Send a command to unlock the front door.",
-      text: 'Type <code>mosquitto_pub -h 10.0.0.50 -t "home/door/lock" -m "UNLOCK"</code>',
-      objective: "Use mosquitto_pub",
-      xp: 50,
-      check: (c, a) =>
-        c === "mosquitto_pub" &&
-        a.includes("-t") &&
-        a.some((x) => x.includes("home/door/lock")) &&
-        a.includes("-m"),
-    },
-    {
-      title: "Turn on Smart Plug",
-      why: "Hijack the living room lights.",
-      text: 'Type <code>mosquitto_pub -h 10.0.0.50 -t "home/livingroom/plug" -m "ON"</code>',
-      objective: "Publish ON message",
-      xp: 40,
-      check: (c, a) =>
-        c === "mosquitto_pub" &&
-        a.some((x) => x.includes("plug")) &&
-        a.some((x) => x.includes("ON")),
-    },
-    {
-      title: "Install CoAP",
-      why: "CoAP is another lightweight IoT protocol (Port 5683).",
-      text: "Type <code>apt install libcoap-1-0-bin -y</code>",
-      objective: "Install libcoap",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("libcoap-1-0-bin"),
-    },
-    {
-      title: "Query CoAP Device",
-      why: "Ask the IoT thermometer for its status.",
-      text: "Type <code>coap-client -m get coap://10.0.0.60/.well-known/core</code>",
-      objective: "Use coap-client",
+      title: "Steghide Embed",
+      why: "<b>steghide</b> targets image and audio files. It parses the file and manipulates the Least Significant Bits (LSB) of the pixel color data, mathematically injecting the secret file into the image without altering how it looks to the human eye.",
+      text: "Type <code>steghide embed -ef mission.txt.gpg -cf cover.jpg -p 'password123'</code>",
+      objective: "Embed data with steghide",
       xp: 45,
       check: (c, a) =>
-        c === "coap-client" &&
-        a.includes("get") &&
-        a.some((x) => x.includes("coap://")),
+        c === "steghide" && a.includes("embed") && a.includes("cover.jpg"),
     },
     {
-      title: "Shodan CLI Install",
-      why: "Install the search engine for exposed IoT devices.",
-      text: "Type <code>apt install python3-shodan -y</code>",
-      objective: "Install python3-shodan",
-      xp: 20,
-      check: (c, a) => c === "apt" && a.includes("python3-shodan"),
+      title: "Steghide Info",
+      why: "The <b>info</b> command probes the image. If provided the correct extraction password, the algorithm verifies that a hidden payload matrix exists inside the file's LSB data.",
+      text: "Type <code>steghide info cover.jpg -p 'password123'</code>",
+      objective: "Get steghide info",
+      xp: 30,
+      check: (c, a) =>
+        c === "steghide" && a.includes("info") && a.includes("cover.jpg"),
     },
     {
-      title: "Shodan Init",
-      why: "Initialize your API key.",
-      text: "Type <code>shodan init YOUR_API_KEY</code>",
-      objective: "Run shodan init",
-      xp: 20,
-      check: (c, a) => c === "shodan" && a.includes("init"),
-    },
-    {
-      title: "Shodan Search Cameras",
-      why: "Search the internet for exposed webcams.",
-      text: 'Type <code>shodan search "webcamXP"</code>',
-      objective: "Shodan search webcam",
+      title: "Steghide Extract",
+      why: "The <b>extract</b> command processes the passphrase, navigates the manipulated LSB pixels, and perfectly rebuilds the hidden GPG archive onto the hard drive.",
+      text: "Type <code>steghide extract -sf cover.jpg -p 'password123'</code>",
+      objective: "Extract with steghide",
       xp: 40,
       check: (c, a) =>
-        c === "shodan" &&
-        a.includes("search") &&
-        a.some((x) => x.includes("webcamXP")),
+        c === "steghide" && a.includes("extract") && a.includes("cover.jpg"),
     },
     {
-      title: "Shodan Search MQTT",
-      why: "Search for exposed MQTT brokers without authentication.",
-      text: 'Type <code>shodan search "port:1883 MQTT"</code>',
-      objective: "Shodan search port:1883",
-      xp: 40,
-      check: (c, a) =>
-        c === "shodan" &&
-        a.includes("search") &&
-        a.some((x) => x.includes("port:1883")),
+      title: "Zsteg Analysis",
+      why: "<b>zsteg</b> is a forensic tool. It automates LSB detection against PNG and BMP files, rapidly testing multiple mathematical data layouts and RGB channels to blindly detect hidden payloads.",
+      text: "Type <code>zsteg cover.jpg</code>",
+      objective: "Analyze with zsteg",
+      xp: 25,
+      check: (c, a) => c === "zsteg" && a.includes("cover.jpg"),
     },
     {
-      title: "Grep Firmware Config",
-      why: "Search the squashfs dump again for cloud API keys.",
-      text: "Type <code>grep -rnw '_firmware_v1.bin.extracted' -e 'api_key'</code>",
-      objective: "Grep api_key recursively",
+      title: "Exiftool Analysis",
+      why: "Attackers often hide reverse shells inside the Exif metadata of images (like the 'Artist' or 'Copyright' tags) and upload them to bypass web filters. <b>exiftool</b> dumps all embedded metadata.",
+      text: "Type <code>exiftool cover.jpg</code>",
+      objective: "Analyze with exiftool",
+      xp: 25,
+      check: (c, a) => c === "exiftool" && a.includes("cover.jpg"),
+    },
+    {
+      title: "Binwalk Forensics",
+      why: "<b>binwalk</b> is an elite structural analysis engine. It scans the raw hex bytes of a file and looks for embedded file signatures. If an attacker appended a hidden `.zip` file directly to the end of the `.jpg` hex code, binwalk will instantly find it.",
+      text: "Type <code>binwalk cover.jpg</code>",
+      objective: "Analyze with binwalk",
+      xp: 30,
+      check: (c, a) => c === "binwalk" && a.includes("cover.jpg"),
+    },
+    {
+      title: "Binwalk Extraction",
+      why: "The <b>-e</b> flag forces `binwalk` to use the `dd` command internally to carve out any hidden file signatures it finds, dumping the extracted archives into a dedicated staging folder.",
+      text: "Type <code>binwalk -e cover.jpg</code>",
+      objective: "Extract with binwalk -e",
       xp: 35,
       check: (c, a) =>
-        c === "grep" && a.includes("-rnw") && a.includes("api_key"),
+        c === "binwalk" && a.includes("-e") && a.includes("cover.jpg"),
+    },
+
+    // --- PHASE 5: CRACKING INFRASTRUCTURE (56-65) ---
+    {
+      title: "PDF2John",
+      why: "Digital Forensics: You intercepted an encrypted, password-protected PDF. <b>pdf2john</b> parses the document headers and extracts the complex cryptographic hashing variables into a text string readable by cracking engines.",
+      text: "Type <code>pdf2john locked.pdf > pdf_hash.txt</code>",
+      objective: "Use pdf2john",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        raw.includes("pdf2john") && raw.includes("locked.pdf"),
     },
     {
-      title: "Router Exploit Test",
-      why: "Use curl to test a known router bypass vulnerability.",
-      text: 'Type <code>curl -d "admin=1" http://10.0.0.1/cgi-bin/config.exp</code>',
-      objective: "Curl exploit payload",
+      title: "Zip2John",
+      why: "Similarly, <b>zip2john</b> extracts the PKZIP cryptographic headers from a locked archive so we can attack the hash offline, rather than attempting to interact with the ZIP software directly.",
+      text: "Type <code>zip2john secret.zip > zip_hash.txt</code>",
+      objective: "Use zip2john",
+      xp: 45,
+      check: (c, a, o, raw) =>
+        raw.includes("zip2john") && raw.includes("secret.zip"),
+    },
+    {
+      title: "Crack ZIP",
+      why: "Execute John the Ripper. The engine calculates billions of candidate passwords, hashes them using the extracted PKZIP math, and compares them to the target hash until a perfect collision occurs.",
+      text: "Type <code>john zip_hash.txt</code>",
+      objective: "Crack zip hash",
       xp: 40,
       check: (c, a) =>
-        c === "curl" &&
-        a.includes("-d") &&
-        a.some((x) => x.includes("cgi-bin")),
+        c === "john" && a.includes("zip_hash.txt") && !a.includes("--show"),
     },
     {
-      title: "Verify Router Root",
-      why: "Check if the exploit granted root access.",
-      text: "Type <code>curl http://10.0.0.1/cgi-bin/config.exp?cmd=whoami</code>",
-      objective: "Curl whoami command",
-      xp: 40,
-      check: (c, a) => c === "curl" && a.some((x) => x.includes("whoami")),
-    },
-    {
-      title: "Mirai Botnet Scan",
-      why: "Simulate what the Mirai botnet does: bruteforce telnet on IoT.",
-      text: "Type <code>hydra -l root -P passwords.txt telnet://10.0.0.200</code>",
-      objective: "Hydra telnet",
+      title: "Hashcat Advanced Mode",
+      why: "Execute Hashcat in Mode 13000 (RAR5 archive). Using the `-a 3` (Brute-Force/Mask) attack type, Hashcat uses the GPU to mathematically exhaust all possible character combinations.",
+      text: "Type <code>hashcat -m 13000 -a 3 rar_hash.txt ?a?a?a?a</code>",
+      objective: "Run hashcat mask attack",
       xp: 50,
-      check: (c, a) => c === "hydra" && a.includes("telnet://10.0.0.200"),
-    },
-    {
-      title: "Nmap IoT Script",
-      why: "Use Nmap's vulnerability scripts against a smart TV.",
-      text: "Type <code>nmap --script=broadcast-upnp-info 10.0.0.150</code>",
-      objective: "Nmap broadcast-upnp",
-      xp: 40,
       check: (c, a) =>
-        c === "nmap" && a.some((x) => x.includes("broadcast-upnp-info")),
+        c === "hashcat" &&
+        a.includes("-a") &&
+        a.includes("3") &&
+        a.some((x) => x.includes("?a?a")),
     },
     {
-      title: "Clean Up Extraction",
-      why: "Remove the firmware directories.",
-      text: "Type <code>rm -rf _firmware* modified_fw.bin</code>",
-      objective: "Remove firmware folders",
-      xp: 20,
-      check: (c, a) =>
-        c === "rm" &&
-        a.includes("-rf") &&
-        a.some((x) => x.includes("_firmware")),
-    },
-    {
-      title: "Stop MQTT",
-      why: "Kill your listeners.",
-      text: "Type <code>killall mosquitto_sub</code>",
-      objective: "Killall mosquitto_sub",
+      title: "Clean Hashes",
+      why: "Eradicate the forensic hash dumps from the filesystem to complete the intelligence operation.",
+      text: "Type <code>rm *.txt *.asc *.enc *.crt *.key *.csr *.gpg *.pem</code>",
+      objective: "Remove artifacts",
       xp: 15,
-      check: (c, a) => c === "killall" && a.includes("mosquitto_sub"),
+      check: (c, a) => c === "rm" && a.includes("*.txt"),
     },
     {
-      title: "Check System Integrity",
-      why: "Ensure your own system wasn't compromised during hacking.",
-      text: "Type <code>debsums -c</code>",
-      objective: "Type debsums -c",
-      xp: 30,
-      check: (c, a) => c === "debsums" && a.includes("-c"),
+      title: "Clean PKI",
+      why: "Remove all generated certificates to leave a pristine architecture.",
+      text: "Type <code>rm -rf _cover.jpg.extracted</code>",
+      objective: "Remove extracted dirs",
+      xp: 15,
+      check: (c, a) => c === "rm" && a.includes("-rf"),
     },
     {
-      title: "Cyber Grandmaster",
-      why: "You have completed all 20 modules and 1,200+ lessons.",
-      text: 'Type <code>echo "I AM THE KERNEL GOD"</code>',
-      objective: "Type echo",
-      xp: 500,
-      check: (c, a, o, raw) => raw.includes("echo") && raw.includes("GOD"),
+      title: "Cryptography Master",
+      why: "You understand LSB Manipulation, Asymmetric RSA Tunnels, Cryptographic Hashes, and Digital Signatures. You are an Encryption Architect.",
+      text: 'Type <code>echo "Cipher Cracked"</code>',
+      objective: "Echo final message",
+      xp: 100,
+      check: (c, a, o, raw) => raw.includes("echo") && raw.includes("Cipher"),
     },
   ],
 };

@@ -7,7 +7,7 @@ const module18_cloud = {
     // --- PHASE 1: TERRAFORM FOUNDATIONS (1-25) ---
     {
       title: "Terraform Version",
-      why: "Check your infrastructure-as-code engine.",
+      why: "Terraform operates using provider plugins. Always verify the binary version to ensure your execution engine matches the syntax required by the `.tf` blueprints.",
       text: "Type <code>terraform version</code>",
       objective: "Type terraform version",
       xp: 10,
@@ -15,7 +15,7 @@ const module18_cloud = {
     },
     {
       title: "Create Main Config",
-      why: "Create the main Terraform blueprint file.",
+      why: "Terraform uses declarative HCL (HashiCorp Configuration Language). We create `main.tf`, the primary blueprint where we describe exactly what the cloud architecture *should* look like.",
       text: "Type <code>touch main.tf</code>",
       objective: "Type touch main.tf",
       xp: 10,
@@ -23,7 +23,7 @@ const module18_cloud = {
     },
     {
       title: "Define Provider",
-      why: "Tell Terraform to connect to AWS.",
+      why: "Terraform is cloud-agnostic. We must explicitly define a `provider` block (like AWS, GCP, or Kubernetes) so the engine knows which API protocols to download and translate our HCL code into.",
       text: 'Type <code>echo \'provider "aws" { region = "us-east-1" }\' > main.tf</code>',
       objective: "Add AWS provider to main.tf",
       xp: 30,
@@ -32,100 +32,89 @@ const module18_cloud = {
     },
     {
       title: "Terraform Init",
-      why: "Download the necessary cloud provider plugins.",
+      why: "The <b>init</b> command parses your `.tf` files, connects to the HashiCorp registry, and downloads the specific API binaries (providers) into a hidden `.terraform` directory.",
       text: "Type <code>terraform init</code>",
       objective: "Type terraform init",
-      xp: 20,
+      xp: 25,
       check: (c, a) => c === "terraform" && a[0] === "init",
     },
     {
-      title: "Format Code",
-      why: "Clean up your Terraform syntax automatically.",
-      text: "Type <code>terraform fmt</code>",
-      objective: "Type terraform fmt",
-      xp: 15,
-      check: (c, a) => c === "terraform" && a[0] === "fmt",
-    },
-    {
-      title: "Validate Config",
-      why: "Check if your main.tf is syntactically valid.",
-      text: "Type <code>terraform validate</code>",
-      objective: "Type terraform validate",
-      xp: 20,
-      check: (c, a) => c === "terraform" && a[0] === "validate",
-    },
-    {
-      title: "Define Server",
-      why: "Add an EC2 instance to your blueprint.",
-      text: 'Type <code>echo \'resource "aws_instance" "web" { ami = "ami-123", instance_type = "t2.micro" }\' >> main.tf</code>',
-      objective: "Append aws_instance to main.tf",
+      title: "Define EC2 Resource",
+      why: "A `resource` block mathematically defines a physical cloud component. Here, we declare the exact AMI image and hardware size for a virtual server.",
+      text: 'Type <code>echo \'resource "aws_instance" "web" { ami = "ami-123456"; instance_type = "t2.micro" }\' >> main.tf</code>',
+      objective: "Append EC2 resource",
       xp: 40,
       check: (c, a, o, raw) =>
         raw.includes("echo") &&
         raw.includes("aws_instance") &&
-        raw.includes("main.tf"),
+        raw.includes(">>"),
+    },
+    {
+      title: "Format Code",
+      why: "The <b>fmt</b> command acts as a strict style linter. It parses your `.tf` files and rewrites the whitespaces and indents to perfectly match the HashiCorp standard.",
+      text: "Type <code>terraform fmt</code>",
+      objective: "Type terraform fmt",
+      xp: 20,
+      check: (c, a) => c === "terraform" && a[0] === "fmt",
+    },
+    {
+      title: "Validate Syntax",
+      why: "The <b>validate</b> command locally compiles the HCL syntax tree without connecting to the cloud provider, catching missing brackets or invalid data types instantly.",
+      text: "Type <code>terraform validate</code>",
+      objective: "Type terraform validate",
+      xp: 25,
+      check: (c, a) => c === "terraform" && a[0] === "validate",
     },
     {
       title: "Terraform Plan",
-      why: "See what Terraform WILL build before actually building it.",
+      why: "The core of Terraform. <b>plan</b> builds a Directed Acyclic Graph (DAG) comparing your `main.tf` to the current state of the cloud. It outputs a strict calculation of exactly what it *will* create, modify, or destroy.",
       text: "Type <code>terraform plan</code>",
       objective: "Type terraform plan",
-      xp: 30,
+      xp: 40,
       check: (c, a) => c === "terraform" && a[0] === "plan",
     },
     {
-      title: "Save Plan",
-      why: "Save the deployment blueprint to a file.",
-      text: "Type <code>terraform plan -out=tfplan</code>",
-      objective: "Type terraform plan -out=tfplan",
-      xp: 35,
-      check: (c, a) =>
-        c === "terraform" &&
-        a.includes("plan") &&
-        a.some((x) => x.includes("tfplan")),
-    },
-    {
       title: "Terraform Apply",
-      why: "Execute the plan and spawn real servers in the cloud.",
-      text: "Type <code>terraform apply tfplan</code>",
-      objective: "Type terraform apply tfplan",
+      why: "The <b>apply</b> command executes the DAG. It initiates secure API calls to AWS, physically spinning up the hardware. The `-auto-approve` flag bypasses the final manual confirmation prompt.",
+      text: "Type <code>terraform apply -auto-approve</code>",
+      objective: "Type terraform apply",
       xp: 50,
       check: (c, a) =>
-        c === "terraform" && a[0] === "apply" && a[1] === "tfplan",
+        c === "terraform" && a[0] === "apply" && a.includes("-auto-approve"),
     },
     {
-      title: "Show State",
-      why: "View the JSON map of the infrastructure Terraform now controls.",
-      text: "Type <code>terraform show</code>",
-      objective: "Type terraform show",
-      xp: 20,
-      check: (c, a) => c === "terraform" && a[0] === "show",
+      title: "Inspect State File",
+      why: "Once applied, Terraform generates a `terraform.tfstate` JSON file. This is the 'Source of Truth'. It rigidly maps the logical resource names in your code to the actual physical Resource IDs in the cloud.",
+      text: "Type <code>cat terraform.tfstate</code>",
+      objective: "View state file",
+      xp: 25,
+      check: (c, a) => c === "cat" && a[0] === "terraform.tfstate",
     },
     {
-      title: "List State Resources",
-      why: "See a clean list of managed cloud resources.",
+      title: "State List",
+      why: "Instead of reading raw JSON, <b>state list</b> parses the local memory state and returns a clean index of every active physical cloud component Terraform is currently tracking.",
       text: "Type <code>terraform state list</code>",
       objective: "Type terraform state list",
-      xp: 25,
+      xp: 30,
       check: (c, a) => c === "terraform" && a[0] === "state" && a[1] === "list",
     },
     {
-      title: "Inspect State Resource",
-      why: "Look at the deep details of your web server.",
+      title: "State Show",
+      why: "The <b>state show</b> command extracts the exact live metadata (like public IPs or DNS allocations) for a specific resource directly from the memory state buffer.",
       text: "Type <code>terraform state show aws_instance.web</code>",
-      objective: "Type terraform state show",
-      xp: 30,
+      objective: "Show specific state",
+      xp: 35,
       check: (c, a) =>
         c === "terraform" &&
         a[0] === "state" &&
         a[1] === "show" &&
-        a[2] === "aws_instance.web",
+        a.includes("aws_instance.web"),
     },
     {
-      title: "Define Output",
-      why: "Tell Terraform to print the server's IP after building it.",
+      title: "Output Variables",
+      why: "If you deploy 100 servers, finding their IPs is impossible. We use `output` blocks to instruct Terraform to extract and print specific data (like the public IP) to the terminal upon completion.",
       text: "Type <code>echo 'output \"ip\" { value = aws_instance.web.public_ip }' >> main.tf</code>",
-      objective: "Append output block",
+      objective: "Create output block",
       xp: 40,
       check: (c, a, o, raw) =>
         raw.includes("echo") &&
@@ -133,461 +122,356 @@ const module18_cloud = {
         raw.includes("public_ip"),
     },
     {
-      title: "Apply Auto-Approve",
-      why: "Apply changes without prompting for 'yes'.",
+      title: "Apply Output",
+      why: "Re-evaluate the DAG. Since the physical server already exists, `apply` simply updates the state file and prints the requested IP address.",
       text: "Type <code>terraform apply -auto-approve</code>",
-      objective: "Type terraform apply -auto-approve",
-      xp: 40,
-      check: (c, a) =>
-        c === "terraform" && a[0] === "apply" && a.includes("-auto-approve"),
+      objective: "Re-apply config",
+      xp: 20,
+      check: (c, a) => c === "terraform" && a[0] === "apply",
     },
     {
-      title: "Print Outputs",
-      why: "Extract the IP variables from the state file.",
+      title: "View Outputs",
+      why: "The <b>output</b> command directly parses the `tfstate` file, allowing you to extract previously calculated variables without needing to communicate with the cloud provider API.",
       text: "Type <code>terraform output</code>",
       objective: "Type terraform output",
-      xp: 20,
+      xp: 25,
       check: (c, a) => c === "terraform" && a[0] === "output",
     },
     {
-      title: "Terraform Taint",
-      why: "Mark a server as degraded, forcing Terraform to replace it on the next run.",
-      text: "Type <code>terraform taint aws_instance.web</code>",
-      objective: "Type terraform taint",
+      title: "Define Variables",
+      why: "Hardcoding 't2.micro' is bad practice. We use `variable` blocks to inject dynamic data during the plan phase, making our modules reusable.",
+      text: 'Type <code>echo \'variable "size" { default = "t2.micro" }\' > vars.tf</code>',
+      objective: "Create vars.tf",
       xp: 35,
-      check: (c, a) =>
-        c === "terraform" && a[0] === "taint" && a[1] === "aws_instance.web",
+      check: (c, a, o, raw) =>
+        raw.includes("echo") &&
+        raw.includes("variable") &&
+        raw.includes("vars.tf"),
     },
     {
-      title: "Plan Replacement",
-      why: "See how Terraform plans to destroy and rebuild the tainted server.",
-      text: "Type <code>terraform plan</code>",
-      objective: "Type terraform plan",
+      title: "Terraform Destroy",
+      why: "Cloud resources cost money. The <b>destroy</b> command reverses the DAG. It calculates dependencies in reverse order, systematically terminating the physical servers and networks via API calls.",
+      text: "Type <code>terraform destroy -auto-approve</code>",
+      objective: "Type terraform destroy",
+      xp: 50,
+      check: (c, a) => c === "terraform" && a[0] === "destroy",
+    },
+    {
+      title: "Verify Destruction",
+      why: "Once destroyed, the `state list` will return completely empty, mathematically proving that no orphaned resources remain in the cloud.",
+      text: "Type <code>terraform state list</code>",
+      objective: "Check state list",
+      xp: 15,
+      check: (c, a) => c === "terraform" && a[0] === "state" && a[1] === "list",
+    },
+    {
+      title: "Clean Environment",
+      why: "Purge your infrastructure blueprints and the hidden `.terraform` binary plugin directory.",
+      text: "Type <code>rm -rf main.tf vars.tf terraform.tfstate* .terraform</code>",
+      objective: "Delete TF files",
       xp: 20,
-      check: (c, a) => c === "terraform" && a[0] === "plan",
-    },
-    {
-      title: "Terraform Untaint",
-      why: "Change your mind and unmark the server.",
-      text: "Type <code>terraform untaint aws_instance.web</code>",
-      objective: "Type terraform untaint",
-      xp: 35,
       check: (c, a) =>
-        c === "terraform" && a[0] === "untaint" && a[1] === "aws_instance.web",
+        c === "rm" && a.includes("-rf") && a.some((x) => x.includes("main.tf")),
     },
     {
-      title: "Workspaces List",
-      why: "Workspaces let you manage Prod and Dev separately.",
+      title: "Taint Resource",
+      why: "Sometimes a server breaks, but Terraform's state file thinks it's healthy. The <b>taint</b> command forces Terraform to mark the resource as 'degraded', guaranteeing it will be physically destroyed and rebuilt on the next apply.",
+      text: "Type <code>terraform taint aws_instance.web</code>",
+      objective: "Simulate taint command",
+      xp: 35,
+      check: (c, a) => c === "terraform" && a[0] === "taint",
+    },
+    {
+      title: "Untaint Resource",
+      why: "Remove the degraded mark from the state file, indicating the resource was manually fixed and does not require reconstruction.",
+      text: "Type <code>terraform untaint aws_instance.web</code>",
+      objective: "Simulate untaint command",
+      xp: 30,
+      check: (c, a) => c === "terraform" && a[0] === "untaint",
+    },
+    {
+      title: "Import Existing",
+      why: "If someone manually built a server in the AWS console, it exists physically but not in your state file. <b>import</b> surgically links the remote hardware ID to your local `.tf` code.",
+      text: "Type <code>terraform import aws_instance.web i-1234567890</code>",
+      objective: "Simulate terraform import",
+      xp: 45,
+      check: (c, a) => c === "terraform" && a[0] === "import",
+    },
+    {
+      title: "State Pull",
+      why: "In enterprise environments, the state file is stored remotely (like an S3 bucket). <b>state pull</b> downloads a local copy of this highly sensitive JSON file for deep inspection.",
+      text: "Type <code>terraform state pull > local.tfstate</code>",
+      objective: "Simulate state pull",
+      xp: 40,
+      check: (c, a, o, raw) =>
+        raw.includes("terraform state pull") && raw.includes(">"),
+    },
+    {
+      title: "Workspace List",
+      why: "Workspaces allow you to manage multiple isolated state files (like 'dev', 'staging', 'prod') using the exact same underlying HCL codebase.",
       text: "Type <code>terraform workspace list</code>",
-      objective: "Type terraform workspace list",
-      xp: 25,
+      objective: "List terraform workspaces",
+      xp: 20,
       check: (c, a) =>
         c === "terraform" && a[0] === "workspace" && a[1] === "list",
     },
     {
-      title: "New Workspace",
-      why: "Create a Production environment.",
-      text: "Type <code>terraform workspace new prod</code>",
-      objective: "Type terraform workspace new prod",
+      title: "Workspace Create",
+      why: "Initialize a new, blank environment state, completely isolated from your production infrastructure.",
+      text: "Type <code>terraform workspace new dev</code>",
+      objective: "Create dev workspace",
       xp: 30,
       check: (c, a) =>
-        c === "terraform" &&
-        a[0] === "workspace" &&
-        a[1] === "new" &&
-        a[2] === "prod",
-    },
-    {
-      title: "Select Workspace",
-      why: "Switch back to the default environment.",
-      text: "Type <code>terraform workspace select default</code>",
-      objective: "Type terraform workspace select default",
-      xp: 30,
-      check: (c, a) =>
-        c === "terraform" &&
-        a[0] === "workspace" &&
-        a[1] === "select" &&
-        a[2] === "default",
-    },
-    {
-      title: "Terraform Refresh",
-      why: "Sync the state file with the real world.",
-      text: "Type <code>terraform refresh</code>",
-      objective: "Type terraform refresh",
-      xp: 25,
-      check: (c, a) => c === "terraform" && a[0] === "refresh",
-    },
-    {
-      title: "Terraform Destroy",
-      why: "Nuke the entire cloud architecture you just built.",
-      text: "Type <code>terraform destroy -auto-approve</code>",
-      objective: "Type terraform destroy -auto-approve",
-      xp: 50,
-      check: (c, a) =>
-        c === "terraform" && a[0] === "destroy" && a.includes("-auto-approve"),
-    },
-    {
-      title: "Clean Up",
-      why: "Remove Terraform files.",
-      text: "Type <code>rm -rf main.tf tfplan terraform.tfstate*</code>",
-      objective: "Remove terraform files",
-      xp: 15,
-      check: (c, a) =>
-        c === "rm" && a.includes("-rf") && a.some((x) => x.includes("main.tf")),
+        c === "terraform" && a[0] === "workspace" && a[1] === "new",
     },
 
-    // --- PHASE 2: KUBERNETES CLUSTER & NODES (26-45) ---
+    // --- PHASE 2: KUBERNETES CLUSTER TRIAGE (26-40) ---
     {
-      title: "Kubeconfig Status",
-      why: "Check your Kubernetes connection.",
+      title: "Cluster Info",
+      why: "Kubernetes is an orchestration engine. The <b>kubectl cluster-info</b> command executes an authenticated REST API call to the `kube-apiserver` to map the location of the core control plane.",
       text: "Type <code>kubectl cluster-info</code>",
       objective: "Type kubectl cluster-info",
       xp: 20,
       check: (c, a) => c === "kubectl" && a[0] === "cluster-info",
     },
     {
-      title: "List Nodes",
-      why: "See the massive physical servers powering your cluster.",
+      title: "Get Nodes",
+      why: "Nodes are physical (or virtual) machines providing CPU/RAM to the cluster. <b>get nodes</b> queries the `etcd` datastore to report which servers are successfully heartbeating to the control plane.",
       text: "Type <code>kubectl get nodes</code>",
       objective: "Type kubectl get nodes",
-      xp: 15,
+      xp: 20,
       check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "nodes",
     },
     {
-      title: "Wide Node Details",
-      why: "Get the IP addresses of your nodes.",
+      title: "Node Wide Format",
+      why: "The <b>-o wide</b> flag forces the API to return the extended internal topology, exposing the private IP addresses and exact container runtime versions (e.g., containerd or Docker) running on the nodes.",
       text: "Type <code>kubectl get nodes -o wide</code>",
       objective: "Type kubectl get nodes -o wide",
-      xp: 20,
+      xp: 25,
       check: (c, a) =>
         c === "kubectl" &&
         a[0] === "get" &&
         a[1] === "nodes" &&
-        a.includes("-o") &&
-        a.includes("wide"),
+        a.includes("-o"),
     },
     {
       title: "Describe Node",
-      why: "View deep hardware resources of the master node.",
-      text: "Type <code>kubectl describe node k8s-master</code>",
-      objective: "Type kubectl describe node k8s-master",
-      xp: 25,
+      why: "The <b>describe</b> command dives deep into the API. It returns the exact hardware allocations (CPU capacity, Memory pressure) and the timeline of systemic events that have occurred on the node.",
+      text: "Type <code>kubectl describe node minikube</code>",
+      objective: "Describe the minikube node",
+      xp: 30,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "describe" &&
-        a[1] === "node" &&
-        a[2] === "k8s-master",
+        c === "kubectl" && a[0] === "describe" && a[1] === "node",
     },
     {
-      title: "Node Metrics",
-      why: "Check CPU and RAM usage of your servers.",
+      title: "Top Nodes",
+      why: "The <b>top</b> command interfaces with the internal `metrics-server`, providing real-time telemetry on the live CPU and Memory utilization percentages across your hardware fleet.",
       text: "Type <code>kubectl top nodes</code>",
       objective: "Type kubectl top nodes",
-      xp: 25,
+      xp: 30,
       check: (c, a) => c === "kubectl" && a[0] === "top" && a[1] === "nodes",
     },
     {
-      title: "Taint Node",
-      why: "Prevent standard pods from being scheduled on the master node.",
-      text: "Type <code>kubectl taint nodes k8s-master dedicated=master:NoSchedule</code>",
-      objective: "Type kubectl taint nodes",
-      xp: 45,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "taint" &&
-        a[1] === "nodes" &&
-        a.some((x) => x.includes("NoSchedule")),
-    },
-    {
-      title: "Label Node",
-      why: "Tag a worker node with SSD storage.",
-      text: "Type <code>kubectl label nodes k8s-worker1 disktype=ssd</code>",
-      objective: "Type kubectl label nodes",
-      xp: 35,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "label" &&
-        a[1] === "nodes" &&
-        a.some((x) => x.includes("disktype=ssd")),
-    },
-    {
-      title: "Show Node Labels",
-      why: "View all tags applied to servers.",
-      text: "Type <code>kubectl get nodes --show-labels</code>",
-      objective: "Type kubectl get nodes --show-labels",
-      xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a[1] === "nodes" &&
-        a.includes("--show-labels"),
-    },
-    {
-      title: "Drain Node",
-      why: "Evict all running apps from a server safely so you can reboot it.",
-      text: "Type <code>kubectl drain k8s-worker1 --ignore-daemonsets</code>",
-      objective: "Type kubectl drain k8s-worker1",
-      xp: 50,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "drain" &&
-        a[1] === "k8s-worker1" &&
-        a.includes("--ignore-daemonsets"),
-    },
-    {
-      title: "Uncordon Node",
-      why: "Tell the cluster the rebooted server is ready for work again.",
-      text: "Type <code>kubectl uncordon k8s-worker1</code>",
-      objective: "Type kubectl uncordon k8s-worker1",
-      xp: 40,
-      check: (c, a) =>
-        c === "kubectl" && a[0] === "uncordon" && a[1] === "k8s-worker1",
-    },
-    {
-      title: "List Contexts",
-      why: "See which clusters you are connected to.",
-      text: "Type <code>kubectl config get-contexts</code>",
-      objective: "Type kubectl config get-contexts",
-      xp: 25,
-      check: (c, a) =>
-        c === "kubectl" && a[0] === "config" && a[1] === "get-contexts",
-    },
-    {
-      title: "Current Context",
-      why: "See your active cluster.",
-      text: "Type <code>kubectl config current-context</code>",
-      objective: "Type kubectl config current-context",
-      xp: 20,
-      check: (c, a) =>
-        c === "kubectl" && a[0] === "config" && a[1] === "current-context",
-    },
-    {
-      title: "List Namespaces",
-      why: "View the virtual partitions within the cluster.",
+      title: "Get Namespaces",
+      why: "Namespaces are virtual clusters within a cluster. They mathematically isolate resources, allowing Development and Production teams to deploy apps on the same hardware without colliding.",
       text: "Type <code>kubectl get namespaces</code>",
       objective: "Type kubectl get namespaces",
-      xp: 15,
+      xp: 20,
       check: (c, a) =>
         c === "kubectl" && a[0] === "get" && a[1] === "namespaces",
     },
     {
-      title: "Create Namespace",
-      why: "Create an isolated zone for the dev team.",
-      text: "Type <code>kubectl create namespace dev</code>",
-      objective: "Type kubectl create namespace dev",
-      xp: 20,
+      title: "Get All in Namespace",
+      why: "By default, kubectl only queries the 'default' namespace. The <b>-n kube-system</b> flag instructs the API to query the deeply isolated system namespace where the DNS and network routing pods live.",
+      text: "Type <code>kubectl get all -n kube-system</code>",
+      objective: "Get all in kube-system",
+      xp: 35,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "create" &&
-        a[1] === "namespace" &&
-        a[2] === "dev",
+        c === "kubectl" && a[0] === "get" && a[1] === "all" && a.includes("-n"),
     },
     {
-      title: "Set Default Namespace",
-      why: "Switch your terminal context to the dev zone.",
-      text: "Type <code>kubectl config set-context --current --namespace=dev</code>",
-      objective: "Change active namespace",
+      title: "Create Namespace",
+      why: "Establish a new, mathematically isolated virtual boundary for your upcoming project deployment.",
+      text: "Type <code>kubectl create namespace staging</code>",
+      objective: "Create staging namespace",
+      xp: 25,
+      check: (c, a) =>
+        c === "kubectl" && a[0] === "create" && a[1] === "namespace",
+    },
+    {
+      title: "Set Context",
+      why: "Typing `-n staging` constantly is tedious. We edit our local `~/.kube/config` file context to permanently alter the default namespace destination for all future API calls.",
+      text: "Type <code>kubectl config set-context --current --namespace=staging</code>",
+      objective: "Set default namespace context",
       xp: 40,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "config" &&
-        a.includes("set-context") &&
-        a.some((x) => x.includes("--namespace=dev")),
+        c === "kubectl" && a[0] === "config" && a.includes("set-context"),
     },
     {
-      title: "Reset Namespace",
-      why: "Go back to the default zone.",
-      text: "Type <code>kubectl config set-context --current --namespace=default</code>",
-      objective: "Change active namespace to default",
+      title: "Verify Context",
+      why: "Check your local kubectl configuration architecture to guarantee the context switch was successfully applied.",
+      text: "Type <code>kubectl config view --minify</code>",
+      objective: "View kubectl config",
       xp: 30,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "config" &&
-        a.some((x) => x.includes("--namespace=default")),
+        c === "kubectl" && a[0] === "config" && a.includes("view"),
     },
     {
-      title: "Get API Resources",
-      why: "List every object type Kubernetes supports.",
+      title: "Explain Command",
+      why: "Kubernetes uses a complex OpenAPI schema. The <b>explain</b> command reads the local API definitions, outputting the exact internal documentation for how a specific resource (like a Pod) operates.",
+      text: "Type <code>kubectl explain pods</code>",
+      objective: "Explain pods",
+      xp: 20,
+      check: (c, a) => c === "kubectl" && a[0] === "explain" && a[1] === "pods",
+    },
+    {
+      title: "API Resources",
+      why: "Kubernetes relies on dozens of APIs. <b>api-resources</b> dumps the entire schema index, showing you all the valid components (Ingress, ConfigMap, Secret) that your server is capable of processing.",
       text: "Type <code>kubectl api-resources</code>",
-      objective: "Type kubectl api-resources",
+      objective: "List API resources",
       xp: 25,
       check: (c, a) => c === "kubectl" && a[0] === "api-resources",
     },
     {
-      title: "Explain Pod",
-      why: "Read the manual on how to configure a Pod.",
-      text: "Type <code>kubectl explain pod</code>",
-      objective: "Type kubectl explain pod",
+      title: "API Versions",
+      why: "Some features are in 'v1' (stable) while others are 'v1beta1' (experimental). This command confirms which architectural versions your control plane currently supports.",
+      text: "Type <code>kubectl api-versions</code>",
+      objective: "List API versions",
       xp: 20,
-      check: (c, a) => c === "kubectl" && a[0] === "explain" && a[1] === "pod",
+      check: (c, a) => c === "kubectl" && a[0] === "api-versions",
     },
     {
-      title: "Explain Pod Spec",
-      why: "Drill down into the Pod's internal spec.",
-      text: "Type <code>kubectl explain pod.spec</code>",
-      objective: "Type kubectl explain pod.spec",
-      xp: 25,
-      check: (c, a) =>
-        c === "kubectl" && a[0] === "explain" && a[1] === "pod.spec",
-    },
-    {
-      title: "Cluster Events",
-      why: "See a live log of everything happening in the cluster.",
+      title: "Get Events",
+      why: "The cluster continuously logs internal logic decisions (like scheduling or scaling failures). <b>get events</b> dumps this systemic timeline from the `etcd` database.",
       text: "Type <code>kubectl get events --sort-by='.metadata.creationTimestamp'</code>",
-      objective: "Get sorted events",
-      xp: 35,
+      objective: "Get sorted cluster events",
+      xp: 40,
+      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "events",
+    },
+    {
+      title: "Reset Context",
+      why: "Point your local configuration tool back to the primary un-isolated 'default' environment.",
+      text: "Type <code>kubectl config set-context --current --namespace=default</code>",
+      objective: "Reset to default namespace",
+      xp: 30,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a[1] === "events" &&
-        a.some((x) => x.includes("sort-by")),
+        c === "kubectl" && a[0] === "config" && a.includes("set-context"),
     },
 
-    // --- PHASE 3: PODS & CONTAINERS (46-65) ---
+    // --- PHASE 3: PODS & CONTAINERS (41-60) ---
     {
-      title: "Run a Pod",
-      why: "Spin up a single Nginx container.",
-      text: "Type <code>kubectl run my-nginx --image=nginx</code>",
-      objective: "Type kubectl run my-nginx --image=nginx",
-      xp: 30,
+      title: "Run Pod",
+      why: "A <b>Pod</b> is the smallest unit in Kubernetes; it is a wrapper that houses one or more Docker containers. The <b>run</b> command submits a request to the `kube-apiserver` to schedule an Nginx container onto a node.",
+      text: "Type <code>kubectl run web --image=nginx</code>",
+      objective: "Run a web pod",
+      xp: 25,
       check: (c, a) =>
         c === "kubectl" &&
         a[0] === "run" &&
-        a[1] === "my-nginx" &&
-        a.some((x) => x.includes("image=nginx")),
+        a[1] === "web" &&
+        a.some((x) => x.includes("nginx")),
     },
     {
-      title: "List Pods",
-      why: "Check if your Nginx container is running.",
+      title: "Get Pods",
+      why: "Query the API to check the status phase of your newly spawned Pod. You are looking for 'Running', indicating the `kubelet` daemon on the hardware successfully pulled the image and started the container.",
       text: "Type <code>kubectl get pods</code>",
       objective: "Type kubectl get pods",
       xp: 15,
       check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "pods",
     },
     {
-      title: "Pod Wide Output",
-      why: "See which worker node the pod was scheduled on.",
-      text: "Type <code>kubectl get pods -o wide</code>",
-      objective: "Type kubectl get pods -o wide",
-      xp: 20,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a[1] === "pods" &&
-        a.includes("-o") &&
-        a.includes("wide"),
-    },
-    {
-      title: "Watch Pods",
-      why: "Live-monitor pod status changes.",
-      text: "Type <code>kubectl get pods -w</code>",
-      objective: "Type kubectl get pods -w",
-      xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a[1] === "pods" &&
-        a.includes("-w"),
-    },
-    {
       title: "Describe Pod",
-      why: "Inspect the massive JSON properties of the pod.",
-      text: "Type <code>kubectl describe pod my-nginx</code>",
-      objective: "Type kubectl describe pod my-nginx",
+      why: "If a Pod is stuck in 'CrashLoopBackOff', use <b>describe</b>. It dumps the entire lifecycle metadata, highlighting exact scheduling errors, insufficient RAM allocations, or image pull failures.",
+      text: "Type <code>kubectl describe pod web</code>",
+      objective: "Describe the web pod",
       xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "describe" &&
-        a[1] === "pod" &&
-        a[2] === "my-nginx",
+      check: (c, a) => c === "kubectl" && a[0] === "describe" && a[1] === "pod",
     },
     {
-      title: "Read Pod Logs",
-      why: "View the Nginx access logs inside the pod.",
-      text: "Type <code>kubectl logs my-nginx</code>",
-      objective: "Type kubectl logs my-nginx",
+      title: "Pod Logs",
+      why: "Kubernetes intercepts the Standard Output stream from the underlying Docker container. The <b>logs</b> command tunnels this stream through the API directly to your terminal screen.",
+      text: "Type <code>kubectl logs web</code>",
+      objective: "Get logs from web pod",
       xp: 20,
-      check: (c, a) =>
-        c === "kubectl" && a[0] === "logs" && a[1] === "my-nginx",
+      check: (c, a) => c === "kubectl" && a[0] === "logs" && a[1] === "web",
     },
     {
       title: "Follow Pod Logs",
-      why: "Tail the logs in real-time.",
-      text: "Type <code>kubectl logs -f my-nginx</code>",
-      objective: "Type kubectl logs -f my-nginx",
+      why: "The <b>-f</b> flag locks the API tunnel open, allowing you to watch the live HTTP traffic hitting the Nginx container in real-time.",
+      text: "Type <code>kubectl logs -f web</code>",
+      objective: "Follow logs from web pod",
       xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "logs" &&
-        a.includes("-f") &&
-        a.includes("my-nginx"),
+      check: (c, a) => c === "kubectl" && a[0] === "logs" && a.includes("-f"),
     },
     {
       title: "Exec into Pod",
-      why: "Drop a bash shell inside the running container.",
-      text: "Type <code>kubectl exec -it my-nginx -- /bin/bash</code>",
-      objective: "Exec into pod",
+      why: "Like Docker, you can bypass the container's primary process. <b>exec -it</b> sends a request to the `kube-apiserver`, routing an interactive bash terminal directly into the running Pod's isolated namespace.",
+      text: "Type <code>kubectl exec -it web -- /bin/bash</code>",
+      objective: "Exec into the web pod",
       xp: 40,
       check: (c, a) =>
         c === "kubectl" &&
         a[0] === "exec" &&
         a.includes("-it") &&
-        a.includes("my-nginx") &&
-        a.includes("/bin/bash"),
+        a.includes("web"),
     },
     {
-      title: "Run Temp Pod",
-      why: "Run an Alpine linux pod, execute a ping, and instantly delete it (--rm).",
-      text: "Type <code>kubectl run temp --image=alpine --rm -it -- ping 8.8.8.8</code>",
-      objective: "Run a temporary pod",
-      xp: 50,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "run" &&
-        a.includes("--rm") &&
-        a.includes("ping"),
+      title: "Exit Exec",
+      why: "Terminate your secondary bash process to detach from the Pod.",
+      text: "Type <code>exit</code>",
+      objective: "Type exit",
+      xp: 10,
+      check: (c) => c === "exit",
     },
     {
-      title: "Label a Pod",
-      why: "Tag the pod as 'production'.",
-      text: "Type <code>kubectl label pod my-nginx env=prod</code>",
-      objective: "Type kubectl label pod",
-      xp: 30,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "label" &&
-        a[1] === "pod" &&
-        a.includes("env=prod"),
-    },
-    {
-      title: "Filter by Label",
-      why: "Search for all pods tagged as 'prod'.",
-      text: "Type <code>kubectl get pods -l env=prod</code>",
-      objective: "Type kubectl get pods -l env=prod",
+      title: "Top Pods",
+      why: "Poll the metrics-server to see the exact millicores (CPU) and Mebibytes (RAM) your specific Pod is consuming.",
+      text: "Type <code>kubectl top pods</code>",
+      objective: "Type kubectl top pods",
       xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a[1] === "pods" &&
-        a.includes("-l") &&
-        a.some((x) => x.includes("env=prod")),
+      check: (c, a) => c === "kubectl" && a[0] === "top" && a[1] === "pods",
     },
     {
       title: "Port Forward",
-      why: "Tunnel port 8080 on your machine directly to the pod's port 80.",
-      text: "Type <code>kubectl port-forward pod/my-nginx 8080:80</code>",
-      objective: "Type kubectl port-forward",
+      why: "By default, Pods are sealed off from the internet. <b>port-forward</b> mathematically wires your local laptop port directly to the Pod's internal container port through an encrypted API tunnel.",
+      text: "Type <code>kubectl port-forward pod/web 8080:80 &</code>",
+      objective: "Port forward to web pod",
       xp: 45,
       check: (c, a) =>
         c === "kubectl" &&
         a[0] === "port-forward" &&
-        a.includes("pod/my-nginx") &&
-        a.includes("8080:80"),
+        a.some((x) => x.includes("8080:80")),
     },
     {
-      title: "Export Pod YAML",
-      why: "Extract the exact YAML blueprint of your running pod.",
-      text: "Type <code>kubectl get pod my-nginx -o yaml > pod.yaml</code>",
-      objective: "Export pod to YAML",
+      title: "Label a Pod",
+      why: "Kubernetes is built entirely on labels. Setting a key-value pair (`env=prod`) tags the Pod so that Network Policies and Load Balancers know mathematically how to route traffic to it.",
+      text: "Type <code>kubectl label pods web env=prod</code>",
+      objective: "Label the web pod",
+      xp: 30,
+      check: (c, a) => c === "kubectl" && a[0] === "label" && a[1] === "pods",
+    },
+    {
+      title: "Show Labels",
+      why: "Query the API, forcing the output table to expose all the key-value tagging infrastructure associated with your Pods.",
+      text: "Type <code>kubectl get pods --show-labels</code>",
+      objective: "Get pods with labels",
+      xp: 25,
+      check: (c, a) =>
+        c === "kubectl" && a[0] === "get" && a.includes("--show-labels"),
+    },
+    {
+      title: "Filter by Label",
+      why: "The <b>-l</b> (Selector) flag parses the `etcd` database, returning ONLY the components matching the exact label criteria. This is how massive clusters are managed efficiently.",
+      text: "Type <code>kubectl get pods -l env=prod</code>",
+      objective: "Filter pods by label",
+      xp: 30,
+      check: (c, a) => c === "kubectl" && a[0] === "get" && a.includes("-l"),
+    },
+    {
+      title: "Extract Pod YAML",
+      why: "The <b>-o yaml</b> flag tells the API to dump the exact internal structural blueprint of the Pod. This is how Cloud Architects reverse-engineer and export active configurations.",
+      text: "Type <code>kubectl get pod web -o yaml > pod.yaml</code>",
+      objective: "Export pod to yaml",
       xp: 40,
       check: (c, a, o, raw) =>
         raw.includes("kubectl") &&
@@ -596,469 +480,236 @@ const module18_cloud = {
         raw.includes(">"),
     },
     {
-      title: "Read YAML",
-      why: "Inspect the exported file.",
-      text: "Type <code>cat pod.yaml</code>",
-      objective: "Type cat pod.yaml",
-      xp: 15,
-      check: (c, a) => c === "cat" && a[0] === "pod.yaml",
-    },
-    {
       title: "Delete Pod",
-      why: "Kill the container.",
-      text: "Type <code>kubectl delete pod my-nginx</code>",
-      objective: "Type kubectl delete pod my-nginx",
+      why: "Because we ran the Pod as a standalone unit (not part of a Deployment), deleting it permanently unlinks its container layers and destroys the virtual environment completely.",
+      text: "Type <code>kubectl delete pod web</code>",
+      objective: "Delete the web pod",
       xp: 20,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "delete" &&
-        a[1] === "pod" &&
-        a[2] === "my-nginx",
+      check: (c, a) => c === "kubectl" && a[0] === "delete" && a[1] === "pod",
     },
     {
-      title: "Delete from YAML",
-      why: "You can also delete resources by passing their YAML file.",
-      text: "Type <code>kubectl delete -f pod.yaml</code>",
-      objective: "Type kubectl delete -f pod.yaml",
-      xp: 30,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "delete" &&
-        a.includes("-f") &&
-        a.includes("pod.yaml"),
-    },
-    {
-      title: "Apply from YAML",
-      why: "Recreate the pod using the blueprint.",
-      text: "Type <code>kubectl apply -f pod.yaml</code>",
-      objective: "Type kubectl apply -f pod.yaml",
-      xp: 30,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "apply" &&
-        a.includes("-f") &&
-        a.includes("pod.yaml"),
-    },
-    {
-      title: "Force Replace",
-      why: "Nuke and recreate a pod forcefully.",
-      text: "Type <code>kubectl replace --force -f pod.yaml</code>",
-      objective: "Type kubectl replace --force",
-      xp: 35,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "replace" &&
-        a.includes("--force") &&
-        a.includes("-f"),
-    },
-    {
-      title: "Check Resource Usage",
-      why: "See how much RAM your pod is eating.",
-      text: "Type <code>kubectl top pod my-nginx</code>",
-      objective: "Type kubectl top pod my-nginx",
-      xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "top" &&
-        a[1] === "pod" &&
-        a[2] === "my-nginx",
-    },
-    {
-      title: "Clean Up Pods",
-      why: "Delete all pods in the default namespace.",
-      text: "Type <code>kubectl delete pods --all</code>",
-      objective: "Type kubectl delete pods --all",
-      xp: 35,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "delete" &&
-        a[1] === "pods" &&
-        a.includes("--all"),
+      title: "Verify Deletion",
+      why: "Confirm the namespace is totally empty.",
+      text: "Type <code>kubectl get pods</code>",
+      objective: "Check pod list",
+      xp: 15,
+      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "pods",
     },
 
-    // --- PHASE 4: DEPLOYMENTS, SCALING & SERVICES (66-85) ---
+    // --- PHASE 4: DEPLOYMENTS & RECONCILIATION LOOPS (61-80) ---
     {
       title: "Create Deployment",
-      why: "Deployments manage ReplicaSets, ensuring pods automatically restart if they crash.",
-      text: "Type <code>kubectl create deployment web --image=nginx</code>",
-      objective: "Type kubectl create deployment",
+      why: "A <b>Deployment</b> is an autonomous controller. It continuously monitors the cluster via a 'Reconciliation Loop'. If a pod dies, the Deployment controller instantly detects it and spawns a replacement.",
+      text: "Type <code>kubectl create deployment my-app --image=nginx</code>",
+      objective: "Create a deployment",
       xp: 35,
       check: (c, a) =>
         c === "kubectl" &&
         a[0] === "create" &&
         a[1] === "deployment" &&
-        a[2] === "web" &&
-        a.some((x) => x.includes("image=nginx")),
+        a[2] === "my-app",
     },
     {
       title: "Get Deployments",
-      why: "View the deployment controller.",
+      why: "Check the status of the master controller to ensure it successfully scheduled its requested Pod replications.",
       text: "Type <code>kubectl get deployments</code>",
-      objective: "Type kubectl get deployments",
-      xp: 15,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a.some((x) => x.includes("deployment")),
-    },
-    {
-      title: "Get ReplicaSets",
-      why: "View the hidden engine keeping your pods alive.",
-      text: "Type <code>kubectl get rs</code>",
-      objective: "Type kubectl get rs",
+      objective: "Get all deployments",
       xp: 20,
-      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "rs",
+      check: (c, a) =>
+        c === "kubectl" && a[0] === "get" && a[1] === "deployments",
     },
     {
       title: "Scale Deployment",
-      why: "Instantly spin up 5 identical web servers.",
-      text: "Type <code>kubectl scale deployment web --replicas=5</code>",
-      objective: "Type kubectl scale deployment",
-      xp: 45,
+      why: "The <b>scale</b> command modifies the desired state. Instructing the controller to demand 3 replicas forces the underlying ReplicaSet to immediately spin up two new identical Pods.",
+      text: "Type <code>kubectl scale deployment my-app --replicas=3</code>",
+      objective: "Scale the deployment to 3",
+      xp: 35,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "scale" &&
-        a[1] === "deployment" &&
-        a[2] === "web" &&
-        a.some((x) => x.includes("replicas=5")),
+        c === "kubectl" && a[0] === "scale" && a.includes("--replicas=3"),
     },
     {
-      title: "Verify Scaling",
-      why: "See all 5 pods booting up.",
+      title: "Get ReplicaSets",
+      why: "A ReplicaSet is the hidden mechanism beneath a Deployment that mathematically maintains the exact number of desired running instances.",
+      text: "Type <code>kubectl get replicasets</code>",
+      objective: "Type kubectl get replicasets",
+      xp: 20,
+      check: (c, a) =>
+        c === "kubectl" && a[0] === "get" && a[1] === "replicasets",
+    },
+    {
+      title: "Verify Pod Scaling",
+      why: "You should now see three distinct Nginx pods running simultaneously across the architecture.",
       text: "Type <code>kubectl get pods</code>",
-      objective: "Type kubectl get pods",
+      objective: "Check the 3 pods",
       xp: 15,
       check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "pods",
     },
     {
-      title: "Set Image (Update)",
-      why: "Update your deployment to use Apache (httpd) instead of Nginx.",
-      text: "Type <code>kubectl set image deployment/web nginx=httpd</code>",
-      objective: "Type kubectl set image",
-      xp: 45,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "set" &&
-        a[1] === "image" &&
-        a[2] === "deployment/web" &&
-        a.some((x) => x.includes("nginx=httpd")),
+      title: "Simulate Failure",
+      why: "Kubernetes is self-healing. If we violently delete one of the running pods, the Deployment's reconciliation loop will detect the state mismatch (2/3) and automatically create a new pod.",
+      text: 'Type <code>echo "Delete a pod, K8s auto-heals"</code>',
+      objective: "Simulate auto-healing concept",
+      xp: 15,
+      check: (c, a, o, raw) =>
+        raw.includes("echo") && raw.includes("auto-heals"),
+    },
+    {
+      title: "Update Image",
+      why: "To update the app code, we instruct the Deployment to change the underlying container image. This triggers a 'Rolling Update', ensuring zero downtime by carefully swapping old pods for new ones.",
+      text: "Type <code>kubectl set image deployment/my-app nginx=nginx:1.19</code>",
+      objective: "Update deployment image",
+      xp: 40,
+      check: (c, a) => c === "kubectl" && a[0] === "set" && a.includes("image"),
     },
     {
       title: "Rollout Status",
-      why: "Watch the zero-downtime rolling update happen.",
-      text: "Type <code>kubectl rollout status deployment/web</code>",
-      objective: "Type kubectl rollout status",
-      xp: 35,
+      why: "The <b>rollout status</b> command queries the controller's progression queue, verifying that the new pods are fully online and the old pods have been successfully retired.",
+      text: "Type <code>kubectl rollout status deployment/my-app</code>",
+      objective: "Check rollout status",
+      xp: 30,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "rollout" &&
-        a[1] === "status" &&
-        a[2] === "deployment/web",
+        c === "kubectl" && a[0] === "rollout" && a[1] === "status",
     },
     {
       title: "Rollout History",
-      why: "View your deployment revisions.",
-      text: "Type <code>kubectl rollout history deployment/web</code>",
-      objective: "Type kubectl rollout history",
+      why: "Every time you update a Deployment, it saves its previous ReplicaSet blueprint. The <b>history</b> command lists the cryptographic revisions stored in the database.",
+      text: "Type <code>kubectl rollout history deployment/my-app</code>",
+      objective: "Check rollout history",
       xp: 30,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "rollout" &&
-        a[1] === "history" &&
-        a[2] === "deployment/web",
+        c === "kubectl" && a[0] === "rollout" && a[1] === "history",
     },
     {
       title: "Rollout Undo",
-      why: "Oh no! Apache is crashing! Instantly rollback to Nginx.",
-      text: "Type <code>kubectl rollout undo deployment/web</code>",
-      objective: "Type kubectl rollout undo",
-      xp: 50,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "rollout" &&
-        a[1] === "undo" &&
-        a[2] === "deployment/web",
+      why: "If version 1.19 contains a fatal bug, <b>undo</b> instructs the Deployment controller to instantly revert to the previous known-good ReplicaSet, performing an automatic hot-rollback.",
+      text: "Type <code>kubectl rollout undo deployment/my-app</code>",
+      objective: "Undo the rollout",
+      xp: 35,
+      check: (c, a) => c === "kubectl" && a[0] === "rollout" && a[1] === "undo",
     },
     {
-      title: "Autoscale Deploy",
-      why: "Tell K8s to automatically scale between 2 and 10 pods based on 80% CPU usage.",
-      text: "Type <code>kubectl autoscale deployment web --min=2 --max=10 --cpu-percent=80</code>",
-      objective: "Type kubectl autoscale",
-      xp: 50,
+      title: "Create ConfigMap",
+      why: "Hardcoding variables inside containers breaks portability. A <b>ConfigMap</b> stores plain-text variables (like UI colors) centrally in `etcd`, injecting them into pods dynamically at runtime.",
+      text: "Type <code>kubectl create configmap web-config --from-literal=theme=dark</code>",
+      objective: "Create a ConfigMap",
+      xp: 35,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "autoscale" &&
-        a[1] === "deployment" &&
-        a.includes("web") &&
-        a.some((x) => x.includes("cpu-percent")),
+        c === "kubectl" && a[0] === "create" && a[1] === "configmap",
+    },
+    {
+      title: "Create Secret",
+      why: "<b>Secrets</b> are base64-encoded objects designed to hold sensitive data (like database passwords or API keys). Unlike ConfigMaps, they are designed to be heavily encrypted at rest in the cluster.",
+      text: "Type <code>kubectl create secret generic db-pass --from-literal=password=secure123</code>",
+      objective: "Create a Secret",
+      xp: 40,
+      check: (c, a) =>
+        c === "kubectl" && a[0] === "create" && a[1] === "secret",
+    },
+    {
+      title: "Get Secrets",
+      why: "Verify the core control plane securely generated the cryptographic object.",
+      text: "Type <code>kubectl get secrets</code>",
+      objective: "List secrets",
+      xp: 20,
+      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "secrets",
+    },
+    {
+      title: "Autoscale Deployment",
+      why: "The Horizontal Pod Autoscaler (HPA) monitors the metrics-server. If average CPU utilization exceeds 50%, it dynamically scales the cluster up to 10 instances to handle the traffic load.",
+      text: "Type <code>kubectl autoscale deployment my-app --min=3 --max=10 --cpu-percent=50</code>",
+      objective: "Set up autoscaling",
+      xp: 50,
+      check: (c, a) => c === "kubectl" && a[0] === "autoscale",
     },
     {
       title: "Get HPA",
-      why: "View the Horizontal Pod Autoscaler.",
+      why: "Query the status of the Autoscaler logic loop to ensure it is actively receiving CPU telemetry data from the nodes.",
       text: "Type <code>kubectl get hpa</code>",
-      objective: "Type kubectl get hpa",
+      objective: "Get Horizontal Pod Autoscaler status",
       xp: 20,
       check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "hpa",
     },
+
+    // --- PHASE 5: NETWORKING, SERVICES & CLEANUP (81-100) ---
     {
-      title: "Expose Service",
-      why: "Create a LoadBalancer to expose the 5 web pods to the internet.",
-      text: "Type <code>kubectl expose deployment web --type=LoadBalancer --port=80</code>",
-      objective: "Type kubectl expose",
-      xp: 45,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "expose" &&
-        a[1] === "deployment" &&
-        a[2] === "web" &&
-        a.some((x) => x.includes("LoadBalancer")),
+      title: "Expose Deployment",
+      why: "Pods constantly die and change IP addresses. A <b>Service</b> creates a permanent, static internal IP address and DNS name. It acts as an internal Load Balancer, routing traffic mathematically to healthy pods.",
+      text: "Type <code>kubectl expose deployment my-app --port=80 --target-port=80</code>",
+      objective: "Expose deployment via Service",
+      xp: 35,
+      check: (c, a) => c === "kubectl" && a[0] === "expose",
     },
     {
       title: "Get Services",
-      why: "Find the public IP assigned to your LoadBalancer.",
+      why: "View the network map. Your newly created Service has an internal `ClusterIP`. Any pod in the entire cluster can now talk to your Nginx app perfectly by just addressing the word 'my-app'.",
       text: "Type <code>kubectl get svc</code>",
-      objective: "Type kubectl get svc",
+      objective: "List services",
       xp: 20,
       check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "svc",
     },
     {
-      title: "Describe Service",
-      why: "Check the internal routing targets of the service.",
-      text: "Type <code>kubectl describe svc web</code>",
-      objective: "Type kubectl describe svc web",
-      xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "describe" &&
-        a[1] === "svc" &&
-        a[2] === "web",
-    },
-    {
       title: "Get Endpoints",
-      why: "See the exact IP addresses of the 5 pods the service is routing to.",
-      text: "Type <code>kubectl get endpoints web</code>",
-      objective: "Type kubectl get endpoints web",
+      why: "The Service creates an <b>Endpoint</b> object under the hood. It tracks the exact physical IP addresses of all healthy pods currently connected to the load balancing pool.",
+      text: "Type <code>kubectl get endpoints my-app</code>",
+      objective: "Check endpoints",
       xp: 25,
       check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a[1] === "endpoints" &&
-        a[2] === "web",
+        c === "kubectl" && a[0] === "get" && a[1] === "endpoints",
     },
     {
-      title: "Edit Service",
-      why: "Open the service YAML directly in the terminal editor.",
-      text: "Type <code>kubectl edit svc web</code>",
-      objective: "Type kubectl edit svc web",
+      title: "Service Port Forward",
+      why: "Instead of forwarding traffic to a single, fragile Pod, you forward your local port to the robust, permanent Service block, allowing the Load Balancer to route your traffic correctly.",
+      text: "Type <code>kubectl port-forward svc/my-app 8080:80 &</code>",
+      objective: "Port forward to service",
       xp: 35,
       check: (c, a) =>
-        c === "kubectl" && a[0] === "edit" && a[1] === "svc" && a[2] === "web",
-    },
-    {
-      title: "Delete Service",
-      why: "Remove the public internet access point.",
-      text: "Type <code>kubectl delete svc web</code>",
-      objective: "Type kubectl delete svc web",
-      xp: 20,
-      check: (c, a) =>
         c === "kubectl" &&
-        a[0] === "delete" &&
-        a[1] === "svc" &&
-        a[2] === "web",
+        a[0] === "port-forward" &&
+        a.some((x) => x.includes("svc/")),
     },
     {
-      title: "Create Ingress",
-      why: "Ingress is a smarter router that reads URL paths.",
-      text: 'Type <code>kubectl create ingress my-ing --rule="myapp.com/*=web:80"</code>',
-      objective: "Type kubectl create ingress",
-      xp: 40,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "create" &&
-        a[1] === "ingress" &&
-        a[2] === "my-ing",
-    },
-    {
-      title: "Get Ingress",
-      why: "Check your routing rules.",
-      text: "Type <code>kubectl get ingress</code>",
-      objective: "Type kubectl get ingress",
-      xp: 20,
-      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "ingress",
-    },
-    {
-      title: "Delete Deployment",
-      why: "Nuke the deployment and all its replica pods.",
-      text: "Type <code>kubectl delete deployment web</code>",
-      objective: "Type kubectl delete deployment web",
+      title: "Describe Service",
+      why: "Inspect the Load Balancer's deep configurations, verifying the exact label selectors (`app=my-app`) it uses to group the pods.",
+      text: "Type <code>kubectl describe svc my-app</code>",
+      objective: "Describe the service",
       xp: 25,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "delete" &&
-        a.some((x) => x.includes("deployment")) &&
-        a.includes("web"),
+      check: (c, a) => c === "kubectl" && a[0] === "describe" && a[1] === "svc",
     },
-
-    // --- PHASE 5: CONFIGMAPS, SECRETS & ADVANCED OPS (86-100) ---
     {
-      title: "Create ConfigMap",
-      why: "Store non-sensitive config files outside of your containers.",
-      text: "Type <code>kubectl create configmap app-config --from-literal=ENV=prod</code>",
-      objective: "Type kubectl create configmap",
+      title: "Apply YAML Manifest",
+      why: "Imperative commands (typing create, expose) are error-prone. Kubernetes relies heavily on Declarative architecture. <b>apply -f</b> submits a complete YAML blueprint to the API, establishing the total state instantly.",
+      text: "Type <code>kubectl apply -f manifest.yaml</code>",
+      objective: "Apply a yaml manifest",
       xp: 40,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "create" &&
-        a[1] === "configmap" &&
-        a.some((x) => x.includes("ENV=prod")),
+      check: (c, a) => c === "kubectl" && a[0] === "apply" && a.includes("-f"),
     },
     {
-      title: "Get ConfigMaps",
-      why: "Verify the map exists.",
-      text: "Type <code>kubectl get cm</code>",
-      objective: "Type kubectl get cm",
-      xp: 15,
-      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "cm",
+      title: "Delete from YAML",
+      why: "The architecture symmetric tear-down. By passing the file back to `delete`, the API parses the blueprint and uninstalls all referenced components seamlessly.",
+      text: "Type <code>kubectl delete -f manifest.yaml</code>",
+      objective: "Delete from yaml manifest",
+      xp: 30,
+      check: (c, a) => c === "kubectl" && a[0] === "delete" && a.includes("-f"),
     },
     {
-      title: "Describe ConfigMap",
-      why: "Read the literal values stored inside.",
-      text: "Type <code>kubectl describe cm app-config</code>",
-      objective: "Type kubectl describe cm",
-      xp: 20,
-      check: (c, a) => c === "kubectl" && a[0] === "describe" && a[1] === "cm",
-    },
-    {
-      title: "Create Secret",
-      why: "Securely store database passwords in K8s.",
-      text: "Type <code>kubectl create secret generic db-pass --from-literal=password=supersecret</code>",
-      objective: "Type kubectl create secret",
-      xp: 45,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "create" &&
-        a[1] === "secret" &&
-        a.some((x) => x.includes("password=")),
-    },
-    {
-      title: "Get Secrets",
-      why: "List encrypted items.",
-      text: "Type <code>kubectl get secrets</code>",
-      objective: "Type kubectl get secrets",
-      xp: 15,
-      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "secrets",
-    },
-    {
-      title: "Describe Secret",
-      why: "K8s will hide the password from the describe output.",
-      text: "Type <code>kubectl describe secret db-pass</code>",
-      objective: "Type kubectl describe secret db-pass",
-      xp: 20,
-      check: (c, a) =>
-        c === "kubectl" && a[0] === "describe" && a[1] === "secret",
-    },
-    {
-      title: "Extract Secret",
-      why: "You must extract the YAML and decode the Base64 to see the real password.",
-      text: "Type <code>kubectl get secret db-pass -o jsonpath='{.data.password}' | base64 --decode</code>",
-      objective: "Extract and decode secret",
-      xp: 60,
-      check: (c, a, o, raw) =>
-        raw.includes("kubectl") &&
-        raw.includes("jsonpath") &&
-        raw.includes("base64") &&
-        raw.includes("--decode"),
-    },
-    {
-      title: "DaemonSets",
-      why: "DaemonSets ensure exactly one pod runs on EVERY node (used for loggers/monitors).",
-      text: "Type <code>kubectl get daemonsets</code>",
-      objective: "Type kubectl get daemonsets",
-      xp: 20,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a.some((x) => x.includes("daemonset")),
-    },
-    {
-      title: "StatefulSets",
-      why: "StatefulSets are used for Databases where data order and identity matters.",
-      text: "Type <code>kubectl get statefulsets</code>",
-      objective: "Type kubectl get statefulsets",
-      xp: 20,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "get" &&
-        a.some((x) => x.includes("statefulset")),
-    },
-    {
-      title: "Persistent Volumes",
-      why: "List massive storage drives attached to the cluster.",
-      text: "Type <code>kubectl get pv</code>",
-      objective: "Type kubectl get pv",
-      xp: 20,
-      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "pv",
-    },
-    {
-      title: "Volume Claims",
-      why: "Check which pods are currently claiming storage.",
-      text: "Type <code>kubectl get pvc</code>",
-      objective: "Type kubectl get pvc",
-      xp: 20,
-      check: (c, a) => c === "kubectl" && a[0] === "get" && a[1] === "pvc",
-    },
-    {
-      title: "Cluster Roles",
-      why: "Check RBAC (Role-Based Access Control) permissions.",
-      text: "Type <code>kubectl get clusterroles</code>",
-      objective: "Type kubectl get clusterroles",
-      xp: 25,
-      check: (c, a) =>
-        c === "kubectl" && a[0] === "get" && a[1] === "clusterroles",
-    },
-    {
-      title: "Auth Can-I",
-      why: "Ask K8s if your current user has permission to delete pods.",
-      text: "Type <code>kubectl auth can-i delete pods</code>",
-      objective: "Type kubectl auth can-i",
+      title: "Diff YAML",
+      why: "The `diff` plugin mathematically calculates what physical changes would occur if you applied an updated YAML file against the current running architecture.",
+      text: "Type <code>kubectl diff -f manifest.yaml</code>",
+      objective: "Diff a yaml manifest",
       xp: 35,
-      check: (c, a) => c === "kubectl" && a[0] === "auth" && a[1] === "can-i",
-    },
-    {
-      title: "Delete All ConfigMaps",
-      why: "Clean up your maps.",
-      text: "Type <code>kubectl delete cm --all</code>",
-      objective: "Type kubectl delete cm --all",
-      xp: 20,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "delete" &&
-        a[1] === "cm" &&
-        a.includes("--all"),
-    },
-    {
-      title: "Delete All Secrets",
-      why: "Clean up your passwords.",
-      text: "Type <code>kubectl delete secrets --all</code>",
-      objective: "Type kubectl delete secrets --all",
-      xp: 20,
-      check: (c, a) =>
-        c === "kubectl" &&
-        a[0] === "delete" &&
-        a[1] === "secrets" &&
-        a.includes("--all"),
+      check: (c, a) => c === "kubectl" && a[0] === "diff" && a.includes("-f"),
     },
     {
       title: "Kustomize Build",
-      why: "Kustomize is a template engine built into kubectl. Render a directory.",
+      why: "<b>Kustomize</b> is a native overlay engine. It takes base YAML templates and merges environment-specific overlays (like adding 'prod' labels) without altering the original raw files.",
       text: "Type <code>kubectl kustomize ./</code>",
-      objective: "Type kubectl kustomize ./",
-      xp: 40,
+      objective: "Run kustomize",
+      xp: 35,
       check: (c, a) => c === "kubectl" && a[0] === "kustomize" && a[1] === "./",
     },
     {
       title: "Cluster Proxy",
-      why: "Open a direct API tunnel to the Kubernetes control plane.",
+      why: "<b>proxy</b> executes a local interceptor server, opening an unauthenticated REST API tunnel directly to the `kube-apiserver`, allowing custom dashboard UIs to read control plane data.",
       text: "Type <code>kubectl proxy --port=8080 &</code>",
       objective: "Type kubectl proxy",
       xp: 45,
@@ -1069,7 +720,7 @@ const module18_cloud = {
     },
     {
       title: "Nuke All Deployments",
-      why: "Destroy all remaining deployments.",
+      why: "The engagement is finished. Command the control plane to permanently terminate every single deployment and replica scaling loop globally.",
       text: "Type <code>kubectl delete deployments --all</code>",
       objective: "Type kubectl delete deployments --all",
       xp: 30,
@@ -1081,7 +732,7 @@ const module18_cloud = {
     },
     {
       title: "Nuke All Services",
-      why: "Destroy all remaining network services.",
+      why: "Command the API to strip the `kube-proxy` iptables routing, permanently dismantling the internal load balancing grid and terminating all access points.",
       text: "Type <code>kubectl delete svc --all</code>",
       objective: "Type kubectl delete svc --all",
       xp: 30,
@@ -1093,12 +744,12 @@ const module18_cloud = {
     },
     {
       title: "Cloud Architect",
-      why: "Module 18 Complete. You control the cloud infrastructure.",
-      text: 'Type <code>echo "Kubernetes God Mode Unlocked"</code>',
-      objective: "Type echo",
-      xp: 200,
+      why: "You understand Immutable Infrastructure, State Files, Load Balancing Services, Reconciliation Loops, and Declarative Graphing. You are a Senior DevOps Engineer.",
+      text: 'Type <code>echo "Infrastructure Conquered"</code>',
+      objective: "Echo final message",
+      xp: 100,
       check: (c, a, o, raw) =>
-        raw.includes("echo") && raw.includes("Kubernetes"),
+        raw.includes("echo") && raw.includes("Infrastructure"),
     },
   ],
 };

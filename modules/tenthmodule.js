@@ -7,7 +7,7 @@ const module10_sysadmin = {
     // --- PHASE 1: USER & GROUP MANAGEMENT (1-15) ---
     {
       title: "Create New User",
-      why: "Add a new account to the system.",
+      why: "The Linux Kernel does not understand usernames, only User IDs (UIDs). The <b>useradd</b> command allocates a new UID. The <b>-m</b> flag tells the system to automatically copy the `/etc/skel` skeleton template to build the user's new home directory.",
       text: "Type <code>useradd -m developer</code>",
       objective: "Use useradd -m developer",
       xp: 15,
@@ -16,7 +16,7 @@ const module10_sysadmin = {
     },
     {
       title: "Set Password",
-      why: "Assign a password to the new user.",
+      why: "Accounts are locked by default until a password is set. The <b>passwd</b> command prompts for a string, hashes it using SHA-512, and injects the cryptographic hash directly into the highly restricted `/etc/shadow` file.",
       text: "Type <code>passwd developer</code>",
       objective: "Type passwd developer",
       xp: 15,
@@ -24,7 +24,7 @@ const module10_sysadmin = {
     },
     {
       title: "Verify User Creation",
-      why: "Check the passwd file to ensure the user exists.",
+      why: "System Administrators always verify structural changes. Grepping the <b>/etc/passwd</b> file confirms the new user's UID, default group, and home directory path were written to the system database.",
       text: 'Type <code>grep "developer" /etc/passwd</code>',
       objective: "Grep developer from /etc/passwd",
       xp: 20,
@@ -33,7 +33,7 @@ const module10_sysadmin = {
     },
     {
       title: "Create User Group",
-      why: "Create a group to manage multiple users.",
+      why: "Role-Based Access Control (RBAC) relies on Groups. <b>groupadd</b> generates a new Group ID (GID) in the `/etc/group` file, allowing you to grant permissions to a department rather than individual users.",
       text: "Type <code>groupadd devteam</code>",
       objective: "Type groupadd devteam",
       xp: 15,
@@ -41,7 +41,7 @@ const module10_sysadmin = {
     },
     {
       title: "Verify Group",
-      why: "Check the system group file.",
+      why: "Verify the kernel successfully allocated the new GID inside the global group registry.",
       text: 'Type <code>grep "devteam" /etc/group</code>',
       objective: "Grep devteam from /etc/group",
       xp: 20,
@@ -50,7 +50,7 @@ const module10_sysadmin = {
     },
     {
       title: "Add User to Group",
-      why: "Append the user to the supplementary group (-aG).",
+      why: "To add a user to a supplementary group, you must use <b>-aG</b> (Append Group). If you forget the '-a', the kernel will wipe the user from all other groups, instantly breaking their access.",
       text: "Type <code>usermod -aG devteam developer</code>",
       objective: "Use usermod -aG",
       xp: 25,
@@ -62,7 +62,7 @@ const module10_sysadmin = {
     },
     {
       title: "Change Primary Group",
-      why: "Change a user's default login group (-g).",
+      why: "Every user has a Primary Group, which dictates the default ownership of any new file they create. The lowercase <b>-g</b> flag forces a change to this primary namespace.",
       text: "Type <code>usermod -g devteam developer</code>",
       objective: "Use usermod -g",
       xp: 25,
@@ -71,7 +71,7 @@ const module10_sysadmin = {
     },
     {
       title: "Lock User Account",
-      why: "Disable an account without deleting it (-L).",
+      why: "If an employee leaves, deleting their account might orphan critical files. The <b>-L</b> (Lock) flag disables login by prepending a single exclamation mark (!) to their hash in `/etc/shadow`, rendering the password mathematically unmatchable.",
       text: "Type <code>usermod -L developer</code>",
       objective: "Use usermod -L",
       xp: 20,
@@ -80,7 +80,7 @@ const module10_sysadmin = {
     },
     {
       title: "Unlock User Account",
-      why: "Restore access to the locked account (-U).",
+      why: "The <b>-U</b> (Unlock) flag strips the exclamation mark from the shadow file, instantly restoring the user's cryptographic access to the server.",
       text: "Type <code>usermod -U developer</code>",
       objective: "Use usermod -U",
       xp: 20,
@@ -89,7 +89,7 @@ const module10_sysadmin = {
     },
     {
       title: "Change Shell",
-      why: "Change the user's default login shell to /bin/sh.",
+      why: "By default, users log into the Bourne Again Shell (/bin/bash). If you want to restrict an account or give them a different terminal environment (like zsh or sh), use the <b>-s</b> flag to overwrite their profile config.",
       text: "Type <code>usermod -s /bin/sh developer</code>",
       objective: "Use usermod -s",
       xp: 25,
@@ -98,7 +98,7 @@ const module10_sysadmin = {
     },
     {
       title: "Change Group Ownership",
-      why: "Change the group ownership of a file to devteam.",
+      why: "The <b>chgrp</b> command edits the raw inode metadata of a file on the hard drive, transferring its secondary access rights exclusively to members of the specified group.",
       text: "Type <code>chgrp devteam notes.txt</code>",
       objective: "Type chgrp devteam notes.txt",
       xp: 20,
@@ -107,7 +107,7 @@ const module10_sysadmin = {
     },
     {
       title: "Verify File Group",
-      why: "Check that the file's group changed.",
+      why: "Run a long-format list to physically confirm that 'devteam' is now displayed in the group-owner column of the file.",
       text: "Type <code>ls -l notes.txt</code>",
       objective: "ls -l notes.txt",
       xp: 15,
@@ -116,7 +116,7 @@ const module10_sysadmin = {
     },
     {
       title: "Delete User",
-      why: "Remove the user from the system.",
+      why: "The <b>userdel</b> command unlinks the UID from the system databases. By default, it acts as a soft-delete—it leaves the user's `/home` folder on the disk to preserve their files.",
       text: "Type <code>userdel developer</code>",
       objective: "Type userdel developer",
       xp: 15,
@@ -124,7 +124,7 @@ const module10_sysadmin = {
     },
     {
       title: "Delete User & Home",
-      why: "Remove the user AND their home directory (-r).",
+      why: "To permanently erase a user and violently scrub their entire home partition data off the hard drive, you must use the <b>-r</b> (Remove) flag.",
       text: "Type <code>userdel -r developer</code>",
       objective: "Use userdel -r",
       xp: 25,
@@ -133,7 +133,7 @@ const module10_sysadmin = {
     },
     {
       title: "Delete Group",
-      why: "Remove the group from the system.",
+      why: "The <b>groupdel</b> command purges the specified GID from `/etc/group`. You cannot delete a group if it is currently assigned as the Primary Group for any active user.",
       text: "Type <code>groupdel devteam</code>",
       objective: "Type groupdel devteam",
       xp: 15,
@@ -143,7 +143,7 @@ const module10_sysadmin = {
     // --- PHASE 2: PACKAGE MANAGEMENT (APT & DPKG) (16-30) ---
     {
       title: "Update Package Lists",
-      why: "Fetch the latest version info from repositories.",
+      why: "Linux does not blindly download software. <b>apt update</b> queries remote Debian mirrors, downloads their latest catalog index, and updates your local cache so your server knows what versions exist.",
       text: "Type <code>apt update</code>",
       objective: "Type apt update",
       xp: 15,
@@ -151,7 +151,7 @@ const module10_sysadmin = {
     },
     {
       title: "Upgrade Packages",
-      why: "Install available upgrades for all packages.",
+      why: "Once the cache is updated, <b>apt upgrade</b> compares the versions installed on your hard drive against the new catalog, automatically downloading and compiling patches for out-of-date software.",
       text: "Type <code>apt upgrade -y</code>",
       objective: "Type apt upgrade -y",
       xp: 20,
@@ -159,7 +159,7 @@ const module10_sysadmin = {
     },
     {
       title: "Search for Package",
-      why: "Find a package in the repository.",
+      why: "You don't need a web browser to find software. The <b>search</b> parameter queries your local APT cache to find binaries matching your keyword.",
       text: "Type <code>apt search htop</code>",
       objective: "Type apt search htop",
       xp: 15,
@@ -167,7 +167,7 @@ const module10_sysadmin = {
     },
     {
       title: "Show Package Info",
-      why: "View details about a specific package.",
+      why: "Before installing unknown software, use the <b>show</b> parameter to read the package metadata, checking the developer details, file size, and exactly what dependencies it requires.",
       text: "Type <code>apt show htop</code>",
       objective: "Type apt show htop",
       xp: 15,
@@ -175,7 +175,7 @@ const module10_sysadmin = {
     },
     {
       title: "Install Package",
-      why: "Install the package to your system.",
+      why: "The <b>install</b> command resolves dependencies, downloads the compressed binaries, extracts them, and registers them in the system path. The <b>-y</b> flag automatically answers 'Yes' to installation prompts.",
       text: "Type <code>apt install htop -y</code>",
       objective: "Type apt install htop -y",
       xp: 20,
@@ -184,7 +184,7 @@ const module10_sysadmin = {
     },
     {
       title: "Verify Installation",
-      why: "Check where the executable was installed.",
+      why: "The <b>which</b> command searches the $PATH environment variables to show you exactly which folder the new binary was placed in (usually `/usr/bin`).",
       text: "Type <code>which htop</code>",
       objective: "Type which htop",
       xp: 15,
@@ -192,7 +192,7 @@ const module10_sysadmin = {
     },
     {
       title: "Remove Package",
-      why: "Uninstall the software.",
+      why: "The <b>remove</b> parameter deletes the core application binaries, but intentionally leaves the software's configuration files on your system in case you decide to reinstall it later.",
       text: "Type <code>apt remove htop -y</code>",
       objective: "Type apt remove htop -y",
       xp: 20,
@@ -201,7 +201,7 @@ const module10_sysadmin = {
     },
     {
       title: "Purge Package",
-      why: "Remove software AND its configuration files.",
+      why: "If you want a completely clean slate, <b>purge</b> instructs the package manager to aggressively track down and destroy the binaries, the configuration files, and any associated system data.",
       text: "Type <code>apt purge htop -y</code>",
       objective: "Type apt purge htop -y",
       xp: 25,
@@ -209,7 +209,7 @@ const module10_sysadmin = {
     },
     {
       title: "Auto-Remove",
-      why: "Clean up orphaned dependencies.",
+      why: "When you install software, APT installs 'dependencies' (extra libraries). When you remove software, those libraries are orphaned. <b>autoremove</b> cleans up these useless files to save hard drive space.",
       text: "Type <code>apt autoremove -y</code>",
       objective: "Type apt autoremove -y",
       xp: 20,
@@ -217,7 +217,7 @@ const module10_sysadmin = {
     },
     {
       title: "List Installed",
-      why: "Show all packages installed on the system.",
+      why: "During a system audit, a SysAdmin will output a master list of all explicitly installed packages to ensure no unauthorized software was deployed to the server.",
       text: "Type <code>apt list --installed</code>",
       objective: "Type apt list --installed",
       xp: 20,
@@ -226,7 +226,7 @@ const module10_sysadmin = {
     },
     {
       title: "Download Debian Package",
-      why: "Use wget to download a manual .deb package.",
+      why: "Sometimes proprietary software isn't in the official APT repositories. Use `wget` to manually download the pre-compiled `.deb` binary archive directly from the vendor.",
       text: "Type <code>wget http://repo.com/tool.deb</code>",
       objective: "Use wget to download tool.deb",
       xp: 20,
@@ -234,7 +234,7 @@ const module10_sysadmin = {
     },
     {
       title: "Install Manual Package",
-      why: "Use dpkg to install downloaded .deb files directly.",
+      why: "<b>dpkg</b> (Debian Package Manager) is the low-level backend engine beneath APT. It installs local `.deb` files directly, without querying the internet or automatically resolving dependencies.",
       text: "Type <code>dpkg -i tool.deb</code>",
       objective: "Use dpkg -i tool.deb",
       xp: 25,
@@ -243,7 +243,7 @@ const module10_sysadmin = {
     },
     {
       title: "List Package Contents",
-      why: "See exactly what files the .deb package installed.",
+      why: "When you install a `.deb` file, where does it put its files? The <b>-L</b> flag forces `dpkg` to list the exact directory paths of every single file it injected into the system.",
       text: "Type <code>dpkg -L tool</code>",
       objective: "Use dpkg -L tool",
       xp: 20,
@@ -251,7 +251,7 @@ const module10_sysadmin = {
     },
     {
       title: "Find Package Owner",
-      why: "Find out which package installed a specific file.",
+      why: "If you find a strange binary in `/usr/bin/tool`, you can use the <b>-S</b> (Search) flag to ask `dpkg` which specific software installation package is responsible for putting it there.",
       text: "Type <code>dpkg -S /usr/bin/tool</code>",
       objective: "Use dpkg -S",
       xp: 25,
@@ -260,7 +260,7 @@ const module10_sysadmin = {
     },
     {
       title: "Remove Manual Package",
-      why: "Uninstall the .deb package.",
+      why: "Use `dpkg` to explicitly tear down the proprietary software via the <b>-r</b> (Remove) flag.",
       text: "Type <code>dpkg -r tool</code>",
       objective: "Use dpkg -r tool",
       xp: 20,
@@ -270,7 +270,7 @@ const module10_sysadmin = {
     // --- PHASE 3: PROCESS & JOB CONTROL (31-45) ---
     {
       title: "System Monitor",
-      why: "Launch the interactive process monitor.",
+      why: "The <b>top</b> command interfaces with the `/proc` filesystem to continuously poll CPU execution threads, sorting the process table dynamically based on hardware resource consumption.",
       text: "Type <code>top</code>",
       objective: "Type top",
       xp: 10,
@@ -278,7 +278,7 @@ const module10_sysadmin = {
     },
     {
       title: "Enhanced Monitor",
-      why: "Launch the colorful, human-readable process monitor.",
+      why: "<b>htop</b> builds upon `top` using the ncurses library to provide a fully interactive, visual UI that maps threads across multi-core processors.",
       text: "Type <code>htop</code>",
       objective: "Type htop",
       xp: 10,
@@ -286,7 +286,7 @@ const module10_sysadmin = {
     },
     {
       title: "Background a Process",
-      why: "The & symbol starts a command invisibly in the background.",
+      why: "Appending an ampersand (<b>&</b>) to a command forks the process. It detaches the task from your terminal's Standard Input (stdin), allowing it to run asynchronously while giving you your prompt back.",
       text: "Type <code>sleep 300 &</code>",
       objective: "Run sleep 300 in the background",
       xp: 20,
@@ -294,7 +294,7 @@ const module10_sysadmin = {
     },
     {
       title: "List Background Jobs",
-      why: "View processes running in the background of your current terminal.",
+      why: "The <b>jobs</b> command asks your current shell (Bash) to list the internal table of tasks you have spawned and detached within this specific session.",
       text: "Type <code>jobs</code>",
       objective: "Type jobs",
       xp: 15,
@@ -302,7 +302,7 @@ const module10_sysadmin = {
     },
     {
       title: "Foreground a Job",
-      why: "Bring the first background job back to the interactive terminal.",
+      why: "The <b>fg</b> command takes a detached job from the background and re-attaches it to your terminal's Standard Input, allowing you to interact with it again.",
       text: "Type <code>fg %1</code>",
       objective: "Type fg %1",
       xp: 20,
@@ -310,7 +310,7 @@ const module10_sysadmin = {
     },
     {
       title: "Suspend Process",
-      why: "Usually done with Ctrl+Z, this pauses the foreground job. Simulate it.",
+      why: "Pressing Ctrl+Z sends a SIGTSTP signal to the CPU. We simulate this by sending <b>SIGSTOP</b>, which instructs the kernel to instantly freeze the execution thread without destroying its RAM allocation.",
       text: "Type <code>kill -STOP %1</code>",
       objective: "Suspend job 1",
       xp: 25,
@@ -318,7 +318,7 @@ const module10_sysadmin = {
     },
     {
       title: "Resume in Background",
-      why: "Restart a suspended job, but keep it in the background.",
+      why: "The <b>bg</b> command sends a SIGCONT (Signal Continue) to a paused thread, instructing the kernel to resume processing the task silently in the background.",
       text: "Type <code>bg %1</code>",
       objective: "Type bg %1",
       xp: 20,
@@ -326,7 +326,7 @@ const module10_sysadmin = {
     },
     {
       title: "Kill Job",
-      why: "Terminate the background job directly.",
+      why: "Send a SIGTERM (Signal 15) to your shell's job index, requesting the process to politely save its state and terminate.",
       text: "Type <code>kill %1</code>",
       objective: "Type kill %1",
       xp: 15,
@@ -334,7 +334,7 @@ const module10_sysadmin = {
     },
     {
       title: "Start Immune Process",
-      why: "nohup keeps a process running even if you close the terminal.",
+      why: "When you close a terminal, it sends a SIGHUP (Hangup) signal, terminating all child processes. <b>nohup</b> mathematically isolates the command, granting it immunity to the hangup signal so it survives logouts.",
       text: "Type <code>nohup sleep 600 &</code>",
       objective: "Use nohup with sleep and &",
       xp: 30,
@@ -342,7 +342,7 @@ const module10_sysadmin = {
     },
     {
       title: "Check Nohup Output",
-      why: "nohup automatically redirects output to nohup.out.",
+      why: "Because an immune process is detached from the terminal screen, `nohup` automatically redirects all output (stdout and stderr) to a hardcoded `nohup.out` file.",
       text: "Type <code>cat nohup.out</code>",
       objective: "Read nohup.out",
       xp: 10,
@@ -350,7 +350,7 @@ const module10_sysadmin = {
     },
     {
       title: "Find Process by Name",
-      why: "Get the PID of a specific running command.",
+      why: "<b>pgrep</b> parses the `/proc` directory specifically to match a program's string name to its kernel-assigned Process ID (PID).",
       text: "Type <code>pgrep sleep</code>",
       objective: "Type pgrep sleep",
       xp: 20,
@@ -358,7 +358,7 @@ const module10_sysadmin = {
     },
     {
       title: "Kill All by Name",
-      why: "Kill every instance of a specific program.",
+      why: "If a web server spawns 50 threads, killing them individually is impossible. <b>killall</b> sends a termination signal across the entire namespace block matching the target name.",
       text: "Type <code>killall sleep</code>",
       objective: "Type killall sleep",
       xp: 25,
@@ -366,7 +366,7 @@ const module10_sysadmin = {
     },
     {
       title: "Verify Killall",
-      why: "Ensure no sleep processes remain.",
+      why: "Query the process table to verify the kernel successfully executed the mass termination.",
       text: "Type <code>pgrep sleep</code>",
       objective: "Type pgrep sleep",
       xp: 15,
@@ -374,7 +374,7 @@ const module10_sysadmin = {
     },
     {
       title: "Process Tree",
-      why: "View processes in a hierarchical tree layout.",
+      why: "<b>pstree</b> visually maps the parent-child inheritance of running tasks. If process A spawns process B, you can see the exact lineage, which is vital for hunting malware.",
       text: "Type <code>pstree</code>",
       objective: "Type pstree",
       xp: 15,
@@ -382,7 +382,7 @@ const module10_sysadmin = {
     },
     {
       title: "Watch Command",
-      why: "Run a command every 2 seconds and watch the output change.",
+      why: "The <b>watch</b> utility hijacks the terminal buffer, automatically re-executing a command every 2 seconds and overwriting the screen. SysAdmins use this to monitor live disk usage or active network drops.",
       text: "Type <code>watch df -h</code>",
       objective: "Type watch df -h",
       xp: 25,
@@ -392,7 +392,7 @@ const module10_sysadmin = {
     // --- PHASE 4: ARCHIVING & SECURE TRANSFER (46-55) ---
     {
       title: "Compress File",
-      why: "Compress a file using the standard gzip format.",
+      why: "<b>gzip</b> utilizes the Lempel-Ziv coding algorithm to mathematically shrink repetitive data patterns within a file, drastically reducing its storage footprint.",
       text: "Type <code>gzip notes.txt</code>",
       objective: "Type gzip notes.txt",
       xp: 15,
@@ -400,7 +400,7 @@ const module10_sysadmin = {
     },
     {
       title: "Verify Compression",
-      why: "Notice the file was renamed to .gz.",
+      why: "Notice the kernel alters the file string, replacing the original file with a single binary `.gz` payload.",
       text: "Type <code>ls -l notes.txt.gz</code>",
       objective: "List notes.txt.gz",
       xp: 10,
@@ -408,7 +408,7 @@ const module10_sysadmin = {
     },
     {
       title: "Read Compressed",
-      why: "Read text directly out of a compressed file without unzipping it.",
+      why: "<b>zcat</b> allows you to stream the contents of a compressed archive directly to Standard Output without needing to decompress the data onto the hard drive first.",
       text: "Type <code>zcat notes.txt.gz</code>",
       objective: "Type zcat notes.txt.gz",
       xp: 20,
@@ -416,7 +416,7 @@ const module10_sysadmin = {
     },
     {
       title: "Decompress File",
-      why: "Unzip the file back to normal.",
+      why: "<b>gunzip</b> reverses the compression algorithm, extracting the raw plaintext data block and removing the `.gz` extension.",
       text: "Type <code>gunzip notes.txt.gz</code>",
       objective: "Type gunzip notes.txt.gz",
       xp: 15,
@@ -424,7 +424,7 @@ const module10_sysadmin = {
     },
     {
       title: "Extract Tarball",
-      why: "Extract a downloaded .tar.gz archive.",
+      why: "Linux uses <b>tar</b> (Tape Archive) to stitch multiple files together into a single block, and <b>gzip</b> to shrink that block. The <b>-xzvf</b> flags instruct it to eXtract, unZip, Verbose stream, and map the File.",
       text: "Type <code>tar -xzvf archive.tar.gz</code>",
       objective: "Use tar -xzvf",
       xp: 25,
@@ -433,7 +433,7 @@ const module10_sysadmin = {
     },
     {
       title: "List Tarball Contents",
-      why: "See what is inside an archive without extracting it (-t).",
+      why: "Before extracting an untrusted payload from the internet, the <b>-t</b> flag safely parses the archive headers, allowing you to see what files are inside without writing them to disk.",
       text: "Type <code>tar -tzvf archive.tar.gz</code>",
       objective: "Use tar -tzvf",
       xp: 25,
@@ -442,7 +442,7 @@ const module10_sysadmin = {
     },
     {
       title: "Secure Copy Local to Remote",
-      why: "Upload a file over an encrypted SSH connection.",
+      why: "<b>scp</b> (Secure Copy) hijacks the SSH protocol on port 22, creating a cryptographic tunnel. It encrypts the file byte-by-byte before transferring it, guaranteeing safety from network sniffers.",
       text: "Type <code>scp notes.txt root@10.0.0.99:/root/</code>",
       objective: "Use scp to upload",
       xp: 35,
@@ -451,7 +451,7 @@ const module10_sysadmin = {
     },
     {
       title: "Secure Copy Remote to Local",
-      why: "Download a file over an encrypted SSH connection.",
+      why: "Reversing the SCP syntax securely downloads a file from the server. The `./` argument tells the protocol to drop the payload exactly into your current working directory.",
       text: "Type <code>scp root@10.0.0.99:/var/log/syslog ./</code>",
       objective: "Use scp to download",
       xp: 35,
@@ -460,7 +460,7 @@ const module10_sysadmin = {
     },
     {
       title: "Web Get",
-      why: "Download a file from the internet.",
+      why: "<b>wget</b> initiates an independent HTTP GET request stream. It runs perfectly in the background and gracefully handles broken downloads without needing an interactive browser shell.",
       text: "Type <code>wget http://linux.org/kernel.zip</code>",
       objective: "Type wget http://linux.org/kernel.zip",
       xp: 15,
@@ -468,7 +468,7 @@ const module10_sysadmin = {
     },
     {
       title: "Unzip Archive",
-      why: "Extract standard zip files.",
+      why: "While tarballs are native to Linux, `.zip` files are native to Windows. The <b>unzip</b> utility bridges this gap, extracting the compressed blocks using the standard Deflate algorithm.",
       text: "Type <code>unzip kernel.zip</code>",
       objective: "Type unzip kernel.zip",
       xp: 15,
@@ -478,7 +478,7 @@ const module10_sysadmin = {
     // --- PHASE 5: HARDWARE & STORAGE MANAGEMENT (56-65) ---
     {
       title: "List Block Devices",
-      why: "See all connected hard drives and partitions.",
+      why: "<b>lsblk</b> queries the `sysfs` filesystem to map physical storage hardware. It shows you the raw drives (like `/dev/sda` or `nvme`) and how they are sliced into usable partitions.",
       text: "Type <code>lsblk</code>",
       objective: "Type lsblk",
       xp: 15,
@@ -486,7 +486,7 @@ const module10_sysadmin = {
     },
     {
       title: "Partition Table",
-      why: "View detailed partition layouts (Requires sudo).",
+      why: "<b>fdisk -l</b> reads the Master Boot Record (MBR) or GUID Partition Table (GPT) directly off the raw metal of the drive, exposing the exact sector alignment of your storage.",
       text: "Type <code>fdisk -l</code>",
       objective: "Type fdisk -l",
       xp: 20,
@@ -494,7 +494,7 @@ const module10_sysadmin = {
     },
     {
       title: "Create Mount Point",
-      why: "Create an empty folder to attach a drive to.",
+      why: "In Linux, hard drives don't get 'C:' or 'D:' letters. To access a drive, you must create a standard, empty directory node somewhere in the filesystem to act as the physical connection bridge.",
       text: "Type <code>mkdir /mnt/usbdrive</code>",
       objective: "mkdir /mnt/usbdrive",
       xp: 15,
@@ -502,7 +502,7 @@ const module10_sysadmin = {
     },
     {
       title: "Mount Drive",
-      why: "Attach the /dev/sdb1 partition to your folder.",
+      why: "The <b>mount</b> command instructs the kernel to take the physical block device (`/dev/sdb1`) and fuse its filesystem tree directly into your empty `/mnt/usbdrive` directory node.",
       text: "Type <code>mount /dev/sdb1 /mnt/usbdrive</code>",
       objective: "Mount /dev/sdb1 to /mnt/usbdrive",
       xp: 30,
@@ -511,7 +511,7 @@ const module10_sysadmin = {
     },
     {
       title: "Verify Mount",
-      why: "Check if the drive shows up in disk free stats.",
+      why: "Executing `df -h` confirms that the kernel successfully recognized the filesystem geometry and has allocated the block storage to the system's active mount matrix.",
       text: "Type <code>df -h</code>",
       objective: "Type df -h",
       xp: 10,
@@ -519,7 +519,7 @@ const module10_sysadmin = {
     },
     {
       title: "List Mount Contents",
-      why: "Read the files on the USB drive.",
+      why: "Because the hardware is now mapped to a software directory, standard commands like `ls` seamlessly read the raw binary data blocks off the external hardware.",
       text: "Type <code>ls /mnt/usbdrive</code>",
       objective: "ls /mnt/usbdrive",
       xp: 15,
@@ -527,7 +527,7 @@ const module10_sysadmin = {
     },
     {
       title: "Unmount Drive",
-      why: "Safely detach the drive before removing it.",
+      why: "<b>umount</b> is critical. Linux caches file changes in RAM to speed up operations. Unmounting forces the kernel to flush all pending writes to the physical disk before severing the software bridge.",
       text: "Type <code>umount /mnt/usbdrive</code>",
       objective: "Type umount /mnt/usbdrive",
       xp: 25,
@@ -535,7 +535,7 @@ const module10_sysadmin = {
     },
     {
       title: "List CPU Hardware",
-      why: "View processor architecture and cores.",
+      why: "<b>lscpu</b> aggregates data from the DMI table and `/proc/cpuinfo`. SysAdmins use this to verify virtualization flags, L3 cache limits, and hyper-threading core layouts before deploying Docker clusters.",
       text: "Type <code>lscpu</code>",
       objective: "Type lscpu",
       xp: 15,
@@ -543,7 +543,7 @@ const module10_sysadmin = {
     },
     {
       title: "List USB Devices",
-      why: "View connected hardware peripherals.",
+      why: "<b>lsusb</b> interrogates the motherboard's Universal Serial Bus controllers, identifying the exact vendor and product hexadecimal IDs of every plugged-in peripheral.",
       text: "Type <code>lsusb</code>",
       objective: "Type lsusb",
       xp: 15,
@@ -551,7 +551,7 @@ const module10_sysadmin = {
     },
     {
       title: "List All Hardware",
-      why: "View a complete, detailed hardware profile.",
+      why: "<b>lshw</b> performs a comprehensive diagnostic sweep, extracting the MAC addresses of network cards, RAM DIMM clock speeds, and the PCI-e bus mapping for the entire motherboard.",
       text: "Type <code>lshw -short</code>",
       objective: "Type lshw -short",
       xp: 25,

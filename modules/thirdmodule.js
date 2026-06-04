@@ -7,7 +7,7 @@ const module3_textman = {
     // --- ECHO & STREAM REDIRECTION (1-10) ---
     {
       title: "Standard Output Echo",
-      why: "Print text strings directly to stdout.",
+      why: "When you type a command, Linux sends the results to a data stream called <b>Standard Output (stdout)</b>, which is wired directly to your screen. The <b>echo</b> command simply takes the text you give it and blasts it straight into that stdout stream.",
       text: 'Type <code>echo "hello"</code>',
       objective: 'Type echo "hello"',
       xp: 10,
@@ -15,7 +15,7 @@ const module3_textman = {
     },
     {
       title: "Write Stream Redirection",
-      why: "The > operator routes output to create or overwrite a file.",
+      why: "You can hijack the stdout stream! The right-angle bracket <b>></b> is the Redirection Operator. It catches the text before it hits your screen and forces it into a file. If the file doesn't exist, Linux creates it. If it does exist, it gets completely overwritten.",
       text: 'Type <code>echo "line1" > a.txt</code>',
       objective: "Create file a.txt via redirection",
       xp: 15,
@@ -23,7 +23,7 @@ const module3_textman = {
     },
     {
       title: "Overwrite Verification",
-      why: "Using > again on the same path completely truncates previous data.",
+      why: "Let's prove how destructive the single <b>></b> operator is. By using it again, you are telling the kernel to truncate (empty) the file completely before dumping 'line2' into it.",
       text: 'Type <code>echo "line2" > a.txt</code>',
       objective: "Overwrite a.txt with line2",
       xp: 15,
@@ -31,7 +31,7 @@ const module3_textman = {
     },
     {
       title: "Append Stream Operator",
-      why: "The >> operator attaches text strings safely to the bottom of files.",
+      why: "If you want to keep existing data, you must use the Append Operator: <b>>></b> (two brackets). This tells the kernel to seek to the absolute bottom of the text document and safely add your new string as a new line.",
       text: 'Type <code>echo "line3" >> a.txt</code>',
       objective: "Append line3 to a.txt",
       xp: 20,
@@ -39,7 +39,7 @@ const module3_textman = {
     },
     {
       title: "Double Append Exercise",
-      why: "Stack another line down into the text buffer.",
+      why: "Let's stack another line down into the text buffer. Building files line-by-line using <code>>></code> is a very common way to write bash scripts automatically from the terminal.",
       text: 'Type <code>echo "line4" >> a.txt</code>',
       objective: "Append line4 to a.txt",
       xp: 20,
@@ -47,7 +47,7 @@ const module3_textman = {
     },
     {
       title: "Write Sibling File",
-      why: "Establish an independent target data store.",
+      why: "Establish an independent target data store. We will use this secondary file for comparison later.",
       text: 'Type <code>echo "data1" > b.txt</code>',
       objective: "Create b.txt via redirection",
       xp: 15,
@@ -63,7 +63,7 @@ const module3_textman = {
     },
     {
       title: "Null Redirection",
-      why: "Write empty whitespace buffers to initialize empty trackers.",
+      why: "You can write empty whitespace strings into files. This is often used by sysadmins to initialize empty tracker files or clear out massive log files without deleting the file node itself.",
       text: 'Type <code>echo "" > empty.txt</code>',
       objective: "Redirect an empty string into empty.txt",
       xp: 15,
@@ -72,7 +72,7 @@ const module3_textman = {
     },
     {
       title: "Write Hidden Log",
-      why: "Redirection applies perfectly to hidden files.",
+      why: "Redirection applies perfectly to hidden dotfiles. Hackers frequently use this technique to silently append their SSH keys into a user's hidden <code>.ssh/authorized_keys</code> file.",
       text: 'Type <code>echo "hidden info" > .hide.txt</code>',
       objective: "Redirect into hidden path .hide.txt",
       xp: 20,
@@ -81,7 +81,7 @@ const module3_textman = {
     },
     {
       title: "Append Hidden Log",
-      why: "Append directly to your hidden tracker config.",
+      why: "Append directly to your hidden tracker config without exposing it to standard <code>ls</code> commands.",
       text: 'Type <code>echo "more hidden" >> .hide.txt</code>',
       objective: "Append into hidden path .hide.txt",
       xp: 20,
@@ -92,7 +92,7 @@ const module3_textman = {
     // --- CONCATENATION & READING SYSTEM FILES (11-20) ---
     {
       title: "Read Stream A",
-      why: "Output complete raw content pools onto your active stdout.",
+      why: "The <b>cat</b> (concatenate) command opens a file descriptor, reads the raw bytes, and dumps them directly into your stdout screen stream. Let's see what you actually wrote to your first file.",
       text: "Type <code>cat a.txt</code>",
       objective: "Read content buffer of a.txt",
       xp: 10,
@@ -100,7 +100,7 @@ const module3_textman = {
     },
     {
       title: "Read Stream B",
-      why: "Verify alternate file store metrics.",
+      why: "Verify your alternate file store metrics.",
       text: "Type <code>cat b.txt</code>",
       objective: "Read content buffer of b.txt",
       xp: 10,
@@ -108,7 +108,7 @@ const module3_textman = {
     },
     {
       title: "Read Hidden Stream",
-      why: "Expose hidden data layers explicitly.",
+      why: "The <code>cat</code> command does not care if a file is hidden (starts with a dot). If you give it the exact name, it will read it.",
       text: "Type <code>cat .hide.txt</code>",
       objective: "Read content buffer of .hide.txt",
       xp: 15,
@@ -116,7 +116,7 @@ const module3_textman = {
     },
     {
       title: "Read Local Sandbox Notes",
-      why: "Verify predefined template workspace guidelines.",
+      why: "Read the pre-existing notes file that was loaded when your sandbox booted up.",
       text: "Type <code>cat notes.txt</code>",
       objective: "Read the workspace notes.txt file",
       xp: 10,
@@ -124,7 +124,7 @@ const module3_textman = {
     },
     {
       title: "Read System Users Database",
-      why: "Inspect structural layout models of /etc/passwd credentials.",
+      why: "In Linux, users aren't managed in a fancy GUI; they are stored in a raw plaintext file called <b>/etc/passwd</b>. Using <code>cat</code> on this absolute path will dump the structural layout of every user profile on the system.",
       text: "Type <code>cat /etc/passwd</code>",
       objective: "Read absolute path file /etc/passwd",
       xp: 20,
@@ -132,7 +132,7 @@ const module3_textman = {
     },
     {
       title: "Read Kernel Logs",
-      why: "Trace system launch errors and active diagnostic tracks.",
+      why: "The system logging daemon records almost everything that happens on the computer (boot metrics, hardware changes) in plain text. Let's dump the raw <b>syslog</b>.",
       text: "Type <code>cat /var/log/syslog</code>",
       objective: "Read absolute path file /var/log/syslog",
       xp: 20,
@@ -140,7 +140,7 @@ const module3_textman = {
     },
     {
       title: "Read Authentication Records",
-      why: "Track remote security parameters and failed login metrics.",
+      why: "Security events (like people typing wrong passwords in SSH) are routed to a specific log called <b>auth.log</b>. This is the first file Blue Teamers check during an incident.",
       text: "Type <code>cat /var/log/auth.log</code>",
       objective: "Read absolute path file /var/log/auth.log",
       xp: 20,
@@ -148,7 +148,7 @@ const module3_textman = {
     },
     {
       title: "Read Nonexistent Target Handler",
-      why: "Analyze the bash terminal standard missing file error handling routines.",
+      why: "If you try to <code>cat</code> a file that isn't there, Linux outputs text into a different stream called <b>Standard Error (stderr)</b>. This allows scripts to handle errors separately from regular data.",
       text: "Type <code>cat missing.txt</code>",
       objective: "Attempt reading missing.txt",
       xp: 10,
@@ -156,7 +156,7 @@ const module3_textman = {
     },
     {
       title: "Read Empty File Stream",
-      why: "Empty streams output null, producing a clean prompt jump.",
+      why: "If you read an empty file, the kernel returns exactly 0 bytes to the stdout stream, resulting in a completely blank return to your prompt.",
       text: "Type <code>cat empty.txt</code>",
       objective: "Read content buffer of empty.txt",
       xp: 10,
@@ -164,7 +164,7 @@ const module3_textman = {
     },
     {
       title: "Read Directory Error Check",
-      why: "Cat can only bind to file data descriptors, not directories.",
+      why: "<code>cat</code> is strictly a text-stream reader. It cannot read a directory node because directories are structurally formatted tables, not flat text. Attempting this throws a specific 'Is a directory' error.",
       text: "Type <code>cat projects</code>",
       objective: "Attempt reading directory path 'projects'",
       xp: 15,
@@ -174,7 +174,7 @@ const module3_textman = {
     // --- METRIC WORD COUNT AUDITING (21-35) ---
     {
       title: "Audit File A",
-      why: "Calculate lines, words, and byte arrays inside file boundaries.",
+      why: "The <b>wc</b> (Word Count) tool calculates data densities. By default, running it against a file returns three columns: the total Lines, the total Words, and the total Bytes.",
       text: "Type <code>wc a.txt</code>",
       objective: "Run word count auditing on a.txt",
       xp: 10,
@@ -182,7 +182,7 @@ const module3_textman = {
     },
     {
       title: "Audit File B",
-      why: "Calculate metrics on sibling files.",
+      why: "Calculate metrics on your secondary sibling file.",
       text: "Type <code>wc b.txt</code>",
       objective: "Run word count auditing on b.txt",
       xp: 10,
@@ -198,7 +198,7 @@ const module3_textman = {
     },
     {
       title: "Audit Passwd Layout",
-      why: "Quickly scan data density rows inside credentials.",
+      why: "Quickly scan the density of the credentials file. If this file suddenly spikes in byte size, a hacker may have injected hundreds of ghost users into the system.",
       text: "Type <code>wc /etc/passwd</code>",
       objective: "Run word count on /etc/passwd",
       xp: 15,
@@ -222,7 +222,7 @@ const module3_textman = {
     },
     {
       title: "Line Isolation Mode: File A",
-      why: "The -l flag isolates line quantities exclusively, stripping word filters.",
+      why: "Usually, you don't care about words or bytes. The <b>-l</b> flag isolates line quantities exclusively. Counting lines is how you count 'items' in Linux (e.g., counting lines in the user file tells you exactly how many users exist).",
       text: "Type <code>wc -l a.txt</code>",
       objective: "Isolate line data values on a.txt via -l",
       xp: 20,
@@ -230,7 +230,7 @@ const module3_textman = {
     },
     {
       title: "Line Isolation Mode: File B",
-      why: "Track total record row quantities efficiently.",
+      why: "Track total record row quantities in your secondary file efficiently.",
       text: "Type <code>wc -l b.txt</code>",
       objective: "Isolate line data values on b.txt via -l",
       xp: 20,
@@ -247,7 +247,7 @@ const module3_textman = {
     },
     {
       title: "Line Isolation Mode: Credentials",
-      why: "Directly assess user profiles row allocation balances.",
+      why: "Directly assess how many exact user profiles are allocated on the machine.",
       text: "Type <code>wc -l /etc/passwd</code>",
       objective: "Isolate line data values on /etc/passwd via -l",
       xp: 20,
@@ -256,7 +256,7 @@ const module3_textman = {
     },
     {
       title: "Line Isolation Mode: Syslog",
-      why: "Count ongoing total incident notifications logged.",
+      why: "Count ongoing total incident notifications logged by the system daemon.",
       text: "Type <code>wc -l /var/log/syslog</code>",
       objective: "Isolate line data values on /var/log/syslog via -l",
       xp: 20,
@@ -265,7 +265,7 @@ const module3_textman = {
     },
     {
       title: "Word Isolation Mode: File A",
-      why: "The -w flag isolates text strings separated by whitespaces.",
+      why: "The <b>-w</b> flag strictly counts words (text strings separated by whitespaces).",
       text: "Type <code>wc -w a.txt</code>",
       objective: "Isolate word count arrays on a.txt via -w",
       xp: 20,
@@ -282,7 +282,7 @@ const module3_textman = {
     },
     {
       title: "Byte Isolation Mode: File A",
-      why: "The -c flag extracts explicit total disk byte load properties.",
+      why: "The <b>-c</b> flag extracts explicit total disk byte properties. Every standard ASCII character takes up exactly 1 byte of hard drive space.",
       text: "Type <code>wc -c a.txt</code>",
       objective: "Isolate total byte metrics on a.txt via -c",
       xp: 20,
@@ -301,7 +301,7 @@ const module3_textman = {
     // --- UPPER STREAM LIMIT SEPARATION (36-50) ---
     {
       title: "Peek File Boundaries: Notes",
-      why: "Head slices upper bounding data sets out of configurations.",
+      why: "If a log file is 10 GB, running `cat` will freeze your terminal. The <b>head</b> command slices the upper bounding data set out of the configuration, showing you only the top 10 lines by default.",
       text: "Type <code>head notes.txt</code>",
       objective: "Inspect top elements of notes.txt",
       xp: 10,
@@ -309,7 +309,7 @@ const module3_textman = {
     },
     {
       title: "Peek File Boundaries: Credentials",
-      why: "Instantly examine configuration schemas at the top of parameters.",
+      why: "Instantly examine configuration schemas at the top of parameters. The top of the passwd file usually shows the `root` and `daemon` accounts.",
       text: "Type <code>head /etc/passwd</code>",
       objective: "Inspect top elements of /etc/passwd",
       xp: 15,
@@ -317,7 +317,7 @@ const module3_textman = {
     },
     {
       title: "Peek File Boundaries: Syslog",
-      why: "Read initial initialization startup records from system headers.",
+      why: "Read the oldest events in a log. The top of the syslog typically contains the raw kernel hardware initialization steps from when the machine was first booted.",
       text: "Type <code>head /var/log/syslog</code>",
       objective: "Inspect top elements of /var/log/syslog",
       xp: 15,
@@ -333,7 +333,7 @@ const module3_textman = {
     },
     {
       title: "Peek File Boundaries: File A",
-      why: "Audit user-defined text structures.",
+      why: "Audit your own user-defined text structures.",
       text: "Type <code>head a.txt</code>",
       objective: "Inspect top elements of a.txt",
       xp: 10,
@@ -341,7 +341,7 @@ const module3_textman = {
     },
     {
       title: "Peek File Boundaries: File B",
-      why: "Audit secondary user-defined text structures.",
+      why: "Audit your secondary user-defined text structures.",
       text: "Type <code>head b.txt</code>",
       objective: "Inspect top elements of b.txt",
       xp: 10,
@@ -349,7 +349,7 @@ const module3_textman = {
     },
     {
       title: "Line Gated Head Slicing",
-      why: "The -n flag restricts parsing to an explicit integer row value.",
+      why: "The <b>-n</b> flag restricts the parsing to an explicit integer row value. You are commanding the system to open the file stream, extract exactly 5 rows, and immediately close the file stream.",
       text: "Type <code>head -n 5 notes.txt</code>",
       objective: "Slice exactly 5 rows off notes.txt via head -n",
       xp: 25,
@@ -357,7 +357,7 @@ const module3_textman = {
     },
     {
       title: "Line Gated Head Slicing: Passwd",
-      why: "Isolate top admin setup rows cleanly.",
+      why: "Isolate only the top 2 admin setup rows cleanly.",
       text: "Type <code>head -n 2 /etc/passwd</code>",
       objective: "Slice exactly 2 rows off /etc/passwd via head -n",
       xp: 25,
@@ -365,7 +365,7 @@ const module3_textman = {
     },
     {
       title: "Alternate Integer Flag Routing",
-      why: "Shorthand syntax supports passing lines directly behind hyphen metrics.",
+      why: "Because system administrators use `head` so frequently, Linux supports a shorthand syntax. You can drop the 'n' and pass the integer directly behind the hyphen.",
       text: "Type <code>head -5 notes.txt</code>",
       objective: "Slice exactly 5 rows using alternative -5 notation",
       xp: 25,
@@ -373,7 +373,7 @@ const module3_textman = {
     },
     {
       title: "Write Stream To Nested Folder",
-      why: "Route redirected text payloads into nested sub-directories.",
+      why: "You can combine Absolute or Relative paths with text redirection. This routes your text payload directly into a file living inside a sub-directory, without requiring you to <code>cd</code> into it first.",
       text: 'Type <code>echo "nested context" > projects/info.txt</code>',
       objective: "Redirect output to projects/info.txt",
       xp: 20,
@@ -384,7 +384,7 @@ const module3_textman = {
     },
     {
       title: "Read Nested Stream",
-      why: "Concatenate remote assets within subfolders.",
+      why: "Concatenate remote assets within subfolders seamlessly.",
       text: "Type <code>cat projects/info.txt</code>",
       objective: "Read contents of projects/info.txt",
       xp: 15,
@@ -392,7 +392,7 @@ const module3_textman = {
     },
     {
       title: "Audit Nested Metrics",
-      why: "Check text metrics inside directory architectures.",
+      why: "Check text metrics inside deeper directory architectures.",
       text: "Type <code>wc projects/info.txt</code>",
       objective: "Run word count on projects/info.txt",
       xp: 15,
@@ -408,7 +408,7 @@ const module3_textman = {
     },
     {
       title: "Append Stream into Nested Folder",
-      why: "Build content pools across sub-level storage frameworks.",
+      why: "Build content pools across sub-level storage frameworks remotely.",
       text: 'Type <code>echo "more specs" >> projects/info.txt</code>',
       objective: "Append text properties to projects/info.txt",
       xp: 20,
@@ -429,7 +429,7 @@ const module3_textman = {
     // --- GREP EXPRESSION PATTERN FILTERING (51-65) ---
     {
       title: "Expression Filter: Linux",
-      why: "Grep isolates and prints rows explicitly containing your pattern.",
+      why: "The <b>grep</b> (Global Regular Expression Print) tool is a powerhouse. It reads a file line-by-line, runs an evaluation on each line, and instantly drops any line that does not contain your specified string.",
       text: 'Type <code>grep "Linux" notes.txt</code>',
       objective: "Filter lines matching 'Linux' from notes.txt",
       xp: 20,
@@ -456,7 +456,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: Root",
-      why: "Muscle memory configuration tracking extraction.",
+      why: "Grep is case-sensitive by default. It looks for exact ASCII matches.",
       text: 'Type <code>grep "Root" notes.txt</code>',
       objective: "Filter lines matching 'Root' from notes.txt",
       xp: 20,
@@ -465,7 +465,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: Sysadmin Identity",
-      why: "Locate user parameters within systemic text files.",
+      why: "This is how system administrators parse large tables. By filtering the user database for your username, you instantly extract your specific User ID (UID) and Home Directory paths.",
       text: 'Type <code>grep "sysadmin" /etc/passwd</code>',
       objective: "Extract sysadmin entries from /etc/passwd",
       xp: 25,
@@ -474,7 +474,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: System Root Privilege",
-      why: "Verify access controls directly within user records.",
+      why: "Verify the core system administrator profile by filtering for the highest-privileged account on the machine.",
       text: 'Type <code>grep "root" /etc/passwd</code>',
       objective: "Extract root entries from /etc/passwd",
       xp: 25,
@@ -483,7 +483,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: Kernel Initialization Trace",
-      why: "Pinpoint core boot checkpoints inside diagnostics records.",
+      why: "When diagnosing server crashes, you can use grep to parse thousands of syslog rows to instantly pinpoint where the server initiated its boot sequence.",
       text: 'Type <code>grep "Booting" /var/log/syslog</code>',
       objective: "Extract Booting logs from /var/log/syslog",
       xp: 25,
@@ -492,7 +492,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: Network Handlers Trace",
-      why: "Audit hardware states via pattern indexing constraints.",
+      why: "Audit hardware states via pattern indexing. Find exactly when the network card came online.",
       text: 'Type <code>grep "Network" /var/log/syslog</code>',
       objective: "Extract Network logs from /var/log/syslog",
       xp: 25,
@@ -501,7 +501,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: App Failures Trace",
-      why: "Track crashed services by isolating system trace values.",
+      why: "Track crashed services by isolating specific application names inside the system trace.",
       text: 'Type <code>grep "Nginx" /var/log/syslog</code>',
       objective: "Extract Nginx logs from /var/log/syslog",
       xp: 25,
@@ -510,7 +510,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: Forensic Security Breaches",
-      why: "Isolate unauthorized brute-force footprints instantly from audit logs.",
+      why: "This is how Blue Teamers detect brute force attacks. Isolate unauthorized footprint attempts instantly from the audit logs.",
       text: 'Type <code>grep "Failed" /var/log/auth.log</code>',
       objective: "Extract Failed attempts from /var/log/auth.log",
       xp: 25,
@@ -519,7 +519,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: Target Attacks Profile",
-      why: "Identify usernames targeted by attackers during intrusion audits.",
+      why: "Identify usernames actively targeted by attackers during an intrusion audit.",
       text: 'Type <code>grep "root" /var/log/auth.log</code>',
       objective: "Extract root security traces from /var/log/auth.log",
       xp: 25,
@@ -546,7 +546,7 @@ const module3_textman = {
     },
     {
       title: "Expression Filter: Nested Scrape",
-      why: "Scrape directory components recursively without moving from your prompt.",
+      why: "Scrape directory components recursively without moving your terminal pointer.",
       text: 'Type <code>grep "nested" projects/info.txt</code>',
       objective: "Filter lines from projects/info.txt",
       xp: 25,
@@ -555,7 +555,7 @@ const module3_textman = {
     },
     {
       title: "The Ultimate Metric Loop",
-      why: "Consolidate line calculations as a complete textual core sign-off validation metrics check.",
+      why: "You have mastered parsing text files. Combine your final metric audit to validate your notes configuration.",
       text: "Type <code>wc -l notes.txt</code>",
       objective: "Run final verification row counts on notes.txt",
       xp: 30,
