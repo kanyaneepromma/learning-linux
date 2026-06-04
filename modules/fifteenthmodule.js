@@ -2,7 +2,7 @@
 // Module 15: Kernel Internals & Reverse Engineering (65 Lessons)
 
 const module15_kernel = {
-  name: "15. Kernel & Reverse Eng (65 Lessons)",
+  name: "15. Kernel & Reverse Eng (66 Lessons)",
   lessons: [
     // --- PHASE 1: HARDWARE & BOOT RING BUFFER (1-12) ---
     {

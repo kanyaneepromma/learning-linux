@@ -2,7 +2,7 @@
 // Module 18: The Cloud Architect - Kubernetes & Terraform (100 Lessons)
 
 const module18_cloud = {
-  name: "18. Cloud Architect (100 Lessons)",
+  name: "18. Cloud Architect (105 Lessons)",
   lessons: [
     // --- PHASE 1: TERRAFORM FOUNDATIONS (1-25) ---
     {
