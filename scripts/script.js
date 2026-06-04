@@ -150,8 +150,6 @@ function formatPromptPath() {
     : currentPath;
 }
 
-let activeModuleIndex = 0;
-let activeLessonIndex = 0;
 let activeTab = "modules";
 
 function switchTab(tabId) {
