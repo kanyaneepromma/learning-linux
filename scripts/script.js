@@ -1,6 +1,41 @@
 // script.js
 // Core Terminal UI and Logic Engine
 
+// --- GLOBAL ERROR HANDLING & MAINTENANCE TAPE ---
+window.addEventListener('error', function(e) {
+    triggerMaintenanceMode(e.message || "Unknown Fatal Exception");
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+    triggerMaintenanceMode(e.reason || "Unhandled Promise Rejection");
+});
+
+function triggerMaintenanceMode(errMsg) {
+    if(document.getElementById('maintenance-tape')) return;
+    if(typeof playSound === 'function') playSound("error");
+    const div = document.createElement('div');
+    div.id = 'maintenance-tape';
+    div.className = 'fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden pointer-events-none bg-black/80 backdrop-blur-md';
+    div.innerHTML = `
+        <div class="absolute w-[200%] h-24 bg-yellow-400 flex items-center justify-center border-y-8 border-black shadow-[0_0_50px_rgba(250,204,21,0.5)] z-10" style="transform: rotate(-20deg);">
+            <span class="text-black font-black text-6xl tracking-[0.2em] uppercase whitespace-nowrap" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(0,0,0,0.15) 40px, rgba(0,0,0,0.15) 80px);">
+                &nbsp;⚠️ UNDER MAINTENANCE ⚠️ DO NOT CROSS ⚠️ UNDER MAINTENANCE ⚠️ DO NOT CROSS ⚠️ UNDER MAINTENANCE ⚠️ DO NOT CROSS ⚠️&nbsp;
+            </span>
+        </div>
+        <div class="absolute w-[200%] h-24 bg-yellow-400 flex items-center justify-center border-y-8 border-black shadow-[0_0_50px_rgba(250,204,21,0.5)] z-10" style="transform: rotate(20deg);">
+            <span class="text-black font-black text-6xl tracking-[0.2em] uppercase whitespace-nowrap" style="background-image: repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(0,0,0,0.15) 40px, rgba(0,0,0,0.15) 80px);">
+                &nbsp;⚠️ FATAL EXCEPTION ⚠️ SYSTEM HALTED ⚠️ FATAL EXCEPTION ⚠️ SYSTEM HALTED ⚠️ FATAL EXCEPTION ⚠️ SYSTEM HALTED ⚠️&nbsp;
+            </span>
+        </div>
+        <div class="relative bg-slate-950 border-4 border-red-500 p-10 rounded-2xl shadow-[0_0_100px_rgba(239,68,68,0.5)] max-w-2xl text-center pointer-events-auto z-50">
+            <h1 class="text-5xl font-black text-red-500 mb-4 animate-pulse">KERNEL PANIC</h1>
+            <p class="text-slate-300 font-mono text-sm mb-8 bg-black/80 p-4 rounded border border-red-500/30 overflow-auto max-h-32 text-left shadow-inner">${errMsg}</p>
+            <button onclick="location.reload()" class="bg-red-500/20 text-red-400 border-2 border-red-500 px-8 py-3 rounded-lg font-black text-lg tracking-widest hover:bg-red-500 hover:text-white hover:shadow-[0_0_30px_rgba(239,68,68,0.8)] transition-all cursor-pointer">REBOOT SYSTEM</button>
+        </div>
+    `;
+    document.body.appendChild(div);
+}
+
 // --- VFS DATABASES ---
 let vfs = {};
 let runningServices = { ssh: true, nginx: false, docker: false };
@@ -189,31 +224,36 @@ function changeModule() {
 }
 
 function renderModulesDropdown() {
+  if (!learningModules || learningModules.length === 0) return;
   let select = document.getElementById("module-selector");
   select.innerHTML = "";
   learningModules.forEach((m, idx) => {
     select.innerHTML += `<option value="${idx}">${m.name}</option>`;
   });
+  
+  if (activeModuleIndex >= learningModules.length) {
+      activeModuleIndex = 0;
+  }
   select.value = activeModuleIndex;
 }
 
 function renderLesson() {
+  if (!learningModules || learningModules.length === 0) return;
   let m = learningModules[activeModuleIndex];
   let l = m.lessons[activeLessonIndex];
   document.getElementById("lesson-module-tag").innerText = m.name.split(" ")[1];
   document.getElementById("lesson-index-tag").innerText =
     `Lesson ${activeLessonIndex + 1}/${m.lessons.length}`;
 
-  // UPGRADED UI: Massive Mission Briefing Box & Clearer Command Target
   document.getElementById("active-lesson-body").innerHTML = `
         <h2 class="text-lg font-black text-white flex items-center gap-1.5 mb-2">
             <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 pulse-emerald"></span>${l.title}
         </h2>
-        <div class="text-slate-300 text-xs leading-relaxed border-l-2 border-indigo-500/50 pl-3 bg-indigo-500/10 py-3 pr-3 rounded-r mb-4">
+        <div class="text-slate-300 text-xs leading-relaxed border-l-2 border-indigo-500/50 pl-3 bg-indigo-500/10 py-3 pr-3 rounded-r mb-4 shadow-inner">
             <strong class="text-indigo-400 uppercase tracking-wider text-[10px] block mb-1.5">Mission Briefing:</strong> 
             ${l.why}
         </div>
-        <div class="text-sm text-slate-200 leading-relaxed font-mono bg-slate-900/80 p-3 rounded border border-slate-800">
+        <div class="text-sm text-slate-200 leading-relaxed font-mono bg-slate-900/80 p-3 rounded border border-slate-800 shadow-md">
             ${l.text}
         </div>`;
 
@@ -224,6 +264,7 @@ function renderLesson() {
 }
 
 function renderModulesOverview() {
+  if (!learningModules || learningModules.length === 0) return;
   let container = document.getElementById("modules-list");
   container.innerHTML = "";
   learningModules.forEach((mod, mIdx) => {
@@ -233,11 +274,11 @@ function renderModulesOverview() {
     });
     let pct = Math.round((count / mod.lessons.length) * 100);
     container.innerHTML += `
-            <div class="p-3 rounded-xl border text-xs flex flex-col gap-2 transition-all ${activeModuleIndex === mIdx ? "bg-slate-950 border-indigo-500/30" : "bg-slate-950/40 border-slate-800"}">
+            <div class="p-3 rounded-xl border text-xs flex flex-col gap-2 transition-all hover:border-indigo-500/50 ${activeModuleIndex === mIdx ? "bg-slate-950 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]" : "bg-slate-950/40 border-slate-800"}">
                 <div class="flex items-center justify-between cursor-pointer" onclick="selectModuleFromList(${mIdx})">
                     <span class="font-bold text-slate-300">${mod.name}</span><span class="text-slate-500 font-mono">${pct}%</span>
                 </div>
-                <div class="w-full bg-slate-900 rounded-full h-1"><div class="bg-indigo-500 h-1 rounded-full" style="width: ${pct}%"></div></div>
+                <div class="w-full bg-slate-900 rounded-full h-1.5"><div class="bg-indigo-500 h-1.5 rounded-full shadow-[0_0_5px_rgba(99,102,241,0.5)]" style="width: ${pct}%"></div></div>
             </div>`;
   });
 }
@@ -265,7 +306,7 @@ function renderQuests() {
     container.innerHTML += `
             <div class="p-4 border rounded-xl space-y-3 transition-all duration-300 ${done ? "bg-emerald-950/20 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]" : "bg-slate-950 border-slate-800"}">
                 <div class="flex items-center justify-between">
-                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 border rounded-full ${done ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : col}">${done ? "✅ Resolved" : q.difficulty}</span>
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 border rounded-full shadow-sm ${done ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : col}">${done ? "✅ Resolved" : q.difficulty}</span>
                     <span class="text-xs font-bold ${done ? "text-emerald-400" : "text-indigo-400"}">+${q.reward} XP</span>
                 </div>
                 <h4 class="font-bold text-white text-sm ${done ? "line-through text-emerald-400/70" : ""}">${q.title}</h4>
@@ -297,7 +338,7 @@ function renderCheatsheet() {
     let isUnlocked = discovered.includes(k);
 
     let div = document.createElement("div");
-    div.className = `p-3 border rounded-xl space-y-1 transition-all duration-500 ${isUnlocked ? "bg-slate-950 border-slate-800/80" : "bg-slate-950/40 border-slate-800/40 opacity-60"}`;
+    div.className = `p-3 border rounded-xl space-y-1 transition-all duration-500 ${isUnlocked ? "bg-slate-950 border-slate-800/80 shadow-md" : "bg-slate-950/40 border-slate-800/40 opacity-60"}`;
 
     let badge = isUnlocked
       ? `<span class="font-mono text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-500/20">Unlocked</span>`
@@ -321,7 +362,7 @@ function filterCheatsheet() {
 }
 
 // --- PROGRESSION ---
-const maxGlobalXp = 45000;
+const maxGlobalXp = 50000;
 function addXp(amount) {
   if (amount > 0) {
     playSound("success");
@@ -329,9 +370,10 @@ function addXp(amount) {
   }
   playerStats.xp += amount;
   let r = "Terminal Newbie";
-  if (playerStats.xp >= 45000) r = "Linux Kernel God 👑🌌";
-  else if (playerStats.xp >= 25000) r = "Global CISO 🛡️";
-  else if (playerStats.xp >= 10000) r = "Red Team Ops 🥷";
+  if (playerStats.xp >= 50000) r = "Kernel God 👑🌌";
+  else if (playerStats.xp >= 35000) r = "Global CISO 🛡️";
+  else if (playerStats.xp >= 20000) r = "Red Team Ops 🥷";
+  else if (playerStats.xp >= 10000) r = "Senior Architect 🏗️";
   else if (playerStats.xp >= 2000) r = "SysAdmin 💻";
 
   document.getElementById("rank-name").innerText = `Rank: ${r}`;
@@ -343,6 +385,7 @@ function addXp(amount) {
 }
 
 function updateOverallProgress() {
+  if (!learningModules || learningModules.length === 0) return;
   let t = 0;
   learningModules.forEach((m) => (t += m.lessons.length));
   document.getElementById("overall-progress-tag").innerText =
@@ -382,7 +425,6 @@ const cmdInput = document.getElementById("cmd-input");
 function printToTerminal(htmlContent, isCommand = false) {
   const div = document.createElement("div");
 
-  // ADDED 'cyber-line' HERE!
   div.className = "mb-1 leading-relaxed cyber-line";
 
   if (isCommand) {
@@ -398,6 +440,12 @@ function executeCommand(rawCommand) {
   let cmdStr = rawCommand.trim();
   if (!cmdStr) return;
   printToTerminal(cmdStr, true);
+
+  // SECRET COMMAND TO MANUALLY TRIGGER THE YELLOW TAPE!
+  if(cmdStr.toLowerCase() === "panic") {
+      triggerMaintenanceMode("MANUAL OVERRIDE: Administrator triggered a catastrophic simulation. The system kernel has panicked.");
+      return;
+  }
 
   let args = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
   let cmdName = args.shift();
@@ -418,29 +466,27 @@ function executeCommand(rawCommand) {
         if (activeTab === "cheatsheet") renderCheatsheet();
       }
 
-      // Verify Lessons
-      let m = learningModules[activeModuleIndex];
-      let l = m.lessons[activeLessonIndex];
-      let lId = `${activeModuleIndex}_${activeLessonIndex}`;
+      // Verify Lessons safely
+      if (learningModules && learningModules.length > 0) {
+          let m = learningModules[activeModuleIndex];
+          let l = m.lessons[activeLessonIndex];
+          let lId = `${activeModuleIndex}_${activeLessonIndex}`;
 
-      // Check if the command satisfies the lesson objective
-      if (l.check(cmdName, args, output, cmdStr)) {
-        // If it's a NEW completion, give XP and save progress!
-        if (!playerStats.completedLessons.includes(lId)) {
-          playerStats.completedLessons.push(lId);
-          addXp(l.xp);
-          printToTerminal(
-            `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs">🏆 Objective Accomplished! +${l.xp} XP</div>`,
-          );
-        }
+          if (l.check(cmdName, args, output, cmdStr)) {
+            if (!playerStats.completedLessons.includes(lId)) {
+              playerStats.completedLessons.push(lId);
+              addXp(l.xp);
+              printToTerminal(
+                `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs shadow-md">🏆 Objective Accomplished! +${l.xp} XP</div>`,
+              );
+            }
 
-        // ALWAYS advance to the next lesson if the command was correct,
-        // even if they already had the XP for this one.
-        if (activeLessonIndex < m.lessons.length - 1) {
-          activeLessonIndex++;
-          saveGame();
-          renderLesson();
-        }
+            if (activeLessonIndex < m.lessons.length - 1) {
+              activeLessonIndex++;
+              saveGame();
+              renderLesson();
+            }
+          }
       }
 
       quests.forEach((q) => {
@@ -457,18 +503,7 @@ function executeCommand(rawCommand) {
         }
       });
     } catch (e) {
-      playSound("error"); // Play buzz
-      document
-        .getElementById("terminal-container")
-        .classList.add("shake-error"); // Shake screen
-      setTimeout(
-        () =>
-          document
-            .getElementById("terminal-container")
-            .classList.remove("shake-error"),
-        300,
-      );
-      printToTerminal(`<span class="term-err">Execution Error.</span>`);
+      triggerMaintenanceMode("Command Execution Engine Failure: " + e.message);
     }
   } else {
     playSound("error"); // Play buzz
@@ -503,7 +538,7 @@ function toggleAssistant() {
     btn.classList.replace("text-emerald-400", "text-yellow-400");
     btn.classList.replace("bg-emerald-400/10", "bg-yellow-400/10");
     btn.classList.replace("border-emerald-400/20", "border-yellow-400/20");
-    // Hide bubble instantly if turned off
+    
     assistantBubble.classList.remove("assistant-show");
     setTimeout(() => assistantBubble.classList.add("hidden"), 300);
   }
@@ -515,17 +550,11 @@ function resetSandbox() {
       "WARNING: This will delete ALL files, reset your rank, and wipe ALL XP. Are you sure?",
     )
   ) {
-    // 1. Reset the Virtual File System
     initVfs();
-
     playSound("sweep");
-
     document.getElementById("prompt-path").innerText = formatPromptPath();
-
-    // 2. NUKE the Local Storage (The real hard reset!)
     localStorage.removeItem("linux_mega_stats");
 
-    // 3. Reset the game variables in memory
     playerStats = {
       xp: 0,
       completedLessons: [],
@@ -536,19 +565,17 @@ function resetSandbox() {
     activeLessonIndex = 0;
     document.getElementById("module-selector").value = 0;
 
-    // 4. Reset the UI counters
     document.getElementById("rank-name").innerText = `Rank: Terminal Newbie`;
     document.getElementById("xp-counter").innerText = `0 / ${maxGlobalXp} XP`;
     document.getElementById("xp-progress").style.width = `0%`;
     document.getElementById("overall-progress-tag").innerText = `Progress: 0%`;
 
-    // 5. Re-render the fresh state
     renderModulesDropdown();
     renderLesson();
     if (activeTab === "quests") renderQuests();
     if (activeTab === "cheatsheet") renderCheatsheet();
 
-    playSound("error"); // Play the buzz sound for a dramatic wipe
+    playSound("error"); 
     document.getElementById("terminal-container").classList.add("shake-error");
     setTimeout(
       () =>
@@ -559,7 +586,7 @@ function resetSandbox() {
     );
 
     printToTerminal(
-      "<span class='text-red-500 font-black bg-red-950/50 px-2 py-1 uppercase'>SYSTEM WIPE COMPLETE. ALL XP DESTROYED.</span>",
+      "<span class='text-red-500 font-black bg-red-950/50 px-2 py-1 uppercase border border-red-500/50 rounded'>SYSTEM WIPE COMPLETE. ALL XP DESTROYED.</span>",
     );
   }
 }
@@ -572,26 +599,21 @@ cmdInput.addEventListener("input", () => {
   const title = document.getElementById("assistant-title");
   const text = document.getElementById("assistant-text");
 
-  // Grab exactly what the user is typing
   let rawText = cmdInput.value.trim();
-  let commandTyped = rawText.split(" ")[0].toLowerCase(); // Only check the first word
+  let commandTyped = rawText.split(" ")[0].toLowerCase(); 
 
   if (commandTyped === "") {
-    // Hide if input is empty
     assistantBubble.classList.remove("assistant-show");
     setTimeout(() => {
       if (!cmdInput.value.trim()) assistantBubble.classList.add("hidden");
     }, 300);
   } else if (deepDiveData[commandTyped]) {
-    // We have a match! Show the deep dive.
     title.innerText = `Command: ${commandTyped}`;
     text.innerHTML = deepDiveData[commandTyped];
 
     assistantBubble.classList.remove("hidden");
-    // Tiny timeout to allow display:block to apply before animating opacity
     setTimeout(() => assistantBubble.classList.add("assistant-show"), 10);
   } else {
-    // Command not in our dictionary yet
     title.innerText = `Command: ${commandTyped}`;
     text.innerHTML = `<em>Bit is analyzing... Keep typing or execute the command!</em>`;
 
@@ -600,7 +622,6 @@ cmdInput.addEventListener("input", () => {
   }
 });
 
-// Also hide the assistant when the user hits Enter!
 cmdInput.addEventListener("keydown", (e) => {
   playSound("type");
   if (e.key === "Enter") {
@@ -612,20 +633,19 @@ cmdInput.addEventListener("keydown", (e) => {
     executeCommand(cmd);
     cmdInput.value = "";
 
-    // ADD THIS TO HIDE THE ASSISTANT AFTER PRESSING ENTER
     const assistantBubble = document.getElementById("cyber-assistant");
     if (assistantBubble) {
       assistantBubble.classList.remove("assistant-show");
       setTimeout(() => assistantBubble.classList.add("hidden"), 300);
     }
   } else if (e.key === "ArrowUp") {
-    e.preventDefault(); // Prevents cursor from jumping
+    e.preventDefault(); 
     if (historyIndex > 0) {
       historyIndex--;
       cmdInput.value = commandHistory[historyIndex];
     }
   } else if (e.key === "ArrowDown") {
-    e.preventDefault(); // Prevents cursor from jumping
+    e.preventDefault(); 
     if (historyIndex < commandHistory.length - 1) {
       historyIndex++;
       cmdInput.value = commandHistory[historyIndex];
@@ -643,6 +663,12 @@ document
 window.onload = () => {
   initVfs();
   loadStats();
+  
+  // Safety check on boot!
+  if(learningModules.length === 0) {
+      triggerMaintenanceMode("MODULE ARCHITECTURE MISSING. The learning array failed to populate. Did you rename a module variable incorrectly?");
+  }
+  
   renderModulesDropdown();
   renderLesson();
   cmdInput.focus();
