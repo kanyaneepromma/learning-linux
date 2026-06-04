@@ -35,7 +35,10 @@ const module20_iot = {
       text: "Type <code>xxd firmware_v1.bin | head -n 10</code>",
       objective: "Hexdump the firmware",
       xp: 25,
-      check: (c, a, o, raw) => raw.includes("xxd") && raw.includes("head") && raw.includes("firmware_v1.bin"),
+      check: (c, a, o, raw) =>
+        raw.includes("xxd") &&
+        raw.includes("head") &&
+        raw.includes("firmware_v1.bin"),
     },
     {
       title: "Strings Analysis",
@@ -43,7 +46,10 @@ const module20_iot = {
       text: "Type <code>strings firmware_v1.bin | grep -i password</code>",
       objective: "Grep strings for password",
       xp: 25,
-      check: (c, a, o, raw) => raw.includes("strings") && raw.includes("grep") && raw.includes("password"),
+      check: (c, a, o, raw) =>
+        raw.includes("strings") &&
+        raw.includes("grep") &&
+        raw.includes("password"),
     },
     {
       title: "Binwalk Analysis",
@@ -59,7 +65,8 @@ const module20_iot = {
       text: "Type <code>binwalk -e firmware_v1.bin</code>",
       objective: "Extract with binwalk",
       xp: 35,
-      check: (c, a) => c === "binwalk" && a.includes("-e") && a.includes("firmware_v1.bin"),
+      check: (c, a) =>
+        c === "binwalk" && a.includes("-e") && a.includes("firmware_v1.bin"),
     },
     {
       title: "Navigate Filesystem",
@@ -75,7 +82,7 @@ const module20_iot = {
       text: "Type <code>ls -l *.squashfs</code>",
       objective: "List squashfs files",
       xp: 15,
-      check: (c, a) => c === "ls" && a.some(x=>x.includes("squashfs")),
+      check: (c, a) => c === "ls" && a.some((x) => x.includes("squashfs")),
     },
     {
       title: "Unsquash Filesystem",
@@ -83,7 +90,8 @@ const module20_iot = {
       text: "Type <code>unsquashfs squashfs-root.squashfs</code>",
       objective: "Run unsquashfs",
       xp: 30,
-      check: (c, a) => c === "unsquashfs" && a.some(x=>x.includes("squashfs")),
+      check: (c, a) =>
+        c === "unsquashfs" && a.some((x) => x.includes("squashfs")),
     },
     {
       title: "Enter Root Filesystem",
@@ -109,7 +117,8 @@ const module20_iot = {
       text: "Type <code>readelf -h bin/busybox</code>",
       objective: "Read ELF header of busybox",
       xp: 30,
-      check: (c, a) => c === "readelf" && a.includes("-h") && a.includes("bin/busybox"),
+      check: (c, a) =>
+        c === "readelf" && a.includes("-h") && a.includes("bin/busybox"),
     },
     {
       title: "Copy QEMU Binary",
@@ -117,7 +126,7 @@ const module20_iot = {
       text: "Type <code>cp /usr/bin/qemu-arm-static ./usr/bin/</code>",
       objective: "Copy qemu-arm-static",
       xp: 30,
-      check: (c, a) => c === "cp" && a.some(x=>x.includes("qemu-arm")),
+      check: (c, a) => c === "cp" && a.some((x) => x.includes("qemu-arm")),
     },
     {
       title: "Chroot Execution",
@@ -125,7 +134,8 @@ const module20_iot = {
       text: "Type <code>sudo chroot . /usr/bin/qemu-arm-static /bin/ls</code>",
       objective: "Execute ls via chroot and QEMU",
       xp: 45,
-      check: (c, a) => c === "sudo" && a.includes("chroot") && a.includes("/bin/ls"),
+      check: (c, a) =>
+        c === "sudo" && a.includes("chroot") && a.includes("/bin/ls"),
     },
     {
       title: "Emulate Web Server",
@@ -133,7 +143,8 @@ const module20_iot = {
       text: "Type <code>sudo chroot . /usr/bin/qemu-arm-static /usr/sbin/httpd &</code>",
       objective: "Emulate httpd daemon",
       xp: 50,
-      check: (c, a) => c === "sudo" && a.includes("chroot") && a.includes("/usr/sbin/httpd"),
+      check: (c, a) =>
+        c === "sudo" && a.includes("chroot") && a.includes("/usr/sbin/httpd"),
     },
     {
       title: "Curl Emulated Server",
@@ -141,15 +152,18 @@ const module20_iot = {
       text: "Type <code>curl http://localhost</code>",
       objective: "Curl localhost",
       xp: 15,
-      check: (c, a) => c === "curl" && a.some(x=>x.includes("localhost")),
+      check: (c, a) => c === "curl" && a.some((x) => x.includes("localhost")),
     },
     {
       title: "NVRAM Faker",
       why: "Emulated IoT processes often crash because they try to read physical EEPROM hardware (NVRAM) that doesn't exist on your laptop. <b>nvram-faker</b> intercepts these kernel calls via `LD_PRELOAD` and feeds the process dummy hardware data to keep it alive.",
-      text: 'Type <code>sudo chroot . /usr/bin/qemu-arm-static -E LD_PRELOAD=/lib/libnvram-faker.so /usr/sbin/httpd &</code>',
+      text: "Type <code>sudo chroot . /usr/bin/qemu-arm-static -E LD_PRELOAD=/lib/libnvram-faker.so /usr/sbin/httpd &</code>",
       objective: "Run httpd with nvram-faker",
       xp: 55,
-      check: (c, a, o, raw) => raw.includes("chroot") && raw.includes("LD_PRELOAD") && raw.includes("nvram"),
+      check: (c, a, o, raw) =>
+        raw.includes("chroot") &&
+        raw.includes("LD_PRELOAD") &&
+        raw.includes("nvram"),
     },
     {
       title: "Dynamic Strace",
@@ -157,7 +171,8 @@ const module20_iot = {
       text: "Type <code>sudo chroot . /usr/bin/qemu-arm-static -strace /usr/sbin/httpd</code>",
       objective: "Run httpd with qemu strace",
       xp: 55,
-      check: (c, a) => c === "sudo" && a.includes("chroot") && a.includes("-strace"),
+      check: (c, a) =>
+        c === "sudo" && a.includes("chroot") && a.includes("-strace"),
     },
 
     // --- PHASE 3: IOT PROTOCOLS (MQTT & COAP) (31-45) ---
@@ -172,18 +187,23 @@ const module20_iot = {
     {
       title: "Mosquitto Subscribe",
       why: "The `mosquitto_sub` client connects to the IoT broker. Using the `#` wildcard subscribes you to ALL topics simultaneously, allowing you to intercept every single plaintext metric (temperature, coordinates) the IoT network broadcasts.",
-      text: "Type <code>mosquitto_sub -h 10.0.0.150 -t \"#\" -v &</code>",
+      text: 'Type <code>mosquitto_sub -h 10.0.0.150 -t "#" -v &</code>',
       objective: "Subscribe to all MQTT topics",
       xp: 40,
-      check: (c, a) => c === "mosquitto_sub" && a.includes("-h") && a.includes("-t") && a.includes('\"#\"'),
+      check: (c, a) =>
+        c === "mosquitto_sub" &&
+        a.includes("-h") &&
+        a.includes("-t") &&
+        a.includes('\"#\"'),
     },
     {
       title: "Mosquitto Publish",
       why: "Hackers don't just listen; they control. `mosquitto_pub` injects an unauthorized message into the broker. Publishing 'OFF' to the `/home/door/lock` topic mathematically commands the physical hardware to disengage.",
-      text: "Type <code>mosquitto_pub -h 10.0.0.150 -t \"/home/door/lock\" -m \"OFF\"</code>",
+      text: 'Type <code>mosquitto_pub -h 10.0.0.150 -t "/home/door/lock" -m "OFF"</code>',
       objective: "Publish malicious MQTT message",
       xp: 40,
-      check: (c, a) => c === "mosquitto_pub" && a.includes("-t") && a.includes("-m"),
+      check: (c, a) =>
+        c === "mosquitto_pub" && a.includes("-t") && a.includes("-m"),
     },
     {
       title: "Nmap CoAP",
@@ -233,7 +253,8 @@ const module20_iot = {
       text: 'Type <code>setenv bootargs "console=ttyS0,115200 root=/dev/mtdblock2 init=/bin/sh"</code>',
       objective: "Simulate U-Boot setenv",
       xp: 45,
-      check: (c, a, o, raw) => raw.includes("setenv") && raw.includes("init=/bin/sh"),
+      check: (c, a, o, raw) =>
+        raw.includes("setenv") && raw.includes("init=/bin/sh"),
     },
     {
       title: "Dump SPI Flash",
@@ -241,7 +262,8 @@ const module20_iot = {
       text: "Type <code>flashrom -p ch341a_spi -r dumped_flash.bin</code>",
       objective: "Simulate SPI flashrom dump",
       xp: 50,
-      check: (c, a) => c === "flashrom" && a.includes("-r") && a.includes("dumped_flash.bin"),
+      check: (c, a) =>
+        c === "flashrom" && a.includes("-r") && a.includes("dumped_flash.bin"),
     },
     {
       title: "Compile Cross-Architecture",
@@ -249,7 +271,8 @@ const module20_iot = {
       text: "Type <code>arm-linux-gnueabihf-gcc backdoor.c -o backdoor_arm</code>",
       objective: "Cross-compile for ARM",
       xp: 45,
-      check: (c, a, o, raw) => raw.includes("gcc") && raw.includes("backdoor_arm"),
+      check: (c, a, o, raw) =>
+        raw.includes("gcc") && raw.includes("backdoor_arm"),
     },
     {
       title: "Inject Backdoor",
@@ -257,7 +280,7 @@ const module20_iot = {
       text: "Type <code>cp backdoor_arm squashfs-root/etc/init.d/</code>",
       objective: "Move backdoor to init.d",
       xp: 30,
-      check: (c, a) => c === "cp" && a.some(x=>x.includes("init.d")),
+      check: (c, a) => c === "cp" && a.some((x) => x.includes("init.d")),
     },
     {
       title: "Repack SquashFS",
@@ -265,7 +288,8 @@ const module20_iot = {
       text: "Type <code>mksquashfs squashfs-root modified.squashfs -comp lzma</code>",
       objective: "Run mksquashfs",
       xp: 50,
-      check: (c, a) => c === "mksquashfs" && a.includes("-comp") && a.includes("lzma"),
+      check: (c, a) =>
+        c === "mksquashfs" && a.includes("-comp") && a.includes("lzma"),
     },
     {
       title: "Stitch Firmware",
@@ -273,9 +297,10 @@ const module20_iot = {
       text: "Type <code>dd if=modified.squashfs of=firmware_v1.bin seek=1024 bs=1K conv=notrunc</code>",
       objective: "Use dd to stitch firmware",
       xp: 60,
-      check: (c, a) => c === "dd" && a.includes("seek=1024") && a.includes("conv=notrunc"),
+      check: (c, a) =>
+        c === "dd" && a.includes("seek=1024") && a.includes("conv=notrunc"),
     },
-    
+
     // --- PHASE 5: CLEANUP & CONCLUSION (61-65) ---
     {
       title: "Clean Up Extraction",
@@ -283,7 +308,10 @@ const module20_iot = {
       text: "Type <code>rm -rf _firmware* squashfs-root modified.squashfs</code>",
       objective: "Remove firmware folders",
       xp: 20,
-      check: (c, a) => c === "rm" && a.includes("-rf") && a.some((x) => x.includes("squashfs-root")),
+      check: (c, a) =>
+        c === "rm" &&
+        a.includes("-rf") &&
+        a.some((x) => x.includes("squashfs-root")),
     },
     {
       title: "Stop MQTT",

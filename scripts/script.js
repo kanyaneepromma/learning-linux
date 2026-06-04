@@ -2,21 +2,22 @@
 // Core Terminal UI and Logic Engine
 
 // --- GLOBAL ERROR HANDLING & MAINTENANCE TAPE ---
-window.addEventListener('error', function(e) {
-    triggerMaintenanceMode(e.message || "Unknown Fatal Exception");
+window.addEventListener("error", function (e) {
+  triggerMaintenanceMode(e.message || "Unknown Fatal Exception");
 });
 
-window.addEventListener('unhandledrejection', function(e) {
-    triggerMaintenanceMode(e.reason || "Unhandled Promise Rejection");
+window.addEventListener("unhandledrejection", function (e) {
+  triggerMaintenanceMode(e.reason || "Unhandled Promise Rejection");
 });
 
 function triggerMaintenanceMode(errMsg) {
-    if(document.getElementById('maintenance-tape')) return;
-    if(typeof playSound === 'function') playSound("error");
-    const div = document.createElement('div');
-    div.id = 'maintenance-tape';
-    div.className = 'fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden pointer-events-none bg-black/80 backdrop-blur-md';
-    div.innerHTML = `
+  if (document.getElementById("maintenance-tape")) return;
+  if (typeof playSound === "function") playSound("error");
+  const div = document.createElement("div");
+  div.id = "maintenance-tape";
+  div.className =
+    "fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden pointer-events-none bg-black/80 backdrop-blur-md";
+  div.innerHTML = `
         <div class="absolute w-[200%] h-24 bg-yellow-400 flex items-center justify-center border-y-8 border-black shadow-[0_0_50px_rgba(250,204,21,0.5)] z-10" style="transform: rotate(-20deg);">
             <span class="text-black font-black text-6xl tracking-[0.2em] uppercase whitespace-nowrap" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(0,0,0,0.15) 40px, rgba(0,0,0,0.15) 80px);">
                 &nbsp;⚠️ UNDER MAINTENANCE ⚠️ DO NOT CROSS ⚠️ UNDER MAINTENANCE ⚠️ DO NOT CROSS ⚠️ UNDER MAINTENANCE ⚠️ DO NOT CROSS ⚠️&nbsp;
@@ -33,7 +34,7 @@ function triggerMaintenanceMode(errMsg) {
             <button onclick="location.reload()" class="bg-red-500/20 text-red-400 border-2 border-red-500 px-8 py-3 rounded-lg font-black text-lg tracking-widest hover:bg-red-500 hover:text-white hover:shadow-[0_0_30px_rgba(239,68,68,0.8)] transition-all cursor-pointer">REBOOT SYSTEM</button>
         </div>
     `;
-    document.body.appendChild(div);
+  document.body.appendChild(div);
 }
 
 // --- VFS DATABASES ---
@@ -230,9 +231,9 @@ function renderModulesDropdown() {
   learningModules.forEach((m, idx) => {
     select.innerHTML += `<option value="${idx}">${m.name}</option>`;
   });
-  
+
   if (activeModuleIndex >= learningModules.length) {
-      activeModuleIndex = 0;
+    activeModuleIndex = 0;
   }
   select.value = activeModuleIndex;
 }
@@ -442,9 +443,11 @@ function executeCommand(rawCommand) {
   printToTerminal(cmdStr, true);
 
   // SECRET COMMAND TO MANUALLY TRIGGER THE YELLOW TAPE!
-  if(cmdStr.toLowerCase() === "panic") {
-      triggerMaintenanceMode("MANUAL OVERRIDE: Administrator triggered a catastrophic simulation. The system kernel has panicked.");
-      return;
+  if (cmdStr.toLowerCase() === "panic") {
+    triggerMaintenanceMode(
+      "MANUAL OVERRIDE: Administrator triggered a catastrophic simulation. The system kernel has panicked.",
+    );
+    return;
   }
 
   let args = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
@@ -468,25 +471,25 @@ function executeCommand(rawCommand) {
 
       // Verify Lessons safely
       if (learningModules && learningModules.length > 0) {
-          let m = learningModules[activeModuleIndex];
-          let l = m.lessons[activeLessonIndex];
-          let lId = `${activeModuleIndex}_${activeLessonIndex}`;
+        let m = learningModules[activeModuleIndex];
+        let l = m.lessons[activeLessonIndex];
+        let lId = `${activeModuleIndex}_${activeLessonIndex}`;
 
-          if (l.check(cmdName, args, output, cmdStr)) {
-            if (!playerStats.completedLessons.includes(lId)) {
-              playerStats.completedLessons.push(lId);
-              addXp(l.xp);
-              printToTerminal(
-                `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs shadow-md">🏆 Objective Accomplished! +${l.xp} XP</div>`,
-              );
-            }
-
-            if (activeLessonIndex < m.lessons.length - 1) {
-              activeLessonIndex++;
-              saveGame();
-              renderLesson();
-            }
+        if (l.check(cmdName, args, output, cmdStr)) {
+          if (!playerStats.completedLessons.includes(lId)) {
+            playerStats.completedLessons.push(lId);
+            addXp(l.xp);
+            printToTerminal(
+              `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs shadow-md">🏆 Objective Accomplished! +${l.xp} XP</div>`,
+            );
           }
+
+          if (activeLessonIndex < m.lessons.length - 1) {
+            activeLessonIndex++;
+            saveGame();
+            renderLesson();
+          }
+        }
       }
 
       quests.forEach((q) => {
@@ -538,7 +541,7 @@ function toggleAssistant() {
     btn.classList.replace("text-emerald-400", "text-yellow-400");
     btn.classList.replace("bg-emerald-400/10", "bg-yellow-400/10");
     btn.classList.replace("border-emerald-400/20", "border-yellow-400/20");
-    
+
     assistantBubble.classList.remove("assistant-show");
     setTimeout(() => assistantBubble.classList.add("hidden"), 300);
   }
@@ -575,7 +578,7 @@ function resetSandbox() {
     if (activeTab === "quests") renderQuests();
     if (activeTab === "cheatsheet") renderCheatsheet();
 
-    playSound("error"); 
+    playSound("error");
     document.getElementById("terminal-container").classList.add("shake-error");
     setTimeout(
       () =>
@@ -600,7 +603,7 @@ cmdInput.addEventListener("input", () => {
   const text = document.getElementById("assistant-text");
 
   let rawText = cmdInput.value.trim();
-  let commandTyped = rawText.split(" ")[0].toLowerCase(); 
+  let commandTyped = rawText.split(" ")[0].toLowerCase();
 
   if (commandTyped === "") {
     assistantBubble.classList.remove("assistant-show");
@@ -639,13 +642,13 @@ cmdInput.addEventListener("keydown", (e) => {
       setTimeout(() => assistantBubble.classList.add("hidden"), 300);
     }
   } else if (e.key === "ArrowUp") {
-    e.preventDefault(); 
+    e.preventDefault();
     if (historyIndex > 0) {
       historyIndex--;
       cmdInput.value = commandHistory[historyIndex];
     }
   } else if (e.key === "ArrowDown") {
-    e.preventDefault(); 
+    e.preventDefault();
     if (historyIndex < commandHistory.length - 1) {
       historyIndex++;
       cmdInput.value = commandHistory[historyIndex];
@@ -663,13 +666,53 @@ document
 window.onload = () => {
   initVfs();
   loadStats();
-  
+
   // Safety check on boot!
-  if(learningModules.length === 0) {
-      triggerMaintenanceMode("MODULE ARCHITECTURE MISSING. The learning array failed to populate. Did you rename a module variable incorrectly?");
+  if (learningModules.length === 0) {
+    triggerMaintenanceMode(
+      "MODULE ARCHITECTURE MISSING. The learning array failed to populate. Did you rename a module variable incorrectly?",
+    );
   }
-  
+
   renderModulesDropdown();
   renderLesson();
   cmdInput.focus();
 };
+
+// --- CONTACT FLYING AIRPLANE LOGIC ---
+function sendContactEmail(e) {
+  // 1. Play the sweeping jet engine sound
+  if (typeof playSound === "function") playSound("whoosh");
+
+  // 2. Create the flying plane element
+  const plane = document.createElement("div");
+  plane.innerText = "✈️";
+  plane.style.position = "fixed";
+  // Start exactly where the user clicked
+  plane.style.left = e.clientX + "px";
+  plane.style.top = e.clientY + "px";
+  plane.style.fontSize = "3rem";
+  plane.style.zIndex = "99999";
+  plane.style.pointerEvents = "none"; // So it doesn't block clicks
+  plane.style.transition = "all 1.5s cubic-bezier(0.5, 0, 0.5, 1)"; // Smooth acceleration curve
+  plane.style.transform = "translate(-50%, -50%) rotate(0deg)";
+  plane.style.filter = "drop-shadow(0 0 15px rgba(96,165,250,0.8))";
+
+  document.body.appendChild(plane);
+
+  // 3. Trigger the flight trajectory on the next frame
+  requestAnimationFrame(() => {
+    // Fly way off the top-right corner of the screen
+    plane.style.left = "120vw";
+    plane.style.top = "-20vh";
+    // Angle the plane up and make it grow as it flies "closer"
+    plane.style.transform = "translate(-50%, -50%) rotate(45deg) scale(3)";
+  });
+
+  // 4. Open the email client and remove the element after the flight finishes
+  setTimeout(() => {
+    plane.remove();
+    window.location.href =
+      "mailto:kanyanee.pro@gmail.com?subject=Hello from the Linux Sandbox!";
+  }, 1500); // Wait exactly 1.5s for the sound and animation to finish
+}

@@ -43,7 +43,6 @@ function playSound(type) {
     osc.start(now);
     osc.stop(now + 0.05);
   } else if (type === "book") {
-    // 📖
     // Soft white noise burst (paper rustle)
     const bufferSize = audioCtx.sampleRate * 0.1;
     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
@@ -62,9 +61,8 @@ function playSound(type) {
     noiseSource.connect(filter).connect(gainNode);
     noiseSource.start(now);
   } else if (type === "quest") {
-    // 🏆
     // Victorious 4-note Arpeggio
-    const freqs = [440, 554, 659, 880]; // A, C#, E, A
+    const freqs = [440, 554, 659, 880];
     freqs.forEach((freq, i) => {
       const osc = audioCtx.createOscillator();
       osc.type = "sine";
@@ -80,7 +78,6 @@ function playSound(type) {
       osc.stop(now + i * 0.08 + 0.2);
     });
   } else if (type === "tool") {
-    // 🛠️
     // Metallic clank/tink
     const osc1 = audioCtx.createOscillator();
     const osc2 = audioCtx.createOscillator();
@@ -100,7 +97,6 @@ function playSound(type) {
     osc1.stop(now + 0.1);
     osc2.stop(now + 0.1);
   } else if (type === "lightbulb") {
-    // 💡
     // Bright pop/ding
     const osc = audioCtx.createOscillator();
     osc.type = "sine";
@@ -114,7 +110,6 @@ function playSound(type) {
     osc.start(now);
     osc.stop(now + 0.15);
   } else if (type === "sweep") {
-    // 🧹
     // Filtered noise sweeping downwards
     const bufferSize = audioCtx.sampleRate * 0.4;
     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
@@ -134,25 +129,46 @@ function playSound(type) {
 
     noiseSource.connect(filter).connect(gainNode);
     noiseSource.start(now);
+  } else if (type === "whoosh") {
+    // ✈️ Jet Engine / Paper Plane Flying Sound
+    const bufferSize = audioCtx.sampleRate * 1.5;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+    const noiseSource = audioCtx.createBufferSource();
+    noiseSource.buffer = buffer;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(100, now);
+    filter.frequency.exponentialRampToValueAtTime(3000, now + 0.75); // Jet swoops in
+    filter.frequency.exponentialRampToValueAtTime(100, now + 1.5); // Jet flies away
+    filter.Q.value = 1;
+
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.6, now + 0.75);
+    gainNode.gain.linearRampToValueAtTime(0, now + 1.5);
+
+    noiseSource.connect(filter).connect(gainNode);
+    noiseSource.start(now);
+    noiseSource.stop(now + 1.5);
   }
 }
 
 function showFloatingXP(amount) {
   const fx = document.createElement("div");
 
-  // Added 'fixed' so it floats OVER the UI instead of breaking the layout
   fx.className =
     "fixed top-1/2 right-[20%] -translate-y-1/2 pointer-events-none z-[100] text-4xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,1)] transition-all duration-1000 ease-out";
   fx.innerText = `+${amount} XP!`;
 
   document.body.appendChild(fx);
 
-  // Trigger the float-up and fade-out animation
   setTimeout(() => {
     fx.style.transform = "translateY(-150px)";
     fx.style.opacity = "0";
   }, 50);
 
-  // Remove the element from the DOM after the animation finishes
   setTimeout(() => fx.remove(), 1000);
 }
