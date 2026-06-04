@@ -1,5 +1,5 @@
-// module.js
-// This file aggregates all individual modules and quests into the master curriculum.
+// scripts/module.js
+// Central Hub mapping all 22 Masterclass Modules
 
 const learningModules = [
   module1_navigation,
@@ -23,5 +23,9 @@ const learningModules = [
   module19_crypto,
   module20_iot,
   module21_capstone,
-  module22_kali,
+  module22_kali
 ];
+
+// Initialize global tracking variables for the UI
+let activeModuleIndex = 0;
+let activeLessonIndex = 0;
