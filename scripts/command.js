@@ -2263,4 +2263,55 @@ const commands = {
     run: () =>
       "[+] Insert the information about the victim to make a dictionary\n[+] If you don't know all the info, just hit enter when asked! ;)\n\n> First Name: John\n> Surname: Doe\n> Nickname: \n> Birthdate (DDMMYYYY): 01011990\n\n[+] Generating dictionary...\n[+] Dictionary generated with 1500 possible passwords.",
   },
+  matrix: {
+    desc: "Enter the Matrix.",
+    run: () => {
+      if (document.getElementById("matrix-canvas")) {
+        document.getElementById("matrix-canvas").remove();
+        clearInterval(window.matrixInterval);
+        return "Matrix mode deactivated.";
+      }
+      const canvas = document.createElement("canvas");
+      canvas.id = "matrix-canvas";
+      canvas.className = "absolute inset-0 z-0 pointer-events-none opacity-20";
+      document.getElementById("terminal-output").appendChild(canvas);
+      const ctx = canvas.getContext("2d");
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+      const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~".split(
+          "",
+        );
+      const fontSize = 14;
+      const columns = canvas.width / fontSize;
+      const drops = Array.from({ length: columns }).fill(1);
+      window.matrixInterval = setInterval(() => {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0F0";
+        ctx.font = fontSize + "px monospace";
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975)
+            drops[i] = 0;
+          drops[i]++;
+        }
+      }, 33);
+      if (typeof playSound === "function") playSound("tool");
+      return "Wake up, Neo...";
+    },
+  },
+  theme: {
+    desc: "Change the terminal theme. Usage: theme [default|hacker|retro]",
+    run: (args) => {
+      let t = args[1] || "default";
+      let tc = document.getElementById("terminal-container");
+      tc.classList.remove("theme-hacker", "theme-retro");
+      if (t === "hacker") tc.classList.add("theme-hacker");
+      if (t === "retro") tc.classList.add("theme-retro");
+      if (typeof playSound === "function") playSound("success");
+      return `<span class="text-emerald-400 font-bold">System theme set to: ${t.toUpperCase()}</span>`;
+    },
+  },
 };

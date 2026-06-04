@@ -1,5 +1,18 @@
 // script.js
-// Core Terminal UI and Logic Engine
+// Core Terminal UI and Logic Engine - ULTIMATE EDITION
+
+// --- DYNAMIC CSS INJECTION FOR THEMES ---
+const themeStyles = document.createElement("style");
+themeStyles.innerHTML = `
+  .theme-hacker { background-color: #050505 !important; color: #0f0 !important; text-shadow: 0 0 5px #0f0; }
+  .theme-hacker .term-rainbow, .theme-hacker .term-prompt, .theme-hacker .term-path { color: #0f0 !important; }
+  .theme-hacker input { color: #0f0 !important; text-shadow: 0 0 5px #0f0; }
+  .theme-retro { background-color: #2b1100 !important; color: #ff8c00 !important; text-shadow: 0 0 5px #ff8c00; box-shadow: inset 0 0 100px rgba(0,0,0,0.9); }
+  .theme-retro::after { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+  .theme-retro .term-rainbow, .theme-retro .term-prompt, .theme-retro .term-path { color: #ff8c00 !important; }
+  .theme-retro input { color: #ff8c00 !important; text-shadow: 0 0 5px #ff8c00; }
+`;
+document.head.appendChild(themeStyles);
 
 // --- GLOBAL ERROR HANDLING & MAINTENANCE TAPE ---
 window.addEventListener("error", function (e) {
@@ -100,6 +113,11 @@ const initialVfsTemplate = {
                 owner: "root",
                 content: "Failed pass for root from 10.0.0.99",
               },
+              ".hidden_flag.b64": {
+                type: "file",
+                owner: "root",
+                content: "Q1RGe0g0Q0s3Ul9NMk4wX000U1QzUn0=",
+              }, // Hidden CTF Flag!
             },
           },
         },
@@ -131,8 +149,22 @@ const initialVfsTemplate = {
   },
 };
 
+// --- FILE SYSTEM PERSISTENCE ---
+function saveVFS() {
+  localStorage.setItem("linux_mega_vfs", JSON.stringify(vfs));
+}
+
 function initVfs() {
-  vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
+  let savedVFS = localStorage.getItem("linux_mega_vfs");
+  if (savedVFS) {
+    try {
+      vfs = JSON.parse(savedVFS);
+    } catch (e) {
+      vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
+    }
+  } else {
+    vfs = JSON.parse(JSON.stringify(initialVfsTemplate));
+  }
   currentPath = "/home/sysadmin";
 }
 
@@ -186,12 +218,15 @@ function formatPromptPath() {
     : currentPath;
 }
 
+// --- UI LOGIC ---
 let activeTab = "modules";
 
 function switchTab(tabId) {
-  if (tabId === "modules") playSound("book");
-  if (tabId === "quests") playSound("quest");
-  if (tabId === "cheatsheet") playSound("tool");
+  if (typeof playSound === "function") {
+    if (tabId === "modules") playSound("book");
+    if (tabId === "quests") playSound("quest");
+    if (tabId === "cheatsheet") playSound("tool");
+  }
 
   activeTab = tabId;
   ["modules", "quests", "cheatsheet"].forEach((t) => {
@@ -232,9 +267,7 @@ function renderModulesDropdown() {
     select.innerHTML += `<option value="${idx}">${m.name}</option>`;
   });
 
-  if (activeModuleIndex >= learningModules.length) {
-    activeModuleIndex = 0;
-  }
+  if (activeModuleIndex >= learningModules.length) activeModuleIndex = 0;
   select.value = activeModuleIndex;
 }
 
@@ -303,7 +336,6 @@ function renderQuests() {
         : q.difficulty === "Medium"
           ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
           : "text-red-400 bg-red-400/10 border-red-400/20";
-
     container.innerHTML += `
             <div class="p-4 border rounded-xl space-y-3 transition-all duration-300 ${done ? "bg-emerald-950/20 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]" : "bg-slate-950 border-slate-800"}">
                 <div class="flex items-center justify-between">
@@ -324,7 +356,6 @@ function renderCheatsheet() {
     .value.toLowerCase()
     .trim();
   let keys = Object.keys(commands).sort();
-
   let discovered = playerStats.discoveredCommands || [];
 
   keys.forEach((k) => {
@@ -335,16 +366,12 @@ function renderCheatsheet() {
       !cmdObj.desc.toLowerCase().includes(query)
     )
       return;
-
     let isUnlocked = discovered.includes(k);
-
     let div = document.createElement("div");
     div.className = `p-3 border rounded-xl space-y-1 transition-all duration-500 ${isUnlocked ? "bg-slate-950 border-slate-800/80 shadow-md" : "bg-slate-950/40 border-slate-800/40 opacity-60"}`;
-
     let badge = isUnlocked
       ? `<span class="font-mono text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-500/20">Unlocked</span>`
       : `<span class="font-mono text-[10px] text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700/50">Locked</span>`;
-
     div.innerHTML = `
         <div class="flex items-center justify-between">
             <span class="font-mono text-xs font-bold ${isUnlocked ? "text-indigo-400" : "text-slate-500"}">${k}</span>
@@ -365,7 +392,11 @@ function filterCheatsheet() {
 // --- PROGRESSION ---
 const maxGlobalXp = 50000;
 function addXp(amount) {
-  if (amount > 0) {
+  if (
+    amount > 0 &&
+    typeof playSound === "function" &&
+    typeof showFloatingXP === "function"
+  ) {
     playSound("success");
     showFloatingXP(amount);
   }
@@ -393,7 +424,6 @@ function updateOverallProgress() {
     `Progress: ${Math.round((playerStats.completedLessons.length / t) * 100)}%`;
 }
 
-// --- NEW SAVE GAME HELPER ---
 function saveGame() {
   playerStats.activeModule = activeModuleIndex;
   playerStats.activeLesson = activeLessonIndex;
@@ -407,8 +437,6 @@ function loadStats() {
       playerStats = JSON.parse(saved);
       if (!playerStats.completedQuests) playerStats.completedQuests = [];
       if (!playerStats.discoveredCommands) playerStats.discoveredCommands = [];
-
-      // LOAD THE BOOKMARKED LESSON!
       if (playerStats.activeModule !== undefined)
         activeModuleIndex = playerStats.activeModule;
       if (playerStats.activeLesson !== undefined)
@@ -425,9 +453,7 @@ const cmdInput = document.getElementById("cmd-input");
 
 function printToTerminal(htmlContent, isCommand = false) {
   const div = document.createElement("div");
-
   div.className = "mb-1 leading-relaxed cyber-line";
-
   if (isCommand) {
     div.innerHTML = `<span class="term-prompt">sysadmin@gemini</span>:<span class="term-path">${formatPromptPath()}</span>$ ${htmlContent}`;
   } else {
@@ -442,12 +468,30 @@ function executeCommand(rawCommand) {
   if (!cmdStr) return;
   printToTerminal(cmdStr, true);
 
-  // SECRET COMMAND TO MANUALLY TRIGGER THE YELLOW TAPE!
+  // Easter Egg: Manual Panic
   if (cmdStr.toLowerCase() === "panic") {
     triggerMaintenanceMode(
       "MANUAL OVERRIDE: Administrator triggered a catastrophic simulation. The system kernel has panicked.",
     );
     return;
+  }
+
+  // Easter Egg: HIDDEN CTF MINIGAME (Intercepts before standard processing)
+  if (
+    cmdStr.includes("base64") &&
+    cmdStr.includes("-d") &&
+    cmdStr.includes(".hidden_flag.b64")
+  ) {
+    if (!playerStats.completedQuests.includes("CTF_HIDDEN")) {
+      playerStats.completedQuests.push("CTF_HIDDEN");
+      addXp(5000);
+      if (typeof playSound === "function") playSound("quest");
+      printToTerminal(
+        `<div class="p-6 bg-yellow-500/20 border-2 border-yellow-400 text-yellow-400 font-black text-center text-2xl shadow-[0_0_50px_rgba(250,204,21,0.6)] animate-pulse rounded-xl mt-4 mb-4">🏴‍☠️ ELITE CTF FLAG CAPTURED! 🏴‍☠️<br><span class="text-sm font-mono text-white mt-2 block tracking-widest">CTF{HACK7R_M2N0_M4ST3R}</span></div>`,
+      );
+      saveGame();
+      return;
+    }
   }
 
   let args = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
@@ -456,6 +500,8 @@ function executeCommand(rawCommand) {
   if (commands[cmdName]) {
     try {
       let output = commands[cmdName].run(args, cmdStr);
+      saveVFS(); // PERSISTENCE: Save file changes to disk!
+
       if (output === "CLEAR_SIGNAL") {
         terminalOutput.innerHTML = "";
       } else if (output !== "") {
@@ -469,7 +515,6 @@ function executeCommand(rawCommand) {
         if (activeTab === "cheatsheet") renderCheatsheet();
       }
 
-      // Verify Lessons safely
       if (learningModules && learningModules.length > 0) {
         let m = learningModules[activeModuleIndex];
         let l = m.lessons[activeLessonIndex];
@@ -483,7 +528,6 @@ function executeCommand(rawCommand) {
               `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs shadow-md">🏆 Objective Accomplished! +${l.xp} XP</div>`,
             );
           }
-
           if (activeLessonIndex < m.lessons.length - 1) {
             activeLessonIndex++;
             saveGame();
@@ -509,8 +553,8 @@ function executeCommand(rawCommand) {
       triggerMaintenanceMode("Command Execution Engine Failure: " + e.message);
     }
   } else {
-    playSound("error"); // Play buzz
-    document.getElementById("terminal-container").classList.add("shake-error"); // Shake screen
+    if (typeof playSound === "function") playSound("error");
+    document.getElementById("terminal-container").classList.add("shake-error");
     setTimeout(
       () =>
         document
@@ -525,8 +569,7 @@ function executeCommand(rawCommand) {
 }
 
 function toggleAssistant() {
-  playSound("lightbulb");
-
+  if (typeof playSound === "function") playSound("lightbulb");
   isAssistantActive = !isAssistantActive;
   const btn = document.getElementById("btn-assistant");
   const assistantBubble = document.getElementById("cyber-assistant");
@@ -541,7 +584,6 @@ function toggleAssistant() {
     btn.classList.replace("text-emerald-400", "text-yellow-400");
     btn.classList.replace("bg-emerald-400/10", "bg-yellow-400/10");
     btn.classList.replace("border-emerald-400/20", "border-yellow-400/20");
-
     assistantBubble.classList.remove("assistant-show");
     setTimeout(() => assistantBubble.classList.add("hidden"), 300);
   }
@@ -553,8 +595,9 @@ function resetSandbox() {
       "WARNING: This will delete ALL files, reset your rank, and wipe ALL XP. Are you sure?",
     )
   ) {
+    localStorage.removeItem("linux_mega_vfs");
     initVfs();
-    playSound("sweep");
+    if (typeof playSound === "function") playSound("sweep");
     document.getElementById("prompt-path").innerText = formatPromptPath();
     localStorage.removeItem("linux_mega_stats");
 
@@ -567,7 +610,6 @@ function resetSandbox() {
     activeModuleIndex = 0;
     activeLessonIndex = 0;
     document.getElementById("module-selector").value = 0;
-
     document.getElementById("rank-name").innerText = `Rank: Terminal Newbie`;
     document.getElementById("xp-counter").innerText = `0 / ${maxGlobalXp} XP`;
     document.getElementById("xp-progress").style.width = `0%`;
@@ -578,7 +620,7 @@ function resetSandbox() {
     if (activeTab === "quests") renderQuests();
     if (activeTab === "cheatsheet") renderCheatsheet();
 
-    playSound("error");
+    if (typeof playSound === "function") playSound("error");
     document.getElementById("terminal-container").classList.add("shake-error");
     setTimeout(
       () =>
@@ -587,9 +629,8 @@ function resetSandbox() {
           .classList.remove("shake-error"),
       300,
     );
-
     printToTerminal(
-      "<span class='text-red-500 font-black bg-red-950/50 px-2 py-1 uppercase border border-red-500/50 rounded'>SYSTEM WIPE COMPLETE. ALL XP DESTROYED.</span>",
+      "<span class='text-red-500 font-black bg-red-950/50 px-2 py-1 uppercase border border-red-500/50 rounded'>SYSTEM WIPE COMPLETE. ALL XP & FILES DESTROYED.</span>",
     );
   }
 }
@@ -597,11 +638,9 @@ function resetSandbox() {
 // --- DEEP DIVE ASSISTANT LISTENER ---
 cmdInput.addEventListener("input", () => {
   if (!isAssistantActive) return;
-
   const assistantBubble = document.getElementById("cyber-assistant");
   const title = document.getElementById("assistant-title");
   const text = document.getElementById("assistant-text");
-
   let rawText = cmdInput.value.trim();
   let commandTyped = rawText.split(" ")[0].toLowerCase();
 
@@ -610,24 +649,63 @@ cmdInput.addEventListener("input", () => {
     setTimeout(() => {
       if (!cmdInput.value.trim()) assistantBubble.classList.add("hidden");
     }, 300);
-  } else if (deepDiveData[commandTyped]) {
+  } else if (
+    typeof deepDiveData !== "undefined" &&
+    deepDiveData[commandTyped]
+  ) {
     title.innerText = `Command: ${commandTyped}`;
     text.innerHTML = deepDiveData[commandTyped];
-
     assistantBubble.classList.remove("hidden");
     setTimeout(() => assistantBubble.classList.add("assistant-show"), 10);
   } else {
     title.innerText = `Command: ${commandTyped}`;
     text.innerHTML = `<em>Bit is analyzing... Keep typing or execute the command!</em>`;
-
     assistantBubble.classList.remove("hidden");
     setTimeout(() => assistantBubble.classList.add("assistant-show"), 10);
   }
 });
 
+// --- TAB COMPLETION & HISTORY ---
 cmdInput.addEventListener("keydown", (e) => {
-  playSound("type");
-  if (e.key === "Enter") {
+  if (e.key !== "Tab" && typeof playSound === "function") playSound("type");
+
+  if (e.key === "Tab") {
+    e.preventDefault(); // Stop browser from jumping focus
+    if (typeof playSound === "function") playSound("type");
+
+    let input = cmdInput.value;
+    let parts = input.split(" ");
+
+    if (parts.length === 1) {
+      // Autocomplete Command Names
+      let search = parts[0].toLowerCase();
+      let matches = Object.keys(commands).filter((c) => c.startsWith(search));
+      if (matches.length === 1) {
+        cmdInput.value = matches[0] + " ";
+      } else if (matches.length > 1) {
+        printToTerminal(
+          `<span class="text-indigo-400">${matches.join("  ")}</span>`,
+        );
+      }
+    } else {
+      // Autocomplete Files in Current Directory
+      let search = parts[parts.length - 1];
+      let node = getVfsNode(currentPath);
+      if (node && node.contents) {
+        let matches = Object.keys(node.contents).filter((f) =>
+          f.startsWith(search),
+        );
+        if (matches.length === 1) {
+          parts[parts.length - 1] = matches[0];
+          cmdInput.value = parts.join(" ");
+        } else if (matches.length > 1) {
+          printToTerminal(
+            `<span class="text-emerald-400">${matches.join("  ")}</span>`,
+          );
+        }
+      }
+    }
+  } else if (e.key === "Enter") {
     let cmd = cmdInput.value;
     if (cmd.trim() !== "") {
       commandHistory.push(cmd);
@@ -635,7 +713,6 @@ cmdInput.addEventListener("keydown", (e) => {
     }
     executeCommand(cmd);
     cmdInput.value = "";
-
     const assistantBubble = document.getElementById("cyber-assistant");
     if (assistantBubble) {
       assistantBubble.classList.remove("assistant-show");
@@ -666,14 +743,11 @@ document
 window.onload = () => {
   initVfs();
   loadStats();
-
-  // Safety check on boot!
   if (learningModules.length === 0) {
     triggerMaintenanceMode(
-      "MODULE ARCHITECTURE MISSING. The learning array failed to populate. Did you rename a module variable incorrectly?",
+      "MODULE ARCHITECTURE MISSING. The learning array failed to populate.",
     );
   }
-
   renderModulesDropdown();
   renderLesson();
   cmdInput.focus();
@@ -681,38 +755,29 @@ window.onload = () => {
 
 // --- CONTACT FLYING AIRPLANE LOGIC ---
 function sendContactEmail(e) {
-  // 1. Play the sweeping jet engine sound
   if (typeof playSound === "function") playSound("whoosh");
-
-  // 2. Create the flying plane element
   const plane = document.createElement("div");
   plane.innerText = "✈️";
   plane.style.position = "fixed";
-  // Start exactly where the user clicked
   plane.style.left = e.clientX + "px";
   plane.style.top = e.clientY + "px";
   plane.style.fontSize = "3rem";
   plane.style.zIndex = "99999";
-  plane.style.pointerEvents = "none"; // So it doesn't block clicks
-  plane.style.transition = "all 1.5s cubic-bezier(0.5, 0, 0.5, 1)"; // Smooth acceleration curve
+  plane.style.pointerEvents = "none";
+  plane.style.transition = "all 1.5s cubic-bezier(0.5, 0, 0.5, 1)";
   plane.style.transform = "translate(-50%, -50%) rotate(0deg)";
   plane.style.filter = "drop-shadow(0 0 15px rgba(96,165,250,0.8))";
-
   document.body.appendChild(plane);
 
-  // 3. Trigger the flight trajectory on the next frame
   requestAnimationFrame(() => {
-    // Fly way off the top-right corner of the screen
     plane.style.left = "120vw";
     plane.style.top = "-20vh";
-    // Angle the plane up and make it grow as it flies "closer"
     plane.style.transform = "translate(-50%, -50%) rotate(45deg) scale(3)";
   });
 
-  // 4. Open the email client and remove the element after the flight finishes
   setTimeout(() => {
     plane.remove();
     window.location.href =
       "mailto:kanyanee.pro@gmail.com?subject=Hello from the Linux Sandbox!";
-  }, 1500); // Wait exactly 1.5s for the sound and animation to finish
+  }, 1500);
 }
