@@ -1,11 +1,16 @@
-// Import the functions you need from the SDKs you need
+// scripts/firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// Add the Firestore imports!
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDf-1z_Vt3JMOaqSRxsJVI7dy7AUFlYfuU",
   authDomain: "digital-tarot-reader.firebaseapp.com",
@@ -19,3 +24,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+// Connect to the named Firestore database in this project.
+const db = getFirestore(app, "learninglinux");
+console.log("🔥 Firebase Hub Online! Connected to learninglinux database.");
+
+// IMPORTANT: We attach these to the 'window' object so script.js can use them without breaking your UI!
+window.db = db;
+window.fsCollection = collection;
+window.fsGetDocs = getDocs;
+window.fsDoc = doc;
+window.fsGetDoc = getDoc;
+window.fsSetDoc = setDoc;

@@ -1,5 +1,5 @@
 // script.js
-// Core Terminal UI and Logic Engine - ULTIMATE EDITION
+// Cloud-Native Terminal UI and Logic Engine - ULTIMATE EDITION
 
 // --- DYNAMIC CSS INJECTION FOR THEMES ---
 const themeStyles = document.createElement("style");
@@ -50,6 +50,127 @@ function triggerMaintenanceMode(errMsg) {
   document.body.appendChild(div);
 }
 
+// --- CLOUD ARCHITECTURE & PROGRESSION ---
+let learningModules = [];
+let userId = localStorage.getItem("linux_sandbox_uid");
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem("linux_sandbox_uid", userId);
+}
+
+let playerStats = {
+  totalExperiencePoints: 0,
+  completedLessonIDs: [],
+  completedQuestIDs: [],
+  discoveredCommands: [],
+  activeModuleIndex: 0,
+  activeLessonIndex: 0,
+};
+
+// --- FETCH MODULES FROM FIRESTORE ---
+async function fetchCurriculumFromCloud() {
+  console.log("📡 Initiating connection to Firestore...");
+  try {
+    if (!window.db || !window.fsGetDocs) {
+      console.error("❌ Firebase SDK missing. Did firebase.js load?");
+      throw new Error("Firebase SDK not initialized correctly.");
+    }
+
+    console.log("🔍 Querying collection: 'curriculum_modules'...");
+    const colRef = window.fsCollection(window.db, "curriculum_modules");
+    const querySnapshot = await window.fsGetDocs(colRef);
+
+    console.log(`📥 Query returned ${querySnapshot.size} documents.`);
+
+    if (querySnapshot.empty) {
+      console.warn(
+        "⚠️ Snapshot is completely EMPTY! Firebase connected, but found ZERO documents in 'curriculum_modules'.",
+      );
+    }
+
+    const fetchedModules = [];
+
+    querySnapshot.forEach((doc) => {
+      console.log(`📄 Found document ID: ${doc.id}`);
+      let modData = doc.data();
+      modData.moduleId = doc.id;
+
+      // Rehydrate the functions
+      if (modData.lessons) {
+        modData.lessons.forEach((lesson) => {
+          if (lesson.validationFunctionString) {
+            lesson.checkFunction = new Function(
+              "commandName",
+              "commandArguments",
+              "terminalOutput",
+              "rawInputString",
+              lesson.validationFunctionString,
+            );
+          }
+        });
+      } else {
+        console.warn(
+          `⚠️ Warning: Document ${doc.id} is missing the 'lessons' array!`,
+        );
+      }
+      fetchedModules.push(modData);
+    });
+
+    // Sort modules alphabetically by their ID
+    learningModules = fetchedModules.sort((a, b) =>
+      a.moduleId.localeCompare(b.moduleId),
+    );
+    console.log(
+      `✅ Cloud Curriculum Loaded: ${learningModules.length} Modules fully parsed.`,
+    );
+
+    if (learningModules.length === 0)
+      throw new Error("Database returned 0 modules. Check your console logs!");
+    return true;
+  } catch (error) {
+    console.error("🔥 FATAL CLOUD ERROR:", error);
+    triggerMaintenanceMode("Cloud Sync Error: " + error.message);
+    return false;
+  }
+}
+
+async function fetchPlayerProgress() {
+  try {
+    const docRef = window.fsDoc(window.db, "user_progress", userId);
+    const docSnap = await window.fsGetDoc(docRef);
+
+    if (docSnap.exists()) {
+      let data = docSnap.data();
+      playerStats.totalExperiencePoints = data.totalExperiencePoints || 0;
+      playerStats.completedLessonIDs = data.completedLessonIDs || [];
+      playerStats.completedQuestIDs = data.completedQuestIDs || [];
+      playerStats.discoveredCommands = data.discoveredCommands || [];
+      playerStats.activeModuleIndex = data.activeModuleIndex || 0;
+      playerStats.activeLessonIndex = data.activeLessonIndex || 0;
+    } else {
+      await saveProgressToCloud();
+    }
+  } catch (error) {
+    console.error(
+      "Progress fetch failed, falling back to local defaults.",
+      error,
+    );
+  }
+}
+
+async function saveProgressToCloud() {
+  try {
+    if (window.db && window.fsSetDoc) {
+      await window.fsSetDoc(
+        window.fsDoc(window.db, "user_progress", userId),
+        playerStats,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to save progress:", error);
+  }
+}
+
 // --- VFS DATABASES ---
 let vfs = {};
 let runningServices = { ssh: true, nginx: false, docker: false };
@@ -59,12 +180,6 @@ let currentPath = "/home/sysadmin";
 let userAliases = { ll: "ls -la" };
 let commandHistory = [];
 let historyIndex = -1;
-let playerStats = {
-  xp: 0,
-  completedLessons: [],
-  completedQuests: [],
-  discoveredCommands: [],
-};
 let isAssistantActive = false;
 
 const initialVfsTemplate = {
@@ -251,11 +366,11 @@ function switchTab(tabId) {
 }
 
 function changeModule() {
-  activeModuleIndex = parseInt(
+  playerStats.activeModuleIndex = parseInt(
     document.getElementById("module-selector").value,
   );
-  activeLessonIndex = 0;
-  saveGame();
+  playerStats.activeLessonIndex = 0;
+  saveProgressToCloud();
   renderLesson();
 }
 
@@ -264,35 +379,40 @@ function renderModulesDropdown() {
   let select = document.getElementById("module-selector");
   select.innerHTML = "";
   learningModules.forEach((m, idx) => {
-    select.innerHTML += `<option value="${idx}">${m.name}</option>`;
+    select.innerHTML += `<option value="${idx}">${m.moduleName}</option>`;
   });
 
-  if (activeModuleIndex >= learningModules.length) activeModuleIndex = 0;
-  select.value = activeModuleIndex;
+  if (playerStats.activeModuleIndex >= learningModules.length)
+    playerStats.activeModuleIndex = 0;
+  select.value = playerStats.activeModuleIndex;
 }
 
 function renderLesson() {
   if (!learningModules || learningModules.length === 0) return;
-  let m = learningModules[activeModuleIndex];
-  let l = m.lessons[activeLessonIndex];
-  document.getElementById("lesson-module-tag").innerText = m.name.split(" ")[1];
+  let currentModule = learningModules[playerStats.activeModuleIndex];
+  let currentLesson = currentModule.lessons[playerStats.activeLessonIndex];
+
+  document.getElementById("lesson-module-tag").innerText =
+    currentModule.moduleName.split(" ")[1] || "Module";
   document.getElementById("lesson-index-tag").innerText =
-    `Lesson ${activeLessonIndex + 1}/${m.lessons.length}`;
+    `Lesson ${playerStats.activeLessonIndex + 1}/${currentModule.lessons.length}`;
 
   document.getElementById("active-lesson-body").innerHTML = `
         <h2 class="text-lg font-black text-white flex items-center gap-1.5 mb-2">
-            <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 pulse-emerald"></span>${l.title}
+            <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 pulse-emerald"></span>${currentLesson.lessonTitle}
         </h2>
         <div class="text-slate-300 text-xs leading-relaxed border-l-2 border-indigo-500/50 pl-3 bg-indigo-500/10 py-3 pr-3 rounded-r mb-4 shadow-inner">
             <strong class="text-indigo-400 uppercase tracking-wider text-[10px] block mb-1.5">Mission Briefing:</strong> 
-            ${l.why}
+            ${currentLesson.missionBriefing}
         </div>
         <div class="text-sm text-slate-200 leading-relaxed font-mono bg-slate-900/80 p-3 rounded border border-slate-800 shadow-md">
-            ${l.text}
+            ${currentLesson.terminalText}
         </div>`;
 
-  document.getElementById("lesson-objective-target").innerHTML = l.objective;
-  document.getElementById("lesson-xp-badge").innerText = `+${l.xp} XP`;
+  document.getElementById("lesson-objective-target").innerHTML =
+    currentLesson.lessonObjective;
+  document.getElementById("lesson-xp-badge").innerText =
+    `+${currentLesson.experiencePoints} XP`;
   renderModulesOverview();
   updateOverallProgress();
 }
@@ -304,13 +424,13 @@ function renderModulesOverview() {
   learningModules.forEach((mod, mIdx) => {
     let count = 0;
     mod.lessons.forEach((les, lIdx) => {
-      if (playerStats.completedLessons.includes(`${mIdx}_${lIdx}`)) count++;
+      if (playerStats.completedLessonIDs.includes(`${mIdx}_${lIdx}`)) count++;
     });
-    let pct = Math.round((count / mod.lessons.length) * 100);
+    let pct = Math.round((count / mod.lessons.length) * 100) || 0;
     container.innerHTML += `
-            <div class="p-3 rounded-xl border text-xs flex flex-col gap-2 transition-all hover:border-indigo-500/50 ${activeModuleIndex === mIdx ? "bg-slate-950 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]" : "bg-slate-950/40 border-slate-800"}">
+            <div class="p-3 rounded-xl border text-xs flex flex-col gap-2 transition-all hover:border-indigo-500/50 ${playerStats.activeModuleIndex === mIdx ? "bg-slate-950 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]" : "bg-slate-950/40 border-slate-800"}">
                 <div class="flex items-center justify-between cursor-pointer" onclick="selectModuleFromList(${mIdx})">
-                    <span class="font-bold text-slate-300">${mod.name}</span><span class="text-slate-500 font-mono">${pct}%</span>
+                    <span class="font-bold text-slate-300">${mod.moduleName}</span><span class="text-slate-500 font-mono">${pct}%</span>
                 </div>
                 <div class="w-full bg-slate-900 rounded-full h-1.5"><div class="bg-indigo-500 h-1.5 rounded-full shadow-[0_0_5px_rgba(99,102,241,0.5)]" style="width: ${pct}%"></div></div>
             </div>`;
@@ -318,18 +438,19 @@ function renderModulesOverview() {
 }
 
 function selectModuleFromList(idx) {
-  activeModuleIndex = idx;
-  activeLessonIndex = 0;
+  playerStats.activeModuleIndex = idx;
+  playerStats.activeLessonIndex = 0;
   document.getElementById("module-selector").value = idx;
-  saveGame();
+  saveProgressToCloud();
   renderLesson();
 }
 
 function renderQuests() {
+  if (typeof quests === "undefined") return;
   let container = document.getElementById("quests-container");
   container.innerHTML = "";
   quests.forEach((q) => {
-    let done = playerStats.completedQuests.includes(q.id);
+    let done = playerStats.completedQuestIDs.includes(q.id);
     let col =
       q.difficulty === "Ultimate"
         ? "text-purple-400 bg-purple-400/10 border-purple-400/20"
@@ -349,6 +470,7 @@ function renderQuests() {
 }
 
 function renderCheatsheet() {
+  if (typeof commands === "undefined") return;
   let container = document.getElementById("cheatsheet-list");
   container.innerHTML = "";
   let query = document
@@ -389,63 +511,46 @@ function filterCheatsheet() {
   renderCheatsheet();
 }
 
-// --- PROGRESSION ---
 const maxGlobalXp = 50000;
-function addXp(amount) {
+function updateExperienceUI(amountToAdd) {
   if (
-    amount > 0 &&
+    amountToAdd > 0 &&
     typeof playSound === "function" &&
     typeof showFloatingXP === "function"
   ) {
     playSound("success");
-    showFloatingXP(amount);
+    showFloatingXP(amountToAdd);
   }
-  playerStats.xp += amount;
-  let r = "Terminal Newbie";
-  if (playerStats.xp >= 50000) r = "Kernel God 👑🌌";
-  else if (playerStats.xp >= 35000) r = "Global CISO 🛡️";
-  else if (playerStats.xp >= 20000) r = "Red Team Ops 🥷";
-  else if (playerStats.xp >= 10000) r = "Senior Architect 🏗️";
-  else if (playerStats.xp >= 2000) r = "SysAdmin 💻";
 
-  document.getElementById("rank-name").innerText = `Rank: ${r}`;
+  playerStats.totalExperiencePoints += amountToAdd;
+
+  let rank = "Terminal Newbie";
+  if (playerStats.totalExperiencePoints >= 50000) rank = "Kernel God 👑🌌";
+  else if (playerStats.totalExperiencePoints >= 35000) rank = "Global CISO 🛡️";
+  else if (playerStats.totalExperiencePoints >= 20000) rank = "Red Team Ops 🥷";
+  else if (playerStats.totalExperiencePoints >= 10000)
+    rank = "Senior Architect 🏗️";
+  else if (playerStats.totalExperiencePoints >= 2000) rank = "SysAdmin 💻";
+
+  document.getElementById("rank-name").innerText = `Rank: ${rank}`;
   document.getElementById("xp-counter").innerText =
-    `${playerStats.xp} / ${maxGlobalXp} XP`;
+    `${playerStats.totalExperiencePoints} / ${maxGlobalXp} XP`;
   document.getElementById("xp-progress").style.width =
-    `${Math.min(100, (playerStats.xp / maxGlobalXp) * 100)}%`;
-  saveGame();
+    `${Math.min(100, (playerStats.totalExperiencePoints / maxGlobalXp) * 100)}%`;
+
+  if (amountToAdd > 0) saveProgressToCloud();
 }
 
 function updateOverallProgress() {
   if (!learningModules || learningModules.length === 0) return;
   let t = 0;
-  learningModules.forEach((m) => (t += m.lessons.length));
+  learningModules.forEach((m) => {
+    if (m.lessons) t += m.lessons.length;
+  });
+  let progress =
+    t > 0 ? Math.round((playerStats.completedLessonIDs.length / t) * 100) : 0;
   document.getElementById("overall-progress-tag").innerText =
-    `Progress: ${Math.round((playerStats.completedLessons.length / t) * 100)}%`;
-}
-
-function saveGame() {
-  playerStats.activeModule = activeModuleIndex;
-  playerStats.activeLesson = activeLessonIndex;
-  localStorage.setItem("linux_mega_stats", JSON.stringify(playerStats));
-}
-
-function loadStats() {
-  let saved = localStorage.getItem("linux_mega_stats");
-  if (saved) {
-    try {
-      playerStats = JSON.parse(saved);
-      if (!playerStats.completedQuests) playerStats.completedQuests = [];
-      if (!playerStats.discoveredCommands) playerStats.discoveredCommands = [];
-      if (playerStats.activeModule !== undefined)
-        activeModuleIndex = playerStats.activeModule;
-      if (playerStats.activeLesson !== undefined)
-        activeLessonIndex = playerStats.activeLesson;
-    } catch (e) {}
-  } else {
-    playerStats.discoveredCommands = [];
-  }
-  addXp(0);
+    `Progress: ${progress}%`;
 }
 
 const terminalOutput = document.getElementById("terminal-output");
@@ -463,12 +568,11 @@ function printToTerminal(htmlContent, isCommand = false) {
   terminalOutput.scrollTop = terminalOutput.scrollHeight;
 }
 
-function executeCommand(rawCommand) {
-  let cmdStr = rawCommand.trim();
+function executeCommand(rawInputString) {
+  let cmdStr = rawInputString.trim();
   if (!cmdStr) return;
   printToTerminal(cmdStr, true);
 
-  // Easter Egg: Manual Panic
   if (cmdStr.toLowerCase() === "panic") {
     triggerMaintenanceMode(
       "MANUAL OVERRIDE: Administrator triggered a catastrophic simulation. The system kernel has panicked.",
@@ -476,79 +580,97 @@ function executeCommand(rawCommand) {
     return;
   }
 
-  // Easter Egg: HIDDEN CTF MINIGAME (Intercepts before standard processing)
+  // Easter Egg: HIDDEN CTF MINIGAME
   if (
     cmdStr.includes("base64") &&
     cmdStr.includes("-d") &&
     cmdStr.includes(".hidden_flag.b64")
   ) {
-    if (!playerStats.completedQuests.includes("CTF_HIDDEN")) {
-      playerStats.completedQuests.push("CTF_HIDDEN");
-      addXp(5000);
+    if (!playerStats.completedQuestIDs.includes("CTF_HIDDEN")) {
+      playerStats.completedQuestIDs.push("CTF_HIDDEN");
+      updateExperienceUI(5000);
       if (typeof playSound === "function") playSound("quest");
       printToTerminal(
         `<div class="p-6 bg-yellow-500/20 border-2 border-yellow-400 text-yellow-400 font-black text-center text-2xl shadow-[0_0_50px_rgba(250,204,21,0.6)] animate-pulse rounded-xl mt-4 mb-4">🏴‍☠️ ELITE CTF FLAG CAPTURED! 🏴‍☠️<br><span class="text-sm font-mono text-white mt-2 block tracking-widest">CTF{HACK7R_M2N0_M4ST3R}</span></div>`,
       );
-      saveGame();
       return;
     }
   }
 
-  let args = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
-  let cmdName = args.shift();
+  let commandArguments = cmdStr.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g) || [];
+  let commandName = commandArguments.shift();
 
-  if (commands[cmdName]) {
+  if (typeof commands !== "undefined" && commands[commandName]) {
     try {
-      let output = commands[cmdName].run(args, cmdStr);
+      let terminalOutput = commands[commandName].run(commandArguments, cmdStr);
       saveVFS(); // PERSISTENCE: Save file changes to disk!
 
-      if (output === "CLEAR_SIGNAL") {
+      if (terminalOutput === "CLEAR_SIGNAL") {
         terminalOutput.innerHTML = "";
-      } else if (output !== "") {
-        printToTerminal(output);
+      } else if (terminalOutput !== "") {
+        printToTerminal(terminalOutput);
       }
 
-      if (!playerStats.discoveredCommands) playerStats.discoveredCommands = [];
-      if (!playerStats.discoveredCommands.includes(cmdName)) {
-        playerStats.discoveredCommands.push(cmdName);
-        saveGame();
+      if (!playerStats.discoveredCommands.includes(commandName)) {
+        playerStats.discoveredCommands.push(commandName);
+        saveProgressToCloud();
         if (activeTab === "cheatsheet") renderCheatsheet();
       }
 
+      // 🛡️ CLOUD LESSON VALIDATION LOGIC 🛡️
       if (learningModules && learningModules.length > 0) {
-        let m = learningModules[activeModuleIndex];
-        let l = m.lessons[activeLessonIndex];
-        let lId = `${activeModuleIndex}_${activeLessonIndex}`;
+        let currentModule = learningModules[playerStats.activeModuleIndex];
+        let currentLesson =
+          currentModule.lessons[playerStats.activeLessonIndex];
+        let uniqueLessonId = `${playerStats.activeModuleIndex}_${playerStats.activeLessonIndex}`;
 
-        if (l.check(cmdName, args, output, cmdStr)) {
-          if (!playerStats.completedLessons.includes(lId)) {
-            playerStats.completedLessons.push(lId);
-            addXp(l.xp);
+        if (
+          currentLesson.checkFunction &&
+          currentLesson.checkFunction(
+            commandName,
+            commandArguments,
+            terminalOutput,
+            rawInputString,
+          )
+        ) {
+          if (!playerStats.completedLessonIDs.includes(uniqueLessonId)) {
+            playerStats.completedLessonIDs.push(uniqueLessonId);
+            updateExperienceUI(currentLesson.experiencePoints);
             printToTerminal(
-              `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs shadow-md">🏆 Objective Accomplished! +${l.xp} XP</div>`,
+              `<div class="my-2 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs shadow-md">🏆 Objective Accomplished! +${currentLesson.experiencePoints} XP</div>`,
             );
           }
-          if (activeLessonIndex < m.lessons.length - 1) {
-            activeLessonIndex++;
-            saveGame();
+          if (
+            playerStats.activeLessonIndex <
+            currentModule.lessons.length - 1
+          ) {
+            playerStats.activeLessonIndex++;
+            saveProgressToCloud();
             renderLesson();
           }
         }
       }
 
-      quests.forEach((q) => {
-        if (
-          !playerStats.completedQuests.includes(q.id) &&
-          q.check(cmdName, args, output, cmdStr)
-        ) {
-          playerStats.completedQuests.push(q.id);
-          addXp(q.reward);
-          printToTerminal(
-            `<div class="my-2 p-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded text-xs shadow-[0_0_15px_rgba(168,85,247,0.2)]">🔥 Quest Cleared: ${q.title}! +${q.reward} XP</div>`,
-          );
-          if (activeTab === "quests") renderQuests();
-        }
-      });
+      if (typeof quests !== "undefined") {
+        quests.forEach((q) => {
+          if (
+            !playerStats.completedQuestIDs.includes(q.id) &&
+            q.check(
+              commandName,
+              commandArguments,
+              terminalOutput,
+              rawInputString,
+            )
+          ) {
+            playerStats.completedQuestIDs.push(q.id);
+            updateExperienceUI(q.reward);
+            printToTerminal(
+              `<div class="my-2 p-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded text-xs shadow-[0_0_15px_rgba(168,85,247,0.2)]">🔥 Quest Cleared: ${q.title}! +${q.reward} XP</div>`,
+            );
+            if (activeTab === "quests") renderQuests();
+          }
+        });
+      }
     } catch (e) {
       triggerMaintenanceMode("Command Execution Engine Failure: " + e.message);
     }
@@ -563,7 +685,7 @@ function executeCommand(rawCommand) {
       300,
     );
     printToTerminal(
-      `<span class="term-err">${cmdName}: command not found</span>`,
+      `<span class="term-err">${commandName}: command not found</span>`,
     );
   }
 }
@@ -599,16 +721,17 @@ function resetSandbox() {
     initVfs();
     if (typeof playSound === "function") playSound("sweep");
     document.getElementById("prompt-path").innerText = formatPromptPath();
-    localStorage.removeItem("linux_mega_stats");
 
     playerStats = {
-      xp: 0,
-      completedLessons: [],
-      completedQuests: [],
+      totalExperiencePoints: 0,
+      completedLessonIDs: [],
+      completedQuestIDs: [],
       discoveredCommands: [],
+      activeModuleIndex: 0,
+      activeLessonIndex: 0,
     };
-    activeModuleIndex = 0;
-    activeLessonIndex = 0;
+    saveProgressToCloud();
+
     document.getElementById("module-selector").value = 0;
     document.getElementById("rank-name").innerText = `Rank: Terminal Newbie`;
     document.getElementById("xp-counter").innerText = `0 / ${maxGlobalXp} XP`;
@@ -670,14 +793,13 @@ cmdInput.addEventListener("keydown", (e) => {
   if (e.key !== "Tab" && typeof playSound === "function") playSound("type");
 
   if (e.key === "Tab") {
-    e.preventDefault(); // Stop browser from jumping focus
+    e.preventDefault();
     if (typeof playSound === "function") playSound("type");
 
     let input = cmdInput.value;
     let parts = input.split(" ");
 
-    if (parts.length === 1) {
-      // Autocomplete Command Names
+    if (parts.length === 1 && typeof commands !== "undefined") {
       let search = parts[0].toLowerCase();
       let matches = Object.keys(commands).filter((c) => c.startsWith(search));
       if (matches.length === 1) {
@@ -688,7 +810,6 @@ cmdInput.addEventListener("keydown", (e) => {
         );
       }
     } else {
-      // Autocomplete Files in Current Directory
       let search = parts[parts.length - 1];
       let node = getVfsNode(currentPath);
       if (node && node.contents) {
@@ -740,17 +861,18 @@ document
   .getElementById("terminal-container")
   .addEventListener("click", () => cmdInput.focus());
 
-window.onload = () => {
+// --- BOOT SEQUENCE ---
+window.onload = async () => {
   initVfs();
-  loadStats();
-  if (learningModules.length === 0) {
-    triggerMaintenanceMode(
-      "MODULE ARCHITECTURE MISSING. The learning array failed to populate.",
-    );
+
+  const modulesLoaded = await fetchCurriculumFromCloud();
+  if (modulesLoaded) {
+    await fetchPlayerProgress();
+    renderModulesDropdown();
+    renderLesson();
+    updateExperienceUI(0);
+    cmdInput.focus();
   }
-  renderModulesDropdown();
-  renderLesson();
-  cmdInput.focus();
 };
 
 // --- CONTACT FLYING AIRPLANE LOGIC ---
