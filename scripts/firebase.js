@@ -1,7 +1,6 @@
 // scripts/firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
-// Add the Firestore imports!
 import {
   getFirestore,
   collection,
@@ -10,6 +9,13 @@ import {
   getDoc,
   setDoc,
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDf-1z_Vt3JMOaqSRxsJVI7dy7AUFlYfuU",
@@ -21,18 +27,23 @@ const firebaseConfig = {
   measurementId: "G-0YK1QPVR3G",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
-// Connect to the named Firestore database in this project.
 const db = getFirestore(app, "learninglinux");
-console.log("🔥 Firebase Hub Online! Connected to learninglinux database.");
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-// IMPORTANT: We attach these to the 'window' object so script.js can use them without breaking your UI!
+// Database window bindings
 window.db = db;
 window.fsCollection = collection;
 window.fsGetDocs = getDocs;
 window.fsDoc = doc;
 window.fsGetDoc = getDoc;
 window.fsSetDoc = setDoc;
+
+// Auth window bindings
+window.auth = auth;
+window.googleProvider = googleProvider;
+window.signInWithPopup = signInWithPopup;
+window.signOut = signOut;
+window.onAuthStateChanged = onAuthStateChanged;

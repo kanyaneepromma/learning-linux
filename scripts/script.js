@@ -52,11 +52,8 @@ function triggerMaintenanceMode(errMsg) {
 
 // --- CLOUD ARCHITECTURE & PROGRESSION ---
 let learningModules = [];
-let userId = localStorage.getItem("linux_sandbox_uid");
-if (!userId) {
-  userId = "user_" + Math.random().toString(36).substr(2, 9);
-  localStorage.setItem("linux_sandbox_uid", userId);
-}
+let userId = null;
+let userProfile = null;
 
 let playerStats = {
   totalExperiencePoints: 0,
@@ -100,10 +97,10 @@ async function fetchCurriculumFromCloud() {
         modData.lessons.forEach((lesson) => {
           if (lesson.validationFunctionString) {
             lesson.checkFunction = new Function(
-              "commandName",
-              "commandArguments",
-              "terminalOutput",
-              "rawInputString",
+              "c",
+              "a",
+              "o",
+              "raw",
               lesson.validationFunctionString,
             );
           }
@@ -602,13 +599,13 @@ function executeCommand(rawInputString) {
 
   if (typeof commands !== "undefined" && commands[commandName]) {
     try {
-      let terminalOutput = commands[commandName].run(commandArguments, cmdStr);
+      let commandResult = commands[commandName].run(commandArguments, cmdStr);
       saveVFS(); // PERSISTENCE: Save file changes to disk!
 
-      if (terminalOutput === "CLEAR_SIGNAL") {
+      if (commandResult === "CLEAR_SIGNAL") {
         terminalOutput.innerHTML = "";
-      } else if (terminalOutput !== "") {
-        printToTerminal(terminalOutput);
+      } else if (commandResult !== "") {
+        printToTerminal(commandResult);
       }
 
       if (!playerStats.discoveredCommands.includes(commandName)) {
@@ -629,7 +626,7 @@ function executeCommand(rawInputString) {
           currentLesson.checkFunction(
             commandName,
             commandArguments,
-            terminalOutput,
+            commandResult,
             rawInputString,
           )
         ) {
@@ -658,7 +655,7 @@ function executeCommand(rawInputString) {
             q.check(
               commandName,
               commandArguments,
-              terminalOutput,
+              commandResult,
               rawInputString,
             )
           ) {
@@ -861,18 +858,48 @@ document
   .getElementById("terminal-container")
   .addEventListener("click", () => cmdInput.focus());
 
-// --- BOOT SEQUENCE ---
-window.onload = async () => {
-  initVfs();
+// --- AUTHENTICATION & BOOT SEQUENCE ---
 
-  const modulesLoaded = await fetchCurriculumFromCloud();
-  if (modulesLoaded) {
-    await fetchPlayerProgress();
-    renderModulesDropdown();
-    renderLesson();
-    updateExperienceUI(0);
-    cmdInput.focus();
-  }
+function triggerGoogleLogin() {
+  window.signInWithPopup(window.auth, window.googleProvider).catch((error) => {
+    console.error("Login Failed", error);
+    alert("Authentication failed: " + error.message);
+  });
+}
+
+function triggerLogout() {
+  window.signOut(window.auth).then(() => {
+    location.reload();
+  });
+}
+
+window.onload = () => {
+  window.onAuthStateChanged(window.auth, async (user) => {
+    if (user) {
+      userId = user.uid;
+      userProfile = user;
+
+      const overlay = document.getElementById("login-overlay");
+      if (overlay) overlay.style.display = "none";
+
+      const promptSpan = document.getElementById("prompt");
+      const emailHandle = user.email.split("@")[0];
+      promptSpan.innerHTML = `<span class="term-rainbow">${emailHandle}@celrigella</span>:<span class="term-path" id="prompt-path">~</span>$`;
+
+      initVfs();
+      const modulesLoaded = await fetchCurriculumFromCloud();
+      if (modulesLoaded) {
+        await fetchPlayerProgress();
+        renderModulesDropdown();
+        renderLesson();
+        updateExperienceUI(0);
+        cmdInput.focus();
+      }
+    } else {
+      const overlay = document.getElementById("login-overlay");
+      if (overlay) overlay.style.display = "flex";
+    }
+  });
 };
 
 // --- CONTACT FLYING AIRPLANE LOGIC ---
